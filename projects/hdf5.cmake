@@ -37,8 +37,13 @@ function(build_hdf5)
   if(NOT (XP_DEFAULT OR XP_PRO_HDF5))
     return()
   endif()
+  set(XP_CONFIGURE
+    -DHDF5_INSTALL_INCLUDE_DIR=include/hdf5
+    -DHDF5_INSTALL_DATA_DIR=share/hdf5
+    -DHDF5_INSTALL_CMAKE_DIR=lib/cmake
+    )
   #configure_file(${PRO_DIR}/use/usexp-hdf5-config.cmake ${STAGE_DIR}/share/cmake/
   #  @ONLY NEWLINE_STYLE LF
   #  )
-  #xpCmakeBuild(hdf5)
+  xpCmakeBuild(hdf5 "" "${XP_CONFIGURE}")
 endfunction()
