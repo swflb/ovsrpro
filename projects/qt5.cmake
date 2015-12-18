@@ -2,7 +2,8 @@
 # qt5
 ########################################
 # NOTES: see instructions http://wiki.qt.io/Building-Qt-5-from-Git
-# requires git >=1.6.x, Perl >= 5.14, & Python >= 2.6 to build.
+# requires git >=1.6.x, Perl >= 5.14, Python >= 2.6, and postgres >= 7.3 to
+# build.
 ########################################
 xpProOption(qt5)
 set(VER v5.5.0)
@@ -38,50 +39,32 @@ function(patch_qt5)
   xpPatch(${PRO_QT5})
 endfunction()
 ########################################
-function(stringToList stringlist lvalue var)
-  if(NOT "${stringlist}" STREQUAL "")
-    string(STRIP ${stringlist} stringlist) # remove leading and trailing spaces
-    string(REPLACE " -" ";-" listlist ${stringlist})
-    foreach(item ${listlist})
-      list(APPEND templist ${lvalue}=${item})
-    endforeach()
-    set(${var} "${templist}" PARENT_SCOPE)
-  endif()
-endfunction()
-########################################
 function(build_qt5)
   if(NOT (XP_DEFAULT OR XP_PRO_QT5))
     return()
   endif()
+  set(XP_CONFIGURE
+    -debug-and-release
+    -static # @todo pull this from cmake...
+    -qt-zlib
+    -qt-pcre
+    -qt-libpng
+    -qt-libjpeg
+    -qt-freetype
+    -opengl desktop
+    -qt-sql-psql
+    -qmake
+    -c++11
+    -opensource
+    -confirm-license
+    -make libs
+    -nomake examples
+    -nomake tools
+    -nomake tests)
   if(WIN32)
-    message(FATAL_ERROR "no windows yet")
+    list(APPEND ${XP_CONFIGURE} -platform win32-msvc2013)
   else()
-    set(XP_CONFIGURE
-      -static
-      -qt-zlib
-      -qt-pcre
-      -qt-libpng
-      -qt-libjpeg
-      -qt-freetype
-      -qt-xcb
-      -qt-xkbcommon
-      -opengl desktop
-      -qt-sql-psql
-      -c++11
-      -opensource
-      -confirm-license
-      -make libs
-      -nomake examples
-      -nomake tools
-      -nomake tests
-      -skip qtwebchannel
-      -skip qtwebengine
-      -skip qtwebkit
-      -skip qtwebkit-examples
-      -skip qtenginio
-      -skip qt3d
-      )
-    xpCmakeBuild(qt5 "" "${XP_CONFIGURE}")
+    list(APPEND ${XP_CONFIGURE} -platform linux-g++)
   endif() # OS type
+  xpCmakeBuild(qt5 "" "${XP_CONFIGURE}")
 endfunction()
-
