@@ -81,6 +81,9 @@ function(build_qt5)
       -skip qtenginio
       -skip qt3d
       )
+    configure_file(${PRO_DIR}/use/usexp-qt5-config.cmake ${STAGE_DIR}/share/cmake/
+    @ONLY NEWLINE_STYLE LF
+    )
     xpCmakeBuild(qt5 "" "${XP_CONFIGURE}")
   endif() # OS type
 endfunction()
