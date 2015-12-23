@@ -38,7 +38,7 @@ macro(setConfigureOptions)
     -qt-libjpeg
     -qt-freetype
     -opengl desktop
-    #-openssl
+    -openssl
     -qt-sql-psql
     -qmake
     -opensource
@@ -71,13 +71,13 @@ macro(setQtQmakeConf)
     if(${XP_BUILD_STATIC})
       # Copy the qmake conf file to setup the /MT compiler flag and enable
       # multiple cores while compiling
-      configure_file(${CMAKE_SOURCE_DIR}/projects/qt5-msvc-desktop-mt.conf
+      configure_file(${PATCH_DIR}/qt5-msvc-desktop-mt.conf
                      ${QT5_REPO_PATH}/qtbase/mkspecs/common/msvc-desktop.conf
                      COPYONLY)
     else()
       # Copy the qmake conf file to setup the /MD compiler flag and enable
       # multiple cores while compiling
-      configure_file(${CMAKE_SOURCE_DIR}/projects/qt5-msvc-desktop-md.conf
+      configure_file(${PATCH_DIR}/qt5-msvc-desktop-md.conf
                      ${QT5_REPO_PATH}/qtbase/mkspecs/common/msvc-desktop.conf
                      COPYONLY)
     endif()
@@ -91,21 +91,32 @@ endfunction(mkpatch_qt5)
 ########################################
 # download - initialize the git submodules
 function(download_qt5)
-  # checkout the repository and update/init all submodules
-  ExternalProject_Add(qt5_repo
-    DOWNLOAD_DIR ${QT5_REPO_PATH}
-    GIT_REPOSITORY ${QT5_REPO}
-    GIT_TAG ${QT5_VER}
-    PATCH_COMMAND "" UPDATE_COMMAND "" CONFIGURE_COMMAND "" BUILD_COMMAND ""
-    INSTALL_COMMAND "")
+  if(NOT TARGET qt5_repo)
+    # checkout the repository and update/init all submodules
+    ExternalProject_Add(qt5_repo
+      DOWNLOAD_DIR ${QT5_REPO_PATH}
+      GIT_REPOSITORY ${QT5_REPO}
+      GIT_TAG ${QT5_VER}
+      PATCH_COMMAND "" UPDATE_COMMAND "" CONFIGURE_COMMAND "" BUILD_COMMAND ""
+      INSTALL_COMMAND "")
+  endif()
 endfunction(download_qt5)
 ########################################
 # patch - remove any of the unwanted submodules
 # so that they do not configure/compile
 function(patch_qt5)
-  foreach(RemoveModule ${QT5_REMOVE_SUBMODULES})
-    file(REMOVE_RECURSE ${QT5_REPO_PATH}/${RemoveModule})
-  endforeach()
+  if(NOT TARGET qt5_patch)
+    add_custom_target(qt5_patch
+      WORKING_DIRECTORY ${QT5_REPO_PATH}
+      COMMAND ECHO Removing unwanted submodules)
+    foreach(RemoveModule ${QT5_REMOVE_SUBMODULES})
+      add_custom_command(TARGET qt5_patch
+        COMMENT "Removing ${RemoveModule}"
+        WORKING_DIRECTORY ${QT5_REPO_PATH}
+        COMMAND ${CMAKE_COMMAND} -E remove_directory ${RemoveModule})
+    endforeach()
+    add_dependencies(qt5_patch qt5_repo)
+  endif()
 endfunction(patch_qt5)
 ########################################
 # Decides which build command to use jom/nmake/make
@@ -122,32 +133,30 @@ macro(findBuildCommand BUILD_COMMAND)
 endmacro()
 # build - configure then build the libraries
 function(build_qt5)
-  setConfigureOptions()
-  setQtQmakeConf()
+  if(NOT TARGET qt5_build)
+    setConfigureOptions()
+    setQtQmakeConf()
 
-  # Determine which build command to use (jom/nmake/make)
-  findBuildCommand(QT_BUILD_COMMAND)
+    # Determine which build command to use (jom/nmake/make)
+    findBuildCommand(QT_BUILD_COMMAND)
 
-  # Create a target to run configure
-  ExternalProject_Add(qt5_configure
-    DOWNLOAD_COMMAND "" UPDATE_COMMAND "" PATCH_COMMAND ""
-    SOURCE_DIR ${QT5_REPO_PATH}
-    CONFIGURE_COMMAND configure ${QT5_CONFIGURE}
-    BUILD_COMMAND "" INSTALL_COMMAND ""
-  )
+    # Create a separate target to build and install...this is because for some
+    # reason even though the configure succeeds just fine, it stops before
+    # executing the build and install commands (may be because configure exits
+    # with warnings about static builds)
+    add_custom_target(qt5_build
+      WORKING_DIRECTORY ${QT5_REPO_PATH}
+      COMMAND configure ${QT5_CONFIGURE})
 
-  # Create a separate target to build and install...this is because for some
-  # reason even though the configure succeeds just fine, it stops before
-  # executing the build and install commands (may be because configure exits
-  # with warnings about static builds)
-  add_custom_target(qt5_build
-    COMMAND cd ${QT5_REPO_PATH}
-    COMMAND ${QT_BUILD_COMMAND}
-    COMMAND ${QT_BUILD_COMMAND} install
-  )
+    # make sure the download and patching happen first...
+    add_dependencies(qt5_build qt5_repo qt5_patch)
 
-  # Copy the useop file to the staging area
-  configure_file(${PRO_DIR}/use/useop-qt5-config.cmake
-                 ${STAGE_DIR}/share/cmake/
-                 COPYONLY)
+    add_custom_targeT(qt5_build_2
+      WORKING_DIRECTORY ${QT5_REPO_PATH}
+      COMMAND ${QT_BUILD_COMMAND}
+      COMMAND ${QT_BUILD_COMMAND} install
+      COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake
+      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin)
+
+  endif()
 endfunction(build_qt5)

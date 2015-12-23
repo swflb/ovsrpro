@@ -25,35 +25,40 @@ endfunction(mkpatch_zookeeper)
 ########################################
 # download
 function(download_zookeeper)
-  xpRepo(${PRO_ZOOKEEPER})
+  if(NOT TARGET zookeeper_repo)
+    xpRepo(${PRO_ZOOKEEPER})
+  endif()
 endfunction(download_zookeeper)
 ########################################
 # patch
 function(patch_zookeeper)
-  ExternalProject_Add(zookeeper_patch
-    DOWNLOAD_COMMAND "" UPDATE_COMMAND "" CONFIGURE_COMMAND "" BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-    SOURCE_DIR ${ZK_REPO_PATH}
-    PATCH_COMMAND ${GIT_EXECUTABLE} apply ${CMAKE_SOURCE_DIR}/projects/zookeeper-mt_adapter-x64-fix.patch
-  )
-  if(WIN32)
-    ExternalProject_Add_Step(zookeeper_patch zookeeper_winconfig_patch
-      COMMAND ${GIT_EXECUTABLE} apply ${CMAKE_SOURCE_DIR}/projects/zookeeper-winconfig.patch
-      COMMENT "Applying winconfig patch"
-      WORKING_DIRECTORY ${ZK_REPO_PATH}
-      DEPENDEES patch
+  if(NOT TARGET zookeeper_patch)
+    ExternalProject_Add(zookeeper_patch
+      DOWNLOAD_COMMAND "" UPDATE_COMMAND "" CONFIGURE_COMMAND "" BUILD_COMMAND ""
+      INSTALL_COMMAND ""
+      SOURCE_DIR ${ZK_REPO_PATH}
+      PATCH_COMMAND ${GIT_EXECUTABLE} apply ${PATCH_DIR}/zookeeper-mt_adapter-x64-fix.patch
     )
-  endif(WIN32)
+    if(WIN32)
+      ExternalProject_Add_Step(zookeeper_patch zookeeper_winconfig_patch
+        COMMAND ${GIT_EXECUTABLE} apply ${PATCH_DIR}/zookeeper-winconfig.patch
+        COMMENT "Applying winconfig patch"
+        WORKING_DIRECTORY ${ZK_REPO_PATH}
+        DEPENDEES patch
+      )
+    endif(WIN32)
 
-  # Copy some generated files that are not directly part of the repository
-  ExternalProject_Add_Step(zookeeper_patch copyJute-c
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/projects/zookeeper.jute.c ${ZK_SRC_PATH}/zookeeper.jute.c
-    COMMENT "Copying Jute C file"
-  )
-  ExternalProject_Add_Step(zookeeper_patch copyJute-h
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/projects/zookeeper.jute.h ${ZK_INCLUDE_PATH}/zookeeper.jute.h
-    COMMENT "Copying Jute H file"
-  )
+    # Copy some generated files that are not directly part of the repository
+    ExternalProject_Add_Step(zookeeper_patch copyJute-c
+      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper.jute.c ${ZK_SRC_PATH}/zookeeper.jute.c
+      COMMENT "Copying Jute C file"
+    )
+    ExternalProject_Add_Step(zookeeper_patch copyJute-h
+      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper.jute.h ${ZK_INCLUDE_PATH}/zookeeper.jute.h
+      COMMENT "Copying Jute H file"
+    )
+    add_dependencies(zookeeper_patch zookeeper_repo)
+  endif()
 endfunction(patch_zookeeper)
 ########################################
 # Set the Windows compiler flag
@@ -82,79 +87,93 @@ endmacro(setWindowsCompilerFlags)
 ########################################
 # build
 function(build_zookeeper)
-  # Gather the zookeeper source files
-  set(zookeeper_src_files
-    ${ZK_SRC_PATH}/mt_adaptor.c
-    ${ZK_SRC_PATH}/recordio.c
-    ${ZK_SRC_PATH}/winport.c
-    ${ZK_SRC_PATH}/zk_hashtable.c
-    ${ZK_SRC_PATH}/zk_log.c
-    ${ZK_SRC_PATH}/zookeeper.c
-    ${ZK_SRC_PATH}/hashtable/hashtable.c
-    ${ZK_SRC_PATH}/hashtable/hashtable_itr.c
-    ${ZK_SRC_PATH}/zookeeper.jute.c
-    ${ZK_SRC_PATH}/winport.h
-    ${ZK_SRC_PATH}/zk_adaptor.h
-    ${ZK_SRC_PATH}/zk_hashtable.h
-    ${ZK_SRC_PATH}/hashtable/hashtable.h
-    ${ZK_SRC_PATH}/hashtable/hashtable_itr.h
-    ${ZK_SRC_PATH}/hashtable/hashtable_private.h
-  )
-  set(zookeeper_hdr_files
-    ${ZK_INCLUDE_PATH}/proto.h
-    ${ZK_INCLUDE_PATH}/recordio.h
-    ${ZK_INCLUDE_PATH}/winconfig.h
-    ${ZK_INCLUDE_PATH}/winstdint.h
-    ${ZK_INCLUDE_PATH}/zookeeper.h
-    ${ZK_INCLUDE_PATH}/zookeeper.jute.h
-    ${ZK_INCLUDE_PATH}/zookeeper_log.h
-    ${ZK_INCLUDE_PATH}/zookeeper_version.h
-  )
+  if(NOT TARGET zookeeper_build)
+    # Gather the zookeeper source files
+    set(zookeeper_src_files
+      ${ZK_SRC_PATH}/mt_adaptor.c
+      ${ZK_SRC_PATH}/recordio.c
+      ${ZK_SRC_PATH}/winport.c
+      ${ZK_SRC_PATH}/zk_hashtable.c
+      ${ZK_SRC_PATH}/zk_log.c
+      ${ZK_SRC_PATH}/zookeeper.c
+      ${ZK_SRC_PATH}/hashtable/hashtable.c
+      ${ZK_SRC_PATH}/hashtable/hashtable_itr.c
+      ${ZK_SRC_PATH}/zookeeper.jute.c
+      ${ZK_SRC_PATH}/winport.h
+      ${ZK_SRC_PATH}/zk_adaptor.h
+      ${ZK_SRC_PATH}/zk_hashtable.h
+      ${ZK_SRC_PATH}/hashtable/hashtable.h
+      ${ZK_SRC_PATH}/hashtable/hashtable_itr.h
+      ${ZK_SRC_PATH}/hashtable/hashtable_private.h
+    )
+    set(zookeeper_hdr_files
+      ${ZK_INCLUDE_PATH}/proto.h
+      ${ZK_INCLUDE_PATH}/recordio.h
+      ${ZK_INCLUDE_PATH}/winconfig.h
+      ${ZK_INCLUDE_PATH}/winstdint.h
+      ${ZK_INCLUDE_PATH}/zookeeper.h
+      ${ZK_INCLUDE_PATH}/zookeeper.jute.h
+      ${ZK_INCLUDE_PATH}/zookeeper_log.h
+      ${ZK_INCLUDE_PATH}/zookeeper_version.h
+    )
 
-  if(WIN32)
-    list(APPEND ${zookeeper_src_files}
-      ${ZK_SRC_PATH}/winport.c)
-    list(APPEND ${zookeeper_hdr_files}
-      ${ZK_SRC_PATH}/winport.h)
-  endif(WIN32)
-
-  # Determine build type
-  if(${XP_BUILD_STATIC})
-    set(ZK_BUILD_TYPE STATIC)
-  else()
-    set(ZK_BUILD_TYPE SHARED)
-  endif()
-
-  # create the library
-  add_library(zookeeper STATIC
-              ${zookeeper_src_files} ${zookeeper_hdr_files})
-  target_include_directories(zookeeper PUBLIC ${ZK_INCLUDE_PATH})
-
-  # Use /MT for a static windows build, and add the 'd' for debug builds
-  if(${XP_BUILD_STATIC})
     if(WIN32)
-      target_compile_options(zookeeper PUBLIC "/MT$<$<STREQUAL:$<CONFIGURATION>,Debug>:d>")
+      list(APPEND ${zookeeper_src_files}
+        ${ZK_SRC_PATH}/winport.c)
+      list(APPEND ${zookeeper_hdr_files}
+        ${ZK_SRC_PATH}/winport.h)
     endif(WIN32)
-  endif(${XP_BUILD_STATIC})
 
-  # Set the library output properties
-  set_target_properties(zookeeper PROPERTIES
-    OUTPUT_NAME libzookeeper-mt
-    ARCHIVE_OUTPUT_DIRECTORY ${STAGE_DIR}/lib
-    ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${STAGE_DIR}/lib
-    ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${STAGE_DIR}/lib
-    LIBRARY_OUTPUT_DIRECTORY ${STAGE_DIR}/lib
-    LIBRARY_OUTPUT_DIRECTORY_DEBUG ${STAGE_DIR}/lib
-    LIBRARY_OUTPUT_DIRECTORY_RELEASE ${STAGE_DIR}/lib
-    RUNTIME_OUTPUT_DIRECTORY ${STAGE_DIR}/bin
-    RUNTIME_OUTPUT_DIRECTORY ${STAGE_DIR}/bin
-    RUNTIME_OUTPUT_DIRECTORY ${STAGE_DIR}/bin)
+    # Determine build type
+    if(${XP_BUILD_STATIC})
+      set(ZK_BUILD_TYPE STATIC)
+    else()
+      set(ZK_BUILD_TYPE SHARED)
+    endif()
 
-  # Copy the include files to the staging directory
-  file(COPY ${zookeeper_hdr_files} DESTINATION ${STAGE_DIR}/include/zookeeper)
+    # indicate that all the files are GENERATED so they don't need to exist when
+    # creating the target...they will be available after download
+    set_source_files_properties(${zookeeper_src_files} ${zookeeper_hdr_files}
+      PROPERTIES GENERATED TRUE)
 
-  # Copy the find package cmake file to the staging directory
-  configure_file(${PRO_DIR}/use/useop-zookeeper-config.cmake
-                 ${STAGE_DIR}/share/cmake/useop-zookeeper-config.cmake
-                 COPYONLY)
+    # create the library
+    add_library(zookeeper_build STATIC
+                ${zookeeper_src_files} ${zookeeper_hdr_files})
+    target_include_directories(zookeeper_build PUBLIC ${ZK_INCLUDE_PATH})
+
+    # Use /MT for a static windows build, and add the 'd' for debug builds
+    if(${XP_BUILD_STATIC})
+      if(WIN32)
+        target_compile_options(zookeeper_build PUBLIC "/MT$<$<STREQUAL:$<CONFIGURATION>,Debug>:d>")
+      endif(WIN32)
+    endif(${XP_BUILD_STATIC})
+
+    # Set the library output properties
+    set_target_properties(zookeeper_build PROPERTIES
+      OUTPUT_NAME libzookeeper-mt
+      ARCHIVE_OUTPUT_DIRECTORY ${STAGE_DIR}/lib
+      ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${STAGE_DIR}/lib
+      ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${STAGE_DIR}/lib
+      LIBRARY_OUTPUT_DIRECTORY ${STAGE_DIR}/lib
+      LIBRARY_OUTPUT_DIRECTORY_DEBUG ${STAGE_DIR}/lib
+      LIBRARY_OUTPUT_DIRECTORY_RELEASE ${STAGE_DIR}/lib
+      RUNTIME_OUTPUT_DIRECTORY ${STAGE_DIR}/bin
+      RUNTIME_OUTPUT_DIRECTORY ${STAGE_DIR}/bin
+      RUNTIME_OUTPUT_DIRECTORY ${STAGE_DIR}/bin)
+
+    # Copy the find package cmake file to the staging directory
+    add_custom_command(TARGET zookeeper_build POST_BUILD
+      COMMENT "Copy useop-zookeeper-config.cmake to staging area"
+      COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-zookeeper-config.cmake ${STAGE_DIR}/share/cmake/useop-zookeeper-config.cmake)
+
+    # Copy the include files to the staging directory
+    foreach(hdrfile ${zookeeper_hdr_files})
+      get_filename_component(file_name_only ${hdrfile} NAME)
+      add_custom_command(TARGET zookeeper_build POST_BUILD
+        COMMENT "Moving ${hdrfile} to staging area"
+        COMMAND ${CMAKE_COMMAND} -E copy ${hdrfile} ${STAGE_DIR}/include/zookeeper/${file_name_only})
+    endforeach()
+
+    add_dependencies(zookeeper_build zookeeper_patch zookeeper_repo)
+  endif()
 endfunction(build_zookeeper)
