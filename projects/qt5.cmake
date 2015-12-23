@@ -9,7 +9,7 @@ xpProOption(qt5)
 set(QT5_VER v5.5.0)
 set(QT5_REPO http://code.qt.io/qt/qt5.git)
 set(QT5_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/qt5_repo)
-set(QT5_INSTALL_PATH ${CMAKE_BINARY_DIR}/xpbase/Install/qt5)
+set(QT5_INSTALL_PATH ${STAGE_DIR}/qt5)
 set(PRO_QT5
   NAME qt5
   WEB "Qt" http://qt.io/ "Qt - Home"
@@ -25,7 +25,8 @@ set(QT5_REMOVE_SUBMODULES
   qtwebchannel
   qtwebengine
   qtwebkit
-  qtwebkit-examples)
+  qtwebkit-examples
+  qtwebsockets)
 #######################################
 # setup the configure options
 macro(setConfigureOptions)
@@ -102,27 +103,51 @@ endfunction(download_qt5)
 # patch - remove any of the unwanted submodules
 # so that they do not configure/compile
 function(patch_qt5)
+  foreach(RemoveModule ${QT5_REMOVE_SUBMODULES})
+    file(REMOVE_RECURSE ${QT5_REPO_PATH}/${RemoveModule})
+  endforeach()
 endfunction(patch_qt5)
 ########################################
+# Decides which build command to use jom/nmake/make
+macro(findBuildCommand BUILD_COMMAND)
+  if(WIN32)
+    if(EXISTS "c:\\jom\\jom.exe")
+      set(${BUILD_COMMAND} "c:\\jom\\jom.exe")
+    else()
+      set(${BUILD_COMMAND} "nmake -j")
+    endif()
+  else()
+    set(${BUILD_COMMAND} "make -j")
+  endif()
+endmacro()
 # build - configure then build the libraries
 function(build_qt5)
   setConfigureOptions()
   setQtQmakeConf()
 
-  if(WIN32)
-    set(QT_BUILD_COMMAND "nmake")
-  else()
-    set(QT_BUILD_COMMAND "make")
-  endif()
+  # Determine which build command to use (jom/nmake/make)
+  findBuildCommand(QT_BUILD_COMMAND)
 
-  ExternalProject_Add(qt5_build
+  # Create a target to run configure
+  ExternalProject_Add(qt5_configure
     DOWNLOAD_COMMAND "" UPDATE_COMMAND "" PATCH_COMMAND ""
     SOURCE_DIR ${QT5_REPO_PATH}
     CONFIGURE_COMMAND configure ${QT5_CONFIGURE}
-    BUILD_COMMAND ${QT_BUILD_COMMAND} BUILD_IN_SOURCE 1
-    INSTALL_COMMAND ${QT_BUILD_COMMAND} install
+    BUILD_COMMAND "" INSTALL_COMMAND ""
   )
 
-#  configure_file(${PRO_DIR}/use/usexp-qt5-config.cmake ${STAGE_DIR}/share/cmake/
-#  @ONLY NEWLINE_STYLE LF)
+  # Create a separate target to build and install...this is because for some
+  # reason even though the configure succeeds just fine, it stops before
+  # executing the build and install commands (may be because configure exits
+  # with warnings about static builds)
+  add_custom_target(qt5_build
+    COMMAND cd ${QT5_REPO_PATH}
+    COMMAND ${QT_BUILD_COMMAND}
+    COMMAND ${QT_BUILD_COMMAND} install
+  )
+
+  # Copy the useop file to the staging area
+  configure_file(${PRO_DIR}/use/useop-qt5-config.cmake
+                 ${STAGE_DIR}/share/cmake/
+                 COPYONLY)
 endfunction(build_qt5)
