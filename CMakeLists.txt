@@ -9,7 +9,7 @@ include(macpro)
 include(opfunmac)
 proInit()
 proAddProjectDir(projects)
-opExecuteStep()
+proExecuteStep()
 
 # move some needed cmake files into place
 configure_file(Findovsrpro.cmake ${STAGE_DIR}/share/cmake/Findovsrpro.cmake COPYONLY)

@@ -21,44 +21,45 @@ set(PRO_ZOOKEEPER
 ########################################
 # mkpatch_zookeeper
 function(mkpatch_zookeeper)
+  xpRepo(${PRO_ZOOKEEPER})
 endfunction(mkpatch_zookeeper)
 ########################################
 # download
 function(download_zookeeper)
-  if(NOT TARGET zookeeper_repo)
-    xpRepo(${PRO_ZOOKEEPER})
-  endif()
+  xpRepo(${PRO_ZOOKEEPER})
 endfunction(download_zookeeper)
 ########################################
 # patch
 function(patch_zookeeper)
-  if(NOT TARGET zookeeper_patch)
-    ExternalProject_Add(zookeeper_patch
-      DOWNLOAD_COMMAND "" UPDATE_COMMAND "" CONFIGURE_COMMAND "" BUILD_COMMAND ""
-      INSTALL_COMMAND ""
-      SOURCE_DIR ${ZK_REPO_PATH}
-      PATCH_COMMAND ${GIT_EXECUTABLE} apply ${PATCH_DIR}/zookeeper-mt_adapter-x64-fix.patch
-    )
-    if(WIN32)
-      ExternalProject_Add_Step(zookeeper_patch zookeeper_winconfig_patch
-        COMMAND ${GIT_EXECUTABLE} apply ${PATCH_DIR}/zookeeper-winconfig.patch
-        COMMENT "Applying winconfig patch"
-        WORKING_DIRECTORY ${ZK_REPO_PATH}
-        DEPENDEES patch
-      )
-    endif(WIN32)
-
-    # Copy some generated files that are not directly part of the repository
-    ExternalProject_Add_Step(zookeeper_patch copyJute-c
-      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper.jute.c ${ZK_SRC_PATH}/zookeeper.jute.c
-      COMMENT "Copying Jute C file"
-    )
-    ExternalProject_Add_Step(zookeeper_patch copyJute-h
-      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper.jute.h ${ZK_INCLUDE_PATH}/zookeeper.jute.h
-      COMMENT "Copying Jute H file"
-    )
-    add_dependencies(zookeeper_patch zookeeper_repo)
+  if(NOT TARGET zookeeper_repo)
+    xpRepo(${PRO_ZOOKEEPER})
   endif()
+  ExternalProject_Add_Step(zookeeper_repo zookeeper_x64Patch
+    COMMENT "Patching Zookeeper for x64"
+    WORKING_DIRECTORY ${ZK_REPO_PATH}
+    COMMAND ${GIT_EXECUTABLE} apply ${PATCH_DIR}/zookeeper-mt_adapter-x64-fix.patch
+    DEPENDEES download
+  )
+  if(WIN32)
+    ExternalProject_Add_Step(zookeeper_repo zookeeper_winconfigPatch
+      COMMAND ${GIT_EXECUTABLE} apply ${PATCH_DIR}/zookeeper-winconfig.patch
+      COMMENT "Applying winconfig patch"
+      WORKING_DIRECTORY ${ZK_REPO_PATH}
+      DEPENDEES download zookeeper_x64Patch
+    )
+  endif(WIN32)
+
+  # Copy some generated files that are not directly part of the repository
+  ExternalProject_Add_Step(zookeeper_repo copyJute-c
+    COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper.jute.c ${ZK_SRC_PATH}/zookeeper.jute.c
+    COMMENT "Copying Jute C file"
+    DEPENDEES download
+  )
+  ExternalProject_Add_Step(zookeeper_repo copyJute-h
+    COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper.jute.h ${ZK_INCLUDE_PATH}/zookeeper.jute.h
+    COMMENT "Copying Jute H file"
+    DEPENDEES download
+  )
 endfunction(patch_zookeeper)
 ########################################
 # Set the Windows compiler flag
@@ -174,6 +175,6 @@ function(build_zookeeper)
         COMMAND ${CMAKE_COMMAND} -E copy ${hdrfile} ${STAGE_DIR}/include/zookeeper/${file_name_only})
     endforeach()
 
-    add_dependencies(zookeeper_build zookeeper_patch zookeeper_repo)
+    add_dependencies(zookeeper_build zookeeper_repo)
   endif()
 endfunction(build_zookeeper)

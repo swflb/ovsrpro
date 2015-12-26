@@ -2,14 +2,14 @@
 # qt5
 ########################################
 # NOTES: see instructions http://wiki.qt.io/Building-Qt-5-from-Git
-# requires git >=1.6.x, Perl >= 5.14, Python >= 2.6, and postgres >= 7.3 to
-# build.
+# requires git >=1.6.x, Perl >= 5.14, Python >= 2.6,
+# and postgres >= 7.3 to build.
 ########################################
 xpProOption(qt5)
 set(QT5_VER v5.5.0)
 set(QT5_REPO http://code.qt.io/qt/qt5.git)
-set(QT5_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/qt5_repo)
-set(QT5_INSTALL_PATH ${STAGE_DIR}/qt5)
+set(QT5_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/qt5)
+set(QT5_DOWNLOAD_FILE qt-everywhere-opensource-src-5.5.0.tar.gz)
 set(PRO_QT5
   NAME qt5
   WEB "Qt" http://qt.io/ "Qt - Home"
@@ -19,6 +19,8 @@ set(PRO_QT5
   VER ${QT5_VER}
   GIT_ORIGIN ${QT5_REPO}
   GIT_TAG ${QT5_VER}
+  DLURL http://download.qt.io/archive/qt/5.5/5.5.0/single/${QT5_DOWNLOAD_FILE}
+  DLMD5 828594c91ba736ce2cd3e1e8a6146452
 )
 set(QT5_REMOVE_SUBMODULES
   qtandroidextras
@@ -30,6 +32,7 @@ set(QT5_REMOVE_SUBMODULES
 #######################################
 # setup the configure options
 macro(setConfigureOptions)
+  set(QT5_INSTALL_PATH ${STAGE_DIR}/qt5)
   # Define configure parameters
   set(QT5_CONFIGURE
     -qt-zlib
@@ -86,36 +89,41 @@ endmacro(setQtQmakeConf)
 #######################################
 # mkpatch_qt5 - initialize and clone the main repository
 function(mkpatch_qt5)
-
+  xpRepo(${PRO_QT5})
 endfunction(mkpatch_qt5)
 ########################################
 # download - initialize the git submodules
 function(download_qt5)
-  if(NOT TARGET qt5_repo)
-    # checkout the repository and update/init all submodules
-    ExternalProject_Add(qt5_repo
-      DOWNLOAD_DIR ${QT5_REPO_PATH}
-      GIT_REPOSITORY ${QT5_REPO}
-      GIT_TAG ${QT5_VER}
-      PATCH_COMMAND "" UPDATE_COMMAND "" CONFIGURE_COMMAND "" BUILD_COMMAND ""
-      INSTALL_COMMAND "")
-  endif()
+  xpNewDownload(${PRO_QT5})
 endfunction(download_qt5)
 ########################################
 # patch - remove any of the unwanted submodules
 # so that they do not configure/compile
 function(patch_qt5)
-  if(NOT TARGET qt5_patch)
-    add_custom_target(qt5_patch
+  xpPatch(${PRO_QT5})
+  if(NOT (XP_DEFAULT OR XP_PRO_QT5))
+    return()
+  endif()
+
+  # Remove the modules that aren't wanted
+  foreach(RemoveModule ${QT5_REMOVE_SUBMODULES})
+    ExternalProject_Add_Step(qt5 qt5_remove_${RemoveModule}
+      COMMENT "Removing ${RemoveModule}"
       WORKING_DIRECTORY ${QT5_REPO_PATH}
-      COMMAND ECHO Removing unwanted submodules)
-    foreach(RemoveModule ${QT5_REMOVE_SUBMODULES})
-      add_custom_command(TARGET qt5_patch
-        COMMENT "Removing ${RemoveModule}"
-        WORKING_DIRECTORY ${QT5_REPO_PATH}
-        COMMAND ${CMAKE_COMMAND} -E remove_directory ${RemoveModule})
-    endforeach()
-    add_dependencies(qt5_patch qt5_repo)
+      COMMAND ${CMAKE_COMMAND} -E remove_directory ${RemoveModule}
+      DEPENDEES download
+      )
+  endforeach()
+
+  # if this didn't come from the repo (direct download) need to
+  # add a .gitignore...it is used by the configure scripts to
+  # determine whether to compile the configure.exe
+  if (NOT EXISTS ${QT5_REPO_PATH}/qtbase/.gitignore)
+    ExternalProject_Add_Step(qt5 qt5_add_gitignore
+      COMMENT "Creating empty gitignore file"
+      WORKING_DIRECTORY ${QT5_REPO_PATH}
+      COMMAND ${CMAKE_COMMAND} -E touch ${QT5_REPO_PATH}/qtbase/.gitignore
+      DEPENDEES download)
   endif()
 endfunction(patch_qt5)
 ########################################
@@ -125,7 +133,7 @@ macro(findBuildCommand BUILD_COMMAND)
     if(EXISTS "c:\\jom\\jom.exe")
       set(${BUILD_COMMAND} "c:\\jom\\jom.exe")
     else()
-      set(${BUILD_COMMAND} "nmake -j")
+      set(${BUILD_COMMAND} "nmake")
     endif()
   else()
     set(${BUILD_COMMAND} "make -j")
@@ -133,30 +141,45 @@ macro(findBuildCommand BUILD_COMMAND)
 endmacro()
 # build - configure then build the libraries
 function(build_qt5)
-  if(NOT TARGET qt5_build)
-    setConfigureOptions()
-    setQtQmakeConf()
-
-    # Determine which build command to use (jom/nmake/make)
-    findBuildCommand(QT_BUILD_COMMAND)
-
-    # Create a separate target to build and install...this is because for some
-    # reason even though the configure succeeds just fine, it stops before
-    # executing the build and install commands (may be because configure exits
-    # with warnings about static builds)
-    add_custom_target(qt5_build
-      WORKING_DIRECTORY ${QT5_REPO_PATH}
-      COMMAND configure ${QT5_CONFIGURE})
-
-    # make sure the download and patching happen first...
-    add_dependencies(qt5_build qt5_repo qt5_patch)
-
-    add_custom_targeT(qt5_build_2
-      WORKING_DIRECTORY ${QT5_REPO_PATH}
-      COMMAND ${QT_BUILD_COMMAND}
-      COMMAND ${QT_BUILD_COMMAND} install
-      COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake
-      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin)
-
+  if(NOT (XP_DEFAULT OR XP_PRO_QT5))
+    return()
+    message("leaving build qt5")
   endif()
+
+  # Make sure the qt5 target this depends on has been created
+  if(NOT TARGET qt5)
+    patch_qt5()
+  endif()
+
+  setConfigureOptions()
+  setQtQmakeConf()
+
+  # Determine which build command to use (jom/nmake/make)
+  findBuildCommand(QT_BUILD_COMMAND)
+
+  # Create a separate target to build and install...this is because for some
+  # reason even though the configure succeeds just fine, it stops before
+  # executing the build and install commands (may be because configure exits
+  # with warnings about static builds)
+  add_custom_target(qt5_configure ALL
+    WORKING_DIRECTORY ${QT5_REPO_PATH}
+    COMMAND configure ${QT5_CONFIGURE})
+
+  # make sure the download and patching happen first...
+  add_dependencies(qt5_configure qt5)
+
+  # we need openssl to compile and link
+  set(XP_INCLUDE_DIR ${XP_ROOTDIR}/include)
+  set(OPENSSL_LIB_DIR ${XP_ROOTDIR}/lib)
+
+  # Finally, build Qt.  But first, upddate the include and lib paths for openssl
+  add_custom_target(qt5_build ALL
+    WORKING_DIRECTORY ${QT5_REPO_PATH}
+    COMMAND set INCLUDE=%INCLUDE%;${XP_INCLUDE_DIR}
+    COMMAND set LIB=%LIB%;${OPENSSL_LIB_DIR}
+    COMMAND ${QT_BUILD_COMMAND} -I${OPENSSL_INCLUDE_DIR}
+    COMMAND ${QT_BUILD_COMMAND} install
+    COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake
+    COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin)
+    add_dependencies(qt5_build qt5_configure qt5)
 endfunction(build_qt5)
