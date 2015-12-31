@@ -2,8 +2,13 @@
 # qt5
 ########################################
 # NOTES: see instructions http://wiki.qt.io/Building-Qt-5-from-Git
-# requires git >=1.6.x, Perl >= 5.14, Python >= 2.6,
-# and postgres >= 7.3 to build.
+# build/configure tools: Perl >= 5.14
+#                        Python >= 2.6
+# depends: openssl from externpro
+#          psql from overseer pro
+# After installation, the qt.conf file in OVSRPRO_INSTALL_PATH/qt5/bin
+# must be manually modified setting the "Prefix" value to the qt5 installation
+# path (e.g. C:/Program Files/ovsrpro 0.0.1-vc120-64/qt5)
 ########################################
 xpProOption(qt5)
 set(QT5_VER v5.5.0)
@@ -29,6 +34,7 @@ set(QT5_REMOVE_SUBMODULES
   qtwebkit
   qtwebkit-examples
   qtwebsockets)
+
 #######################################
 # setup the configure options
 macro(setConfigureOptions)
@@ -68,25 +74,6 @@ macro(setConfigureOptions)
   endif() # OS type
 endmacro(setConfigureOptions)
 #######################################
-# Update the qmake conf with the /MT flag for static windows builds
-macro(setQtQmakeConf)
-  if(WIN32)
-    if(${XP_BUILD_STATIC})
-      # Copy the qmake conf file to setup the /MT compiler flag and enable
-      # multiple cores while compiling
-      configure_file(${PATCH_DIR}/qt5-msvc-desktop-mt.conf
-                     ${QT5_REPO_PATH}/qtbase/mkspecs/common/msvc-desktop.conf
-                     COPYONLY)
-    else()
-      # Copy the qmake conf file to setup the /MD compiler flag and enable
-      # multiple cores while compiling
-      configure_file(${PATCH_DIR}/qt5-msvc-desktop-md.conf
-                     ${QT5_REPO_PATH}/qtbase/mkspecs/common/msvc-desktop.conf
-                     COPYONLY)
-    endif()
-  endif()
-endmacro(setQtQmakeConf)
-#######################################
 # mkpatch_qt5 - initialize and clone the main repository
 function(mkpatch_qt5)
   xpRepo(${PRO_QT5})
@@ -125,6 +112,20 @@ function(patch_qt5)
       COMMAND ${CMAKE_COMMAND} -E touch ${QT5_REPO_PATH}/qtbase/.gitignore
       DEPENDEES download)
   endif()
+
+  # setup the mkspec file appropriately for static/dynamic
+  if(WIN32)
+    if(${XP_BUILD_STATIC})
+      set(QT5_MKSPEC ${PATCH_DIR}/qt5-msvc-desktop-mt.conf)
+    else()
+      set(QT5_MKSPEC ${PATCH_DIR}/qt5-msvc-desktop-md.conf)
+    endif()
+
+    ExternalProject_Add_Step(qt5 qt5_setup_mkspec
+      COMMENT "Preparing MKSPEC"
+      COMMAND ${CMAKE_COMMAND} -E copy ${QT5_MKSPEC} ${QT5_REPO_PATH}/qtbase/mkspecs/common/msvc-desktop.conf
+      DEPENDEES download)
+  endif()
 endfunction(patch_qt5)
 ########################################
 # Decides which build command to use jom/nmake/make
@@ -143,7 +144,6 @@ endmacro()
 function(build_qt5)
   if(NOT (XP_DEFAULT OR XP_PRO_QT5))
     return()
-    message("leaving build qt5")
   endif()
 
   # Make sure the qt5 target this depends on has been created
@@ -151,8 +151,12 @@ function(build_qt5)
     patch_qt5()
   endif()
 
+  # Make sure the psql target this depends on has been created
+  if(NOT TARGET psql_build)
+    build_psql()
+  endif()
+
   setConfigureOptions()
-  setQtQmakeConf()
 
   # Determine which build command to use (jom/nmake/make)
   findBuildCommand(QT_BUILD_COMMAND)
@@ -162,24 +166,37 @@ function(build_qt5)
   # executing the build and install commands (may be because configure exits
   # with warnings about static builds)
   add_custom_target(qt5_configure ALL
+    COMMENT "Configuring QT5"
     WORKING_DIRECTORY ${QT5_REPO_PATH}
-    COMMAND configure ${QT5_CONFIGURE})
+    COMMAND configure ${QT5_CONFIGURE}
+    DEPENDS qt5 psql_build)
 
-  # make sure the download and patching happen first...
-  add_dependencies(qt5_configure qt5)
-
-  # we need openssl to compile and link
-  set(XP_INCLUDE_DIR ${XP_ROOTDIR}/include)
-  set(OPENSSL_LIB_DIR ${XP_ROOTDIR}/lib)
-
-  # Finally, build Qt.  But first, upddate the include and lib paths for openssl
-  add_custom_target(qt5_build ALL
-    WORKING_DIRECTORY ${QT5_REPO_PATH}
-    COMMAND set INCLUDE=%INCLUDE%;${XP_INCLUDE_DIR}
-    COMMAND set LIB=%LIB%;${OPENSSL_LIB_DIR}
-    COMMAND ${QT_BUILD_COMMAND} -I${OPENSSL_INCLUDE_DIR}
-    COMMAND ${QT_BUILD_COMMAND} install
-    COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake
-    COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin)
-    add_dependencies(qt5_build qt5_configure qt5)
+  # On windows, add the include directories for open ssl and postgres
+  if(WIN32)
+    set(PG_DIR ${STAGE_DIR}/psql)
+    set(XP_INCLUDE_DIR ${XP_ROOTDIR}/include) # for open ssl
+    set(OPENSSL_LIB_DIR ${XP_ROOTDIR}/lib) # for open ssl
+    add_custom_target(qt5_build ALL
+      COMMENT "Configuration complete...building QT5"
+      WORKING_DIRECTORY ${QT5_REPO_PATH}
+      # The postgres and openssl includes seem to conflict with other libraries...they need to
+      # be included after all other options, which can be done with VS using the _CL_ environment
+      # variable
+      COMMAND set _CL_=%_CL% /I"${XP_INCLUDE_DIR}" /I"${PG_DIR}/include"
+      COMMAND set LIB=%LIB%;"${OPENSSL_LIB_DIR}";"${PG_DIR}\\lib"
+      COMMAND ${QT_BUILD_COMMAND}
+      COMMAND ${QT_BUILD_COMMAND} install
+      COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake
+      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin
+      DEPENDS qt5 qt5_configure psql_build)
+  else()
+    add_custom_target(qt5_build ALL
+      COMMENT "Configuration complete...building QT5"
+      WORKING_DIRECTORY ${QT5_REPO_PATH}
+      COMMAND ${QT_BUILD_COMMAND}
+      COMMAND ${QT_BUILD_COMMAND} install
+      COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake
+      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin
+      DEPENDS qt5 qt5_configure psql_build)
+  endif()
 endfunction(build_qt5)
