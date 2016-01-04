@@ -138,7 +138,7 @@ function(build_zookeeper)
       PROPERTIES GENERATED TRUE)
 
     # create the library
-    add_library(zookeeper_build STATIC
+    add_library(zookeeper_build ${${ZK_BUILD_TYPE}}
                 ${zookeeper_src_files} ${zookeeper_hdr_files})
     target_include_directories(zookeeper_build PUBLIC ${ZK_INCLUDE_PATH})
 
@@ -161,6 +161,17 @@ function(build_zookeeper)
       RUNTIME_OUTPUT_DIRECTORY ${STAGE_DIR}/bin
       RUNTIME_OUTPUT_DIRECTORY ${STAGE_DIR}/bin
       RUNTIME_OUTPUT_DIRECTORY ${STAGE_DIR}/bin)
+
+    if(NOT WIN32)
+      add_custom_command(TARGET zookeeper_build PRE_BUILD
+        COMMENT "Bootstrapping autoconf, automake, and libtool"
+        WORKING_DIRECTORY ${ZK_SRC_PATH}
+        COMMAND autoreconf -if)
+      add_custom_command(TARGET zookeeper_build PRE-BUILD
+        COMMENT "Configuring Zookeeper"
+        WORKING_DIRECTORY ${ZK_SRC_PATH}
+        COMMAND configure)
+    endif()
 
     # Copy the find package cmake file to the staging directory
     add_custom_command(TARGET zookeeper_build POST_BUILD
