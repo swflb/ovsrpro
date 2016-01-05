@@ -18,6 +18,17 @@ set(PRO_ZOOKEEPER
   GIT_ORIGIN ${ZK_REPO}
   GIT_TAG ${ZK_VER}
 )
+set(CPP_UNIT_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/cppunit)
+set(CPP_UNIT_VER 1.12.1)
+set(CPP_UNIT
+  NAME cppunit
+  WEB "CppUnit" http://cppunit.sourceforge.net "CppUnit-C++ port of JUnit"
+  LICENSE "LGPL" http://cppunit.sourceforge.net/doc/cvs "LGPL"
+  DESC "C++ port of JUnit"
+  VER ${CPP_UNIT_VER}
+  DLURL http://sourceforge.net/projects/cppunit/files/cppunit/1.12.1/cppunit-1.12.1.tar.gz
+  DLMD5 bd30e9cf5523cdfc019b94f5e1d7fd19
+)
 ########################################
 # mkpatch_zookeeper
 function(mkpatch_zookeeper)
@@ -86,6 +97,11 @@ macro(setWindowsCompilerFlags OLD_VAL NEW_VAL)
   endif()
 endmacro(setWindowsCompilerFlags)
 ########################################
+# download cpp unit
+macro(downloadCppUnit)
+  xpNewDownload(${CPP_UNIT})
+endmacro(downloadCppUnit)
+########################################
 # build
 function(build_zookeeper)
   if(NOT TARGET zookeeper_build)
@@ -123,6 +139,9 @@ function(build_zookeeper)
         ${ZK_SRC_PATH}/winport.c)
       list(APPEND ${zookeeper_hdr_files}
         ${ZK_SRC_PATH}/winport.h)
+    else()
+      list(APPEND ${zookeeper_hdr_files}
+        ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo/src/c/config.h)
     endif(WIN32)
 
     # Determine build type
@@ -163,14 +182,26 @@ function(build_zookeeper)
       RUNTIME_OUTPUT_DIRECTORY ${STAGE_DIR}/bin)
 
     if(NOT WIN32)
-      add_custom_command(TARGET zookeeper_build PRE_BUILD
-        COMMENT "Bootstrapping autoconf, automake, and libtool"
-        WORKING_DIRECTORY ${ZK_SRC_PATH}
-        COMMAND autoreconf -if)
-      add_custom_command(TARGET zookeeper_build PRE-BUILD
-        COMMENT "Configuring Zookeeper"
-        WORKING_DIRECTORY ${ZK_SRC_PATH}
-        COMMAND configure)
+      if(NOT TARGET download_cppunit-1.12.1.tar.gz)
+        downloadCppUnit()
+      endif()
+
+      add_custom_target(zookeeper_unzip_cppunit
+        COMMENT "Unzipping cpp unit"
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/xpbase/Source
+        DEPENDS download_cppunit-${CPP_UNIT_VER}.tar.gz
+        COMMAND ${CMAKE_COMMAND} -E tar xzf ${DWNLD_DIR}/cppunit-${CPP_UNIT_VER}.tar.gz
+      )
+      add_custom_target(zookeeper_configure
+        COMMENT "Bootstrapping autoconf, automake, and libtool and configuring zookeeper"
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo/src/c
+        DEPENDS zookeeper_repo zookeeper_unzip_cppunit
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo ant compile_jute
+        COMMAND ${CMAKE_COMMAND} -E env ACLOCAL=\"aclocal -I ${CMAKE_BINARY_DIR}/xpbase/Source/cppunit-${CPP_UNIT_VER}\" autoreconf -if
+        COMMAND ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo/src/c/configure --without-cppunit
+      )
+      target_include_directories(zookeeper_build PRIVATE ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo/src/c)
+      add_dependencies(zookeeper_build zookeeper_configure)
     endif()
 
     # Copy the find package cmake file to the staging directory

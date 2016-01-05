@@ -49,7 +49,6 @@ macro(setConfigureOptions)
     -opengl desktop
     -openssl
     -qt-sql-psql
-    -qmake
     -opensource
     -confirm-license
     -make libs
@@ -68,9 +67,9 @@ macro(setConfigureOptions)
     list(APPEND QT5_CONFIGURE -static)
   endif()
   if(WIN32)
-    list(APPEND QT5_CONFIGURE -platform win32-msvc2013)
+    list(APPEND QT5_CONFIGURE -platform win32-msvc2013 -qmake)
   else()
-    list(APPEND QT5_CONFIGURE -platform linux-g++ -c++11)
+    list(APPEND QT5_CONFIGURE -platform linux-g++ -c++11 -qt-xcb)
   endif() # OS type
 endmacro(setConfigureOptions)
 #######################################
@@ -166,9 +165,9 @@ function(build_qt5)
   # executing the build and install commands (may be because configure exits
   # with warnings about static builds)
   add_custom_target(qt5_configure ALL
-    COMMENT "Configuring QT5"
+    COMMENT "Configuring qt5"
     WORKING_DIRECTORY ${QT5_REPO_PATH}
-    COMMAND configure ${QT5_CONFIGURE}
+    COMMAND ./configure ${QT5_CONFIGURE}
     DEPENDS qt5 psql_build)
 
   # On windows, add the include directories for open ssl and postgres
@@ -177,7 +176,7 @@ function(build_qt5)
     set(XP_INCLUDE_DIR ${XP_ROOTDIR}/include) # for open ssl
     set(OPENSSL_LIB_DIR ${XP_ROOTDIR}/lib) # for open ssl
     add_custom_target(qt5_build ALL
-      COMMENT "Configuration complete...building QT5"
+      COMMENT "Configuration complete...building qt5"
       WORKING_DIRECTORY ${QT5_REPO_PATH}
       # The postgres and openssl includes seem to conflict with other libraries...they need to
       # be included after all other options, which can be done with VS using the _CL_ environment
@@ -191,12 +190,14 @@ function(build_qt5)
       DEPENDS qt5 qt5_configure psql_build)
   else()
     add_custom_target(qt5_build ALL
-      COMMENT "Configuration complete...building QT5"
+      COMMENT "Configuration complete...building qt5"
       WORKING_DIRECTORY ${QT5_REPO_PATH}
-      COMMAND ${QT_BUILD_COMMAND}
-      COMMAND ${QT_BUILD_COMMAND} install
+      COMMAND make clean
+      COMMAND make
+      COMMAND make install
       COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake
       COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin
       DEPENDS qt5 qt5_configure psql_build)
+
   endif()
 endfunction(build_qt5)
