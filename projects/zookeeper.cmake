@@ -31,9 +31,14 @@ endfunction(download_zookeeper)
 ########################################
 # patch
 function(patch_zookeeper)
+  if(NOT (XP_DEFAULT OR XP_PRO_ZOOKEEPER))
+    return()
+  endif()
+
   if(NOT TARGET zookeeper_repo)
     xpRepo(${PRO_ZOOKEEPER})
   endif()
+
   ExternalProject_Add_Step(zookeeper_repo zookeeper_x64Patch
     COMMENT "Patching Zookeeper for x64"
     WORKING_DIRECTORY ${ZK_REPO_PATH}
@@ -88,6 +93,10 @@ endmacro(setWindowsCompilerFlags)
 ########################################
 # build
 function(build_zookeeper)
+  if(NOT (XP_DEFAULT OR XP_PRO_ZOOKEEPER))
+    return()
+  endif()
+
   if(NOT TARGET zookeeper_build)
     # Gather the zookeeper source files
     set(zookeeper_src_files
