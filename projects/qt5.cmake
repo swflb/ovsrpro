@@ -172,7 +172,6 @@ function(build_qt5)
 
   # On windows, add the include directories for open ssl and postgres
   if(WIN32)
-    set(PG_DIR ${STAGE_DIR}/psql)
     set(XP_INCLUDE_DIR ${XP_ROOTDIR}/include) # for open ssl
     set(OPENSSL_LIB_DIR ${XP_ROOTDIR}/lib) # for open ssl
     add_custom_target(qt5_build ALL
@@ -181,13 +180,14 @@ function(build_qt5)
       # The postgres and openssl includes seem to conflict with other libraries...they need to
       # be included after all other options, which can be done with VS using the _CL_ environment
       # variable
-      COMMAND set _CL_=%_CL% /I"${XP_INCLUDE_DIR}" /I"${PG_DIR}/include"
-      COMMAND set LIB=%LIB%;"${OPENSSL_LIB_DIR}";"${PG_DIR}\\lib"
+      COMMAND set _CL_=%_CL% /I"${XP_INCLUDE_DIR}" /I"${STAGE_DIR}/include/psql"
+      COMMAND set LIB=%LIB%;"${OPENSSL_LIB_DIR}";"${STAGE_DIR}/lib"
       COMMAND ${QT_BUILD_COMMAND}
       COMMAND ${QT_BUILD_COMMAND} install
       COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake
       COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin
-      DEPENDS qt5 qt5_configure psql_build)
+      DEPENDS qt5 qt5_configure psql_build
+    )
   else()
     add_custom_target(qt5_build ALL
       COMMENT "Configuration complete...building qt5"
@@ -197,7 +197,8 @@ function(build_qt5)
       COMMAND make install
       COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake
       COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin
-      DEPENDS qt5 qt5_configure psql_build)
+      DEPENDS qt5 qt5_configure psql_build
+    )
 
   endif()
 endfunction(build_qt5)
