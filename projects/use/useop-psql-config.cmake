@@ -8,8 +8,13 @@ unset(PSQL_LIBRARY_DIRS CACHE)
 
 # Set the PSQL variables...
 set(PSQL_ROOT_DIR ${OP_ROOTDIR}/psql)
-set(PSQL_INCLUDE_DIR ${PSQL_ROOT_DIR}/include)
-set(PSQL_LIB_DIR ${PSQL_ROOT_DIR}/lib)
+set(PSQL_INCLUDE_DIR ${OP_ROOTDIR}/include/psql)
+set(PSQL_LIB_DIR ${OP_ROOTDIR}/lib)
+
+if(WIN32)
+  set(PSQL_LIBS
+    ${PSQL_LIB_DIR}/libpq.lib)
+endif()
 
 # Add the psql headers to the system includes
 include_directories(SYSTEM ${PSQL_INCLUDE_DIR})
