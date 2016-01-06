@@ -178,8 +178,13 @@ function(build_zookeeper)
     endif(${XP_BUILD_STATIC})
 
     # Set the library output properties
+    if(UNIX)
+      set(lib_name zookeeper-mt)
+    else()
+      set(lib_name libzookeeper-mt)
+    endif()
     set_target_properties(zookeeper_build PROPERTIES
-      OUTPUT_NAME libzookeeper-mt
+      OUTPUT_NAME ${lib_name}
       ARCHIVE_OUTPUT_DIRECTORY ${STAGE_DIR}/lib
       ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${STAGE_DIR}/lib
       ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${STAGE_DIR}/lib
