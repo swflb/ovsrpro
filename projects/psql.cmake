@@ -84,10 +84,13 @@ function(build_psql)
   else()
     add_custom_target(psql_build ALL
       COMMENT "Configuring and building psql"
-      WORKING_DIRECTORY ${PSQL_REPO_PATH}/src
-      COMMAND ./configure --libdir=${STAGE_DIR}/LIBRARY_OUTPUT_DIRECTORY --includedir ${STAGE_DIR}/include/psql
+      WORKING_DIRECTORY ${PSQL_REPO_PATH}
+      COMMAND ./configure --prefix=${STAGE_DIR}/psql --libdir=${STAGE_DIR}/lib --includedir ${STAGE_DIR}/include/psql --without-readline --with-openssl
       COMMAND make -j5
-      COMMAND make install
+      COMMAND make -C src/bin install
+      COMMAND make -C src/include install
+      COMMAND make -C src/interfaces install
+      DEPENDS psql
     )
   endif()
 
