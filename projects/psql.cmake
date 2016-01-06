@@ -70,6 +70,7 @@ function(build_psql)
       COMMAND ${CMAKE_COMMAND} -E copy ${PSQL_REPO_PATH}/src/interfaces/libpq/libpq-int.h ${STAGE_DIR}/include/psql/libpq-int.h
       COMMAND ${CMAKE_COMMAND} -E copy ${PSQL_REPO_PATH}/src/interfaces/libpq/pqexpbuffer.h ${STAGE_DIR}/include/psql/pqexpbuffer.h
       COMMAND ${CMAKE_COMMAND} -E copy ${PSQL_REPO_PATH}/src/interfaces/libpq/win32.h ${STAGE_DIR}/include/psql/win32.h
+      COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-psql-config.cmake ${STAGE_DIR}/share/cmake/useop-psql-config.cmake
       DEPENDS psql
     )
 
@@ -93,12 +94,4 @@ function(build_psql)
       DEPENDS psql
     )
   endif()
-
-  # Just move the psql download to the staging directory
-#  add_custom_target(psql_build ALL
-#    COMMENT "Copying psql download and use file to staging area"
-#    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PSQL_DOWNLOAD_PATH} ${STAGE_DIR}/psql
-#    COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-psql-config.cmake ${STAGE_DIR}/share/cmake
-#    DEPENDS psql
-#  )
 endfunction()
