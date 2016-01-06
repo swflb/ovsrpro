@@ -197,8 +197,8 @@ function(build_qt5)
       COMMAND set LIB=%LIB%;"${OPENSSL_LIB_DIR}";"${STAGE_DIR}/lib"
       COMMAND ${QT_BUILD_COMMAND}
       COMMAND ${QT_BUILD_COMMAND} install
-      COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake
-      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin
+      COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake/useop-qt5-config.cmake
+      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin/qt.conf
       DEPENDS qt5 qt5_configure psql_build
     )
   else()
@@ -207,7 +207,7 @@ function(build_qt5)
       WORKING_DIRECTORY ${QT5_REPO_PATH}
       COMMAND make -j5
       COMMAND make install
-      COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake
+      COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake/useop-qt5-config.cmake
       COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin/qt.conf
       DEPENDS qt5 qt5_configure psql_build
     )
