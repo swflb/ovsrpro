@@ -67,6 +67,19 @@ function(build_librdkafka)
     patch_librdkafka()
   endif()
 
+  if(UNIX)
+    add_custom_target(librdkafka_build
+      COMMENT "Configuring and building librdkafka"
+      WORKING_DIRECTORY ${KAFKA_REPO_PATH}
+      COMMAND ./configure --prefix ${STAGE_DIR}/
+      COMMAND make
+      COMMAND make install
+      COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-librdkafka-config.cmake ${STAGE_DIR}/share/cmake/useop-librdkafka-config.cmake
+      DEPENDS librdkafka_repo
+    )
+    return()    
+  endif()
+
   # define the src files
   set(c_files
     ${KAFKA_REPO_PATH}/src/rdkafka.c
