@@ -53,7 +53,7 @@ macro(setConfigureOptions)
     -confirm-license
     -make libs
     -nomake examples
-    -nomake tools
+    -make tools
     -nomake tests
     -prefix ${QT5_INSTALL_PATH})
   # Check whether to include debug build
@@ -69,7 +69,20 @@ macro(setConfigureOptions)
   if(WIN32)
     list(APPEND QT5_CONFIGURE -platform win32-msvc2013 -qmake)
   else()
-    list(APPEND QT5_CONFIGURE -platform linux-g++ -c++11 -qt-xcb)
+    list(APPEND QT5_CONFIGURE -platform linux-g++
+      -c++11
+      -qt-xcb
+      -qt-xkbcommon-x11
+      -optimized-qmake
+      -verbose
+      -no-nis
+      -no-cups
+      -no-iconv
+      -no-evdev
+      -no-tslib
+      -no-icu
+      -no-android-style-assets
+      -no-gstreamer)
   endif() # OS type
 endmacro(setConfigureOptions)
 #######################################
@@ -136,7 +149,7 @@ macro(findBuildCommand BUILD_COMMAND)
       set(${BUILD_COMMAND} "nmake")
     endif()
   else()
-    set(${BUILD_COMMAND} "make -j")
+    set(${BUILD_COMMAND} "make")
   endif()
 endmacro()
 # build - configure then build the libraries
@@ -193,7 +206,7 @@ function(build_qt5)
       COMMENT "Configuration complete...building qt5"
       WORKING_DIRECTORY ${QT5_REPO_PATH}
       COMMAND make clean
-      COMMAND make
+      COMMAND make -j5
       COMMAND make install
       COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake
       COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin
