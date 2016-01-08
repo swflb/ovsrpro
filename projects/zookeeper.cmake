@@ -59,6 +59,7 @@ function(patch_zookeeper)
   if(WIN32)
     ExternalProject_Add_Step(zookeeper_repo zookeeper_winconfigPatch
       COMMAND ${GIT_EXECUTABLE} apply ${PATCH_DIR}/zookeeper-winconfig.patch
+      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper-win32-gettimeofday.c ${ZK_SRC_PATH}/gettimeofday.c
       COMMENT "Applying winconfig patch"
       WORKING_DIRECTORY ${ZK_REPO_PATH}
       DEPENDEES download zookeeper_x64Patch
@@ -145,7 +146,8 @@ function(build_zookeeper)
 
     if(WIN32)
       list(APPEND ${zookeeper_src_files}
-        ${ZK_SRC_PATH}/winport.c)
+        ${ZK_SRC_PATH}/winport.c
+        ${ZK_SRC_PATH}/gettimeofday.c)
       list(APPEND ${zookeeper_hdr_files}
         ${ZK_SRC_PATH}/winport.h)
     else()
@@ -218,11 +220,6 @@ function(build_zookeeper)
       add_dependencies(zookeeper_build zookeeper_configure)
     endif()
 
-    # Copy the find package cmake file to the staging directory
-    add_custom_command(TARGET zookeeper_build POST_BUILD
-      COMMENT "Copy useop-zookeeper-config.cmake to staging area"
-      COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-zookeeper-config.cmake ${STAGE_DIR}/share/cmake/useop-zookeeper-config.cmake)
-
     # Copy the include files to the staging directory
     foreach(hdrfile ${zookeeper_hdr_files})
       get_filename_component(file_name_only ${hdrfile} NAME)
@@ -232,5 +229,11 @@ function(build_zookeeper)
     endforeach()
 
     add_dependencies(zookeeper_build zookeeper_repo)
+
+    # Copy the find package cmake file to the staging directory
+    configure_file(${PRO_DIR}/use/useop-zookeeper-config.cmake
+                   ${STAGE_DIR}/share/cmake/useop-zookeeper-config.cmake
+                   COPYONLY)
+
   endif()
 endfunction(build_zookeeper)

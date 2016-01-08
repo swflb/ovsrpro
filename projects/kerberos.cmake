@@ -11,8 +11,8 @@ if(WIN32)
   set(KERBEROS_DL_URL http://web.mit.edu/kerberos/dist/kfw/4.0/kfw-4.0.1-src.zip)
   set(KERBEROS_DL_MD5 6d58ca865beb5b5c145dc4f579753d33)
 else()
-  set(KERBEROS_DL_URL http://web.mit.edu/kerberos/dist/krb5/1.12/krb5-1.12.5.tar.gz)
-  set(KERBEROS_DL_MD5 d38d4592aeca049e1e1a0a7f0cd97aef)
+  set(KERBEROS_DL_URL http://web.mit.edu/kerberos/dist/krb5/1.14/krb5-1.14.tar.gz)
+  set(KERBEROS_DL_MD5 0727968764d0208388b85ad31aafde24)
 endif()
 #######################################
 set(PRO_KERBEROS
@@ -99,6 +99,15 @@ function(build_kerberos)
       COMMAND ${CMAKE_COMMAND} -E remove_directory ${STAGE_DIR}/kerberos
       DEPENDS kerberos
     )
+  else()
+    add_custom_target(kerberos_build ALL
+      COMMENT "Building kerberos"
+      WORKING_DIRECTORY ${KERBEROS_DOWNLOAD_PATH}/src
+      COMMAND ./configure --prefix=${STAGE_DIR} --includedir=${STAGE_DIR}/include/kerberos
+      COMMAND make
+      COMMAND make install
+      DEPENDS kerberos
+      )
   endif()
 
   set(numBits 64)

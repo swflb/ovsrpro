@@ -9,16 +9,16 @@ unset(Zookeeper_LIB CACHE)
 
 # Set the include and libs paths
 set(Zookeeper_INCLUDE_DIR ${OP_ROOTDIR}/include/)
-set(Zookeeper_LIBS_DIR ${OP_ROOTDIR}/lib/zookeeper)
+set(Zookeeper_LIBS_DIR ${OP_ROOTDIR}/lib)
 
 # Windows needs the .lib and the winsock library
 if(WIN32)
   set(Zookeeper_LIB
-    ${Zookeeper_LIBS_IDR}/libzookeeper_mt.lib
+    ${Zookeeper_LIBS_DIR}/libzookeeper-mt.lib
     ws2_32.lib)
 else()
 # Unix just needs the .a
-  set(Zookeeper_LIB ${Zookeeper_LIBS_DIR}/libzookeeper_mt.a)
+  set(Zookeeper_LIB ${Zookeeper_LIBS_DIR}/libzookeeper-mt.a)
 endif(WIN32)
 
 # Add the zookeeper headers to the system includes

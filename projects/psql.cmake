@@ -69,9 +69,6 @@ function(build_psql)
       COMMENT "Configuring and building psql"
       WORKING_DIRECTORY ${PSQL_REPO_PATH}/src
       COMMAND nmake /f win32.mak CPU=AMD64 SSL_INC=${OPENSSL_INCLUDE_DIR} SSL_LIB_PATH=${XP_ROOTDIR}/lib LIB_ONLY
-      # Need to link in Secur32.lib
-      COMMAND lib /out:${STAGE_DIR}/lib/libpq.lib ${lib_path} Secur32.lib
-      #COMMAND ${CMAKE_COMMAND} -E copy ${PSQL_REPO_PATH}/src/interfaces/libpq/Release/libpq.lib ${STAGE_DIR}/lib/libpq.lib
       COMMAND ${CMAKE_COMMAND} -E copy_directory ${PSQL_REPO_PATH}/src/include ${STAGE_DIR}/include/psql
       COMMAND ${CMAKE_COMMAND} -E copy ${PSQL_REPO_PATH}/src/interfaces/libpq/pg_config_paths.h ${STAGE_DIR}/include/psql/pg_config_paths.h
       COMMAND ${CMAKE_COMMAND} -E copy ${PSQL_REPO_PATH}/src/interfaces/libpq/fe-auth.h ${STAGE_DIR}/include/psql/fe-auth.h
@@ -84,6 +81,18 @@ function(build_psql)
       DEPENDS psql
     )
 
+    if(${XP_BUILD_STATIC})
+      add_custom_command(TARGET psql_build POST_BUILD
+        WORKING_DIRECTORY ${PSQL_REPO_PATH}/src
+        COMMAND lib /out:${STAGE_DIR}/lib/libpq.lib ${lib_path} Secur32.lib
+      )
+    else()
+      add_custom_command(TARGET psql_build POST_BUILD
+        WORKING_DIRECTORY ${PSQL_REPO_PATH}/src
+        COMMAND ${CMAKE_COMMAND} -E copy ${PSQL_REPO_PATH}/src/interfaces/libpq/Release/libpq.lib ${STAGE_DIR}/lib/libpq.lib
+      )
+    endif()
+
     if(${XP_BUILD_DEBUG})
       add_custom_command(TARGET psql_build POST_BUILD
         COMMENT "Build psql - debug"
@@ -91,6 +100,19 @@ function(build_psql)
         COMMAND nmake /f win32.mak CPU=AMD64 SSL_INC=${OPENSSL_INCLUDE_DIR} SSL_LIB_PATH=${XP_ROOTDIR}/lib DEBUG=1 LIB_ONLY
         COMMAND ${CMAKE_COMMAND} -E copy ${PSQL_REPO_PATH}/src/interfaces/libpq/Debug/libpqd.lib ${STAGE_DIR}/lib/libpqd.lib
       )
+
+      set(lib_path ${PSQL_REPO_PATH}/src/interfaces/libpq/Release/libpqd.lib)
+      if(${XP_BUILD_STATIC})
+        add_custom_command(TARGET psql_build POST_BUILD
+          WORKING_DIRECTORY ${PSQL_REPO_PATH}/src
+          COMMAND lib /out:${STAGE_DIR}/lib/libpqd.lib ${lib_path} Secur32.lib
+        )
+      else()
+        add_custom_command(TARGET psql_build POST_BUILD
+          WORKING_DIRECTORY ${PSQL_REPO_PATH}/src
+          COMMAND ${CMAKE_COMMAND} -E copy ${lib_path} ${STAGE_DIR}/lib/libpqd.lib
+        )
+      endif()
     endif()
   else()
     add_custom_target(psql_build ALL

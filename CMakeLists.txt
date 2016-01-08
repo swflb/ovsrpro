@@ -13,6 +13,7 @@ proAddProjectDir(projects)
 proExecuteStep()
 
 # move some needed cmake files into place
+MESSAGE("Stage: ${STAGE_DIR}")
 configure_file(Findovsrpro.cmake ${STAGE_DIR}/share/cmake/Findovsrpro.cmake COPYONLY)
 configure_file(opfunmac.cmake ${STAGE_DIR}/share/cmake/opfunmac.cmake COPYONLY)
 configure_file(useop-ovsrpro.cmake ${STAGE_DIR}/share/cmake/useop-ovsrpro.cmake COPYONLY)
