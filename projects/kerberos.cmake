@@ -34,6 +34,10 @@ function(download_kerberos)
 endfunction()
 #######################################
 function(patch_kerberos)
+  if(NOT (XP_DEFULAT OR XP_PRO_KERBEROS))
+    return()
+  endif()
+
   xpPatch(${PRO_KERBEROS})
 
   if(WIN32)
@@ -42,7 +46,7 @@ function(patch_kerberos)
       COMMENT "Applying kerberos minimal patch"
       # eliminate executables that we won't ever need for linking etc.
       COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/kerberos-windows-minimal-Makefile.in ${KERBEROS_DOWNLOAD_PATH}/src/Makefile.in
-      # fix the install script due to theh parts we removed
+      # fix the install script due to the parts we removed
       COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/kerberos-windows-Makefile.in ${KERBEROS_DOWNLOAD_PATH}/src/windows/Makefile.in
       # fix libecho to work on 64 bit...
       COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/kerberos-libecho.c ${KERBEROS_DOWNLOAD_PATH}/src/util/windows/libecho.c
@@ -78,41 +82,28 @@ function(build_kerberos)
 
     set(ADD_TO_PATH "C:\\Program Files (x86)\\GnuWin32\\bin\;C:\\Perl64\\bin\;")
 
-    if(${XP_BUILD_STATIC})
-      opSetWindowsStaticFlags(/MT)
-    endif()
-
     add_custom_target(kerberos_build ALL
       COMMENT "Building kerberos"
       WORKING_DIRECTORY ${KERBEROS_DOWNLOAD_PATH}/src
       # build the 64 bit libraries
       COMMAND set PATH=%PATH%\;${ADD_TO_PATH}
-      COMMAND nmake clean
       COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/kerberos
       COMMAND ${CMAKE_COMMAND} -E env CPU=AMD64 KRB_INSTALL_DIR=${STAGE_DIR}/kerberos nmake -f Makefile.in prep-windows
       COMMAND ${CMAKE_COMMAND} -E env CPU=AMD64 KRB_INSTALL_DIR=${STAGE_DIR}/kerberos CL=/D_XKEYCHECK_H=1 nmake NODEBUG=${NODEBUG}
       COMMAND ${CMAKE_COMMAND} -E env CPU=AMD64 KRB_INSTALL_DIR=${STAGE_DIR}/kerberos nmake install NODEBUG=${NODEBUG}
-      DEPENDS kerberos
-    )
-
-    set(SIMPLE_PATH "C:\\windows\\system32\;C:\\windows\;C:\\windows\\System32\\Wbem\;")
-    # for a 32-bit build, do something like this...
-    add_custom_target(kerberos_x86
-      COMMENT "Building x86 kerberos"
-      # Setup the environment for x86 as the generator should have used amd64
-      WORKING_DIRECTORY ${KERBEROS_DOWNLOAD_PATH}/src
-      COMMAND set PATH=${SIMPLE_PATH}\;${ADD_TO_PATH}
-      COMMAND set INCLUDE=
-      COMMAND set LIB=
-      COMMAND set LIBPATH=
-      COMMAND CALL "C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\vcvarsall.bat" x86
-      COMMAND echo after: %PATH%
-      # Configure/build/install
-      COMMAND nmake clean
-      COMMAND ${CMAKE_COMMAND} -E env CPU=i386 KRB_INSTALL_DIR=${STAGE_DIR}/kerberos nmake -f Makefile.in prep-windows
-      COMMAND ${CMAKE_COMMAND} -E env CPU=i386 KRB_INSTALL_DIR=${STAGE_DIR}/kerberos CL=/D_XKEYCHECK_H=1 nmake NODEBUG=${NODEBUG}
-      COMMAND ${CMAKE_COMMAND} -E env CPU=i386 KRB_INSTALL_DIR=${STAGE_DIR}/kerberos nmake install NODEBUG=${NODEBUG}
+      # re-arrange the installation a bit...
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${STAGE_DIR}/kerberos/include ${STAGE_DIR}/include/kerberos
+      COMMAND ${CMAKE_COMMAND} -E copy ${KERBEROS_DOWNLOAD_PATH}/src/lib/gssapi/obj/AMD64/rel/gssapi.lib ${STAGE_DIR}/lib/gssapi.lib
+      COMMAND ${CMAKE_COMMAND} -E copy ${KERBEROS_DOWNLOAD_PATH}/src/lib/krb5/obj/AMD64/rel/krb5.lib ${STAGE_DIR}/lib/krb5.LIBRARY_OUTPUT_DIRECTORY
+      COMMAND ${CMAKE_COMMAND} -E copy ${KERBEROS_DOWNLOAD_PATH}/src/util/et/obj/AMD64/rel/comerr.lib ${STAGE_DIR}/lib/comerr.lib
+      COMMAND ${CMAKE_COMMAND} -E remove_directory ${STAGE_DIR}/kerberos
       DEPENDS kerberos
     )
   endif()
+
+  set(numBits 64)
+  if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    set(numBits 32)
+  endif()
+  configure_file(${PRO_DIR}/use/useop-kerberos-config.cmake ${STAGE_DIR}/share/cmake/useop-kerberos-config.cmake)
 endfunction()

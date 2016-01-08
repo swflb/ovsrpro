@@ -15,7 +15,7 @@ SUBDIRS=util include lib \
   plugins/preauth/pkinit \
   kdc kadmin slave tests \
   config-files gen-manpages @po@
-WINSUBDIRS=include util lib ccapi windows
+WINSUBDIRS=include util lib
 BUILDTOP=$(REL).
 LOCALINCLUDES = -I$(srcdir)
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -156,10 +156,6 @@ config-windows:: Makefile-windows
 ##DOS##MKFDEP=$(WCONFIG_EXE) config\win-pre.in config\win-post.in
 
 WINMAKEFILES=Makefile \
-  ccapi\Makefile \
-  ccapi\lib\win\Makefile \
-  ccapi\server\win\Makefile \
-  ccapi\test\Makefile \
   include\Makefile \
   lib\Makefile lib\crypto\Makefile lib\crypto\krb\Makefile \
   lib\crypto\builtin\Makefile lib\crypto\builtin\aes\Makefile \
@@ -186,22 +182,10 @@ WINMAKEFILES=Makefile \
   util\support\Makefile \
   util\windows\Makefile \
   util\wshelper\Makefile \
-  windows\Makefile windows\lib\Makefile \
-  windows\cns\Makefile windows\gina\Makefile \
-  windows\ms2mit\Makefile \
-  windows\wintel\Makefile windows\kfwlogon\Makefile \
 
 ##DOS##Makefile-windows:: $(MKFDEP) $(WINMAKEFILES)
 
 ##DOS##Makefile: Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##ccapi\Makefile: ccapi\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##ccapi\lib\win\Makefile: ccapi\lib\win\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##ccapi\server\win\Makefile: ccapi\server\win\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##ccapi\test\Makefile: ccapi\test\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##include\Makefile: include\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -278,20 +262,6 @@ WINMAKEFILES=Makefile \
 ##DOS##util\windows\Makefile: util\windows\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##util\wshelper\Makefile: util\wshelper\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##windows\Makefile: windows\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##windows\lib\Makefile: windows\lib\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##windows\cns\Makefile: windows\cns\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##windows\gina\Makefile: windows\gina\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##windows\ms2mit\Makefile: windows\ms2mit\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##windows\wintel\Makefile: windows\wintel\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##windows\kfwlogon\Makefile: windows\kfwlogon\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 
 clean-windows:: Makefile-windows
@@ -518,17 +488,9 @@ install-windows::
   copy include\gssapi\gssapi_ext.h "$(KRB_INSTALL_DIR)\include\gssapi\."
   copy lib\$(OUTPRE)*.lib "$(KRB_INSTALL_DIR)\lib\."
   copy lib\$(OUTPRE)*.dll "$(KRB_INSTALL_DIR)\bin\."
-  copy windows\cns\$(OUTPRE)krb5.exe "$(KRB_INSTALL_DIR)\bin\."
-  copy windows\ms2mit\$(OUTPRE)*.exe "$(KRB_INSTALL_DIR)\bin\."
-  copy windows\kfwlogon\$(OUTPRE)*.lib "$(KRB_INSTALL_DIR)\lib\."
-  copy windows\kfwlogon\$(OUTPRE)*.exe "$(KRB_INSTALL_DIR)\bin\."
-  copy windows\kfwlogon\$(OUTPRE)*.dll "$(KRB_INSTALL_DIR)\bin\."
   copy util\windows\$(OUTPRE)*.lib "$(KRB_INSTALL_DIR)\lib\."
   copy util\wshelper\$(OUTPRE)$(DLIB).lib "$(KRB_INSTALL_DIR)\lib\."
   copy util\wshelper\$(OUTPRE)$(DLIB).dll "$(KRB_INSTALL_DIR)\bin\."
-  copy ccapi\lib\win\srctmp\$(OUTPRE)$(CCLIB).dll "$(KRB_INSTALL_DIR)\bin\."
-  copy ccapi\lib\win\srctmp\$(CCLIB).lib "$(KRB_INSTALL_DIR)\lib\."
-  copy ccapi\server\win\srctmp\$(OUTPRE)ccapiserver.exe "$(KRB_INSTALL_DIR)\bin\."
 
 install-unix::
   $(INSTALL_SCRIPT) krb5-config \

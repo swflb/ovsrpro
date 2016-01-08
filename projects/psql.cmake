@@ -29,15 +29,22 @@ function(download_psql)
 endfunction()
 #######################################
 function(patch_psql)
+  if(NOT (XP_DEFULAT OR XP_PRO_PSQL))
+    return()
+  endif()
+
   xpPatch(${PRO_PSQL})
 
-  if(${XP_BUILD_STATIC})
-    ExternalProject_Add_Step(psql updateToStatic
-      COMMENT "Replacing win32.mak file to enable /MT compiler flag"
-      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/psql-win32-static.mak ${PSQL_REPO_PATH}/src/interfaces/libpq/win32.mak
-      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/psql-win32-top-level-static.mak ${PSQL_REPO_PATH}/src/win32.mak
-      DEPENDEES download
-    )
+  if(WIN32)
+    if(${XP_BUILD_STATIC})
+      ExternalProject_Add_Step(psql updateToStatic
+        COMMENT "Replacing win32.mak file to enable /MT compiler flag"
+        COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/psql-win32-static.mak ${PSQL_REPO_PATH}/src/interfaces/libpq/win32.mak
+        COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/psql-win32-top-level-static.mak ${PSQL_REPO_PATH}/src/win32.mak
+        COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/psql-win32error-static_patch.c ${PSQL_REPO_PATH}/src/port/win32error.c
+        DEPENDEES download
+      )
+    endif()
   endif()
 endfunction()
 #######################################
@@ -57,11 +64,14 @@ function(build_psql)
   xpFindPkg(PKGS openssl)
 
   if(WIN32)
+    set(lib_path ${PSQL_REPO_PATH}/src/interfaces/libpq/Release/libpq.lib)
     add_custom_target(psql_build ALL
       COMMENT "Configuring and building psql"
       WORKING_DIRECTORY ${PSQL_REPO_PATH}/src
       COMMAND nmake /f win32.mak CPU=AMD64 SSL_INC=${OPENSSL_INCLUDE_DIR} SSL_LIB_PATH=${XP_ROOTDIR}/lib LIB_ONLY
-      COMMAND ${CMAKE_COMMAND} -E copy ${PSQL_REPO_PATH}/src/interfaces/libpq/Release/libpq.lib ${STAGE_DIR}/lib/libpq.lib
+      # Need to link in Secur32.lib
+      COMMAND lib /out:${STAGE_DIR}/lib/libpq.lib ${lib_path} Secur32.lib
+      #COMMAND ${CMAKE_COMMAND} -E copy ${PSQL_REPO_PATH}/src/interfaces/libpq/Release/libpq.lib ${STAGE_DIR}/lib/libpq.lib
       COMMAND ${CMAKE_COMMAND} -E copy_directory ${PSQL_REPO_PATH}/src/include ${STAGE_DIR}/include/psql
       COMMAND ${CMAKE_COMMAND} -E copy ${PSQL_REPO_PATH}/src/interfaces/libpq/pg_config_paths.h ${STAGE_DIR}/include/psql/pg_config_paths.h
       COMMAND ${CMAKE_COMMAND} -E copy ${PSQL_REPO_PATH}/src/interfaces/libpq/fe-auth.h ${STAGE_DIR}/include/psql/fe-auth.h

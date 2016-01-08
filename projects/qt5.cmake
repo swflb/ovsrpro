@@ -67,7 +67,7 @@ macro(setConfigureOptions)
     list(APPEND QT5_CONFIGURE -static)
   endif()
   if(WIN32)
-    list(APPEND QT5_CONFIGURE -platform win32-msvc2013 -qmake)
+    list(APPEND QT5_CONFIGURE -platform win32-msvc2013 -qmake -mp)
   else()
     list(APPEND QT5_CONFIGURE -platform linux-g++
       -c++11
