@@ -158,14 +158,15 @@ function(build_qt5)
     return()
   endif()
 
+  # Make sure the psql target this depends on has been created
+  if(NOT (XP_DEFAULT OR XP_PRO_PSQL))
+    message(FATAL "qt5 requires psql")
+    return()
+  endif()
+
   # Make sure the qt5 target this depends on has been created
   if(NOT TARGET qt5)
     patch_qt5()
-  endif()
-
-  # Make sure the psql target this depends on has been created
-  if(NOT TARGET psql_build)
-    build_psql()
   endif()
 
   setConfigureOptions()
@@ -193,8 +194,10 @@ function(build_qt5)
       # The postgres and openssl includes seem to conflict with other libraries...they need to
       # be included after all other options, which can be done with VS using the _CL_ environment
       # variable
-      COMMAND set _CL_=%_CL% /I"${XP_INCLUDE_DIR}" /I"${STAGE_DIR}/include/psql"
-      COMMAND set LIB=%LIB%;"${OPENSSL_LIB_DIR}";"${STAGE_DIR}/lib"
+      COMMAND set _CL_=%_CL_% /I"${XP_INCLUDE_DIR}" /I"${STAGE_DIR}/include/psql"
+      COMMAND set LIB=${OPENSSL_LIB_DIR}\;${STAGE_DIR}/lib\;%LIB%
+      COMMAND echo %LIB%
+      COMMAND echo %_CL_%
       COMMAND ${QT_BUILD_COMMAND}
       COMMAND ${QT_BUILD_COMMAND} install
       COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake
