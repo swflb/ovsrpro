@@ -12,8 +12,12 @@ set(PSQL_INCLUDE_DIR ${OP_ROOTDIR}/include/psql)
 set(PSQL_LIB_DIR ${OP_ROOTDIR}/lib)
 
 if(WIN32)
-  set(PSQL_LIBS
-    ${PSQL_LIB_DIR}/libpq.lib)
+  if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+    set(PSQL_LIBS ${PSQL_LIB_DIR}/libpqd.lib)
+  else()
+    set(PSQL_LIBS
+      ${PSQL_LIB_DIR}/libpq.lib)
+  endif()
 endif()
 
 # Add the psql headers to the system includes

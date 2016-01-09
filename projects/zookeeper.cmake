@@ -114,126 +114,123 @@ function(build_zookeeper)
     return()
   endif()
 
-  if(NOT TARGET zookeeper_build)
-    # Gather the zookeeper source files
-    set(zookeeper_src_files
-      ${ZK_SRC_PATH}/mt_adaptor.c
-      ${ZK_SRC_PATH}/recordio.c
+  # Gather the zookeeper source files
+  set(zookeeper_src_files
+    ${ZK_SRC_PATH}/mt_adaptor.c
+    ${ZK_SRC_PATH}/recordio.c
+    ${ZK_SRC_PATH}/zk_hashtable.c
+    ${ZK_SRC_PATH}/zk_log.c
+    ${ZK_SRC_PATH}/zookeeper.c
+    ${ZK_SRC_PATH}/hashtable/hashtable.c
+    ${ZK_SRC_PATH}/hashtable/hashtable_itr.c
+    ${ZK_SRC_PATH}/zookeeper.jute.c
+    ${ZK_SRC_PATH}/winport.h
+    ${ZK_SRC_PATH}/zk_adaptor.h
+    ${ZK_SRC_PATH}/zk_hashtable.h
+    ${ZK_SRC_PATH}/hashtable/hashtable.h
+    ${ZK_SRC_PATH}/hashtable/hashtable_itr.h
+    ${ZK_SRC_PATH}/hashtable/hashtable_private.h
+  )
+  set(zookeeper_hdr_files
+    ${ZK_INCLUDE_PATH}/proto.h
+    ${ZK_INCLUDE_PATH}/recordio.h
+    ${ZK_INCLUDE_PATH}/winconfig.h
+    ${ZK_INCLUDE_PATH}/winstdint.h
+    ${ZK_INCLUDE_PATH}/zookeeper.h
+    ${ZK_INCLUDE_PATH}/zookeeper.jute.h
+    ${ZK_INCLUDE_PATH}/zookeeper_log.h
+    ${ZK_INCLUDE_PATH}/zookeeper_version.h
+  )
+
+  if(WIN32)
+    list(APPEND zookeeper_src_files
       ${ZK_SRC_PATH}/winport.c
-      ${ZK_SRC_PATH}/zk_hashtable.c
-      ${ZK_SRC_PATH}/zk_log.c
-      ${ZK_SRC_PATH}/zookeeper.c
-      ${ZK_SRC_PATH}/hashtable/hashtable.c
-      ${ZK_SRC_PATH}/hashtable/hashtable_itr.c
-      ${ZK_SRC_PATH}/zookeeper.jute.c
-      ${ZK_SRC_PATH}/winport.h
-      ${ZK_SRC_PATH}/zk_adaptor.h
-      ${ZK_SRC_PATH}/zk_hashtable.h
-      ${ZK_SRC_PATH}/hashtable/hashtable.h
-      ${ZK_SRC_PATH}/hashtable/hashtable_itr.h
-      ${ZK_SRC_PATH}/hashtable/hashtable_private.h
-    )
-    set(zookeeper_hdr_files
-      ${ZK_INCLUDE_PATH}/proto.h
-      ${ZK_INCLUDE_PATH}/recordio.h
-      ${ZK_INCLUDE_PATH}/winconfig.h
-      ${ZK_INCLUDE_PATH}/winstdint.h
-      ${ZK_INCLUDE_PATH}/zookeeper.h
-      ${ZK_INCLUDE_PATH}/zookeeper.jute.h
-      ${ZK_INCLUDE_PATH}/zookeeper_log.h
-      ${ZK_INCLUDE_PATH}/zookeeper_version.h
-    )
-
-    if(WIN32)
-      list(APPEND ${zookeeper_src_files}
-        ${ZK_SRC_PATH}/winport.c
-        ${ZK_SRC_PATH}/gettimeofday.c)
-      list(APPEND ${zookeeper_hdr_files}
-        ${ZK_SRC_PATH}/winport.h)
-    else()
-      list(APPEND ${zookeeper_hdr_files}
-        ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo/src/c/config.h)
-    endif(WIN32)
-
-    # Determine build type
-    if(${XP_BUILD_STATIC})
-      set(ZK_BUILD_TYPE STATIC)
-    else()
-      set(ZK_BUILD_TYPE SHARED)
-    endif()
-
-    # indicate that all the files are GENERATED so they don't need to exist when
-    # creating the target...they will be available after download
-    set_source_files_properties(${zookeeper_src_files} ${zookeeper_hdr_files}
-      PROPERTIES GENERATED TRUE)
-
-    # create the library
-    add_library(zookeeper_build ${${ZK_BUILD_TYPE}}
-                ${zookeeper_src_files} ${zookeeper_hdr_files})
-    target_include_directories(zookeeper_build PUBLIC ${ZK_INCLUDE_PATH})
-
-    # Use /MT for a static windows build, and add the 'd' for debug builds
-    if(${XP_BUILD_STATIC})
-      if(WIN32)
-        target_compile_options(zookeeper_build PUBLIC "/MT$<$<STREQUAL:$<CONFIGURATION>,Debug>:d>")
-      endif(WIN32)
-    endif(${XP_BUILD_STATIC})
-
-    # Set the library output properties
-    if(UNIX)
-      set(lib_name zookeeper-mt)
-    else()
-      set(lib_name libzookeeper-mt)
-    endif()
-    set_target_properties(zookeeper_build PROPERTIES
-      OUTPUT_NAME ${lib_name}
-      ARCHIVE_OUTPUT_DIRECTORY ${STAGE_DIR}/lib
-      ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${STAGE_DIR}/lib
-      ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${STAGE_DIR}/lib
-      LIBRARY_OUTPUT_DIRECTORY ${STAGE_DIR}/lib
-      LIBRARY_OUTPUT_DIRECTORY_DEBUG ${STAGE_DIR}/lib
-      LIBRARY_OUTPUT_DIRECTORY_RELEASE ${STAGE_DIR}/lib
-      RUNTIME_OUTPUT_DIRECTORY ${STAGE_DIR}/bin
-      RUNTIME_OUTPUT_DIRECTORY ${STAGE_DIR}/bin
-      RUNTIME_OUTPUT_DIRECTORY ${STAGE_DIR}/bin)
-
-    if(NOT WIN32)
-      if(NOT TARGET download_cppunit-1.12.1.tar.gz)
-        downloadCppUnit()
-      endif()
-
-      add_custom_target(zookeeper_unzip_cppunit
-        COMMENT "Unzipping cpp unit"
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/xpbase/Source
-        DEPENDS download_cppunit-${CPP_UNIT_VER}.tar.gz
-        COMMAND ${CMAKE_COMMAND} -E tar xzf ${DWNLD_DIR}/cppunit-${CPP_UNIT_VER}.tar.gz
-      )
-      add_custom_target(zookeeper_configure
-        COMMENT "Bootstrapping autoconf, automake, and libtool and configuring zookeeper"
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo/src/c
-        DEPENDS zookeeper_repo zookeeper_unzip_cppunit
-        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo ant compile_jute
-        COMMAND ${CMAKE_COMMAND} -E env ACLOCAL=\"aclocal -I ${CMAKE_BINARY_DIR}/xpbase/Source/cppunit-${CPP_UNIT_VER}\" autoreconf -if
-        COMMAND ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo/src/c/configure --without-cppunit
-      )
-      target_include_directories(zookeeper_build PRIVATE ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo/src/c)
-      add_dependencies(zookeeper_build zookeeper_configure)
-    endif()
-
-    # Copy the include files to the staging directory
-    foreach(hdrfile ${zookeeper_hdr_files})
-      get_filename_component(file_name_only ${hdrfile} NAME)
-      add_custom_command(TARGET zookeeper_build POST_BUILD
-        COMMENT "Moving ${hdrfile} to staging area"
-        COMMAND ${CMAKE_COMMAND} -E copy ${hdrfile} ${STAGE_DIR}/include/zookeeper/${file_name_only})
-    endforeach()
-
-    add_dependencies(zookeeper_build zookeeper_repo)
-
-    # Copy the find package cmake file to the staging directory
-    configure_file(${PRO_DIR}/use/useop-zookeeper-config.cmake
-                   ${STAGE_DIR}/share/cmake/useop-zookeeper-config.cmake
-                   COPYONLY)
-
+      ${ZK_SRC_PATH}/gettimeofday.c)
+    list(APPEND ${zookeeper_hdr_files}
+      ${ZK_SRC_PATH}/winport.h)
+  else()
+    list(APPEND zookeeper_hdr_files
+      ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo/src/c/config.h)
   endif()
+  message("files: ${zookeeper_src_files}")
+
+  # Determine build type
+  if(${XP_BUILD_STATIC})
+    set(ZK_BUILD_TYPE STATIC)
+  else()
+    set(ZK_BUILD_TYPE SHARED)
+  endif()
+
+  # indicate that all the files are GENERATED so they don't need to exist when
+  # creating the target...they will be available after download
+  set_source_files_properties(${zookeeper_src_files} ${zookeeper_hdr_files}
+    PROPERTIES GENERATED TRUE)
+
+  # create the library
+  add_library(zookeeper_build ${${ZK_BUILD_TYPE}}
+              ${zookeeper_src_files} ${zookeeper_hdr_files})
+  target_include_directories(zookeeper_build PUBLIC ${ZK_INCLUDE_PATH})
+
+  # Use /MT for a static windows build, and add the 'd' for debug builds
+  if(${XP_BUILD_STATIC})
+    if(WIN32)
+      target_compile_options(zookeeper_build PUBLIC "/MT$<$<STREQUAL:$<CONFIGURATION>,Debug>:d>")
+    endif(WIN32)
+  endif(${XP_BUILD_STATIC})
+
+  # Set the library output properties
+  if(UNIX)
+    set(lib_name zookeeper-mt)
+  else()
+    set(lib_name libzookeeper-mt)
+  endif()
+  set_target_properties(zookeeper_build PROPERTIES
+    OUTPUT_NAME ${lib_name}
+    ARCHIVE_OUTPUT_DIRECTORY ${STAGE_DIR}/lib
+    ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${STAGE_DIR}/lib
+    ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${STAGE_DIR}/lib
+    LIBRARY_OUTPUT_DIRECTORY ${STAGE_DIR}/lib
+    LIBRARY_OUTPUT_DIRECTORY_DEBUG ${STAGE_DIR}/lib
+    LIBRARY_OUTPUT_DIRECTORY_RELEASE ${STAGE_DIR}/lib
+    RUNTIME_OUTPUT_DIRECTORY ${STAGE_DIR}/bin
+    RUNTIME_OUTPUT_DIRECTORY ${STAGE_DIR}/bin
+    RUNTIME_OUTPUT_DIRECTORY ${STAGE_DIR}/bin)
+
+  if(NOT WIN32)
+    if(NOT TARGET download_cppunit-1.12.1.tar.gz)
+      downloadCppUnit()
+    endif()
+
+    add_custom_target(zookeeper_unzip_cppunit
+      COMMENT "Unzipping cpp unit"
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/xpbase/Source
+      DEPENDS download_cppunit-${CPP_UNIT_VER}.tar.gz
+      COMMAND ${CMAKE_COMMAND} -E tar xzf ${DWNLD_DIR}/cppunit-${CPP_UNIT_VER}.tar.gz
+    )
+    add_custom_target(zookeeper_configure
+      COMMENT "Bootstrapping autoconf, automake, and libtool and configuring zookeeper"
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo/src/c
+      DEPENDS zookeeper_repo zookeeper_unzip_cppunit
+      COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo ant compile_jute
+      COMMAND ${CMAKE_COMMAND} -E env ACLOCAL=\"aclocal -I ${CMAKE_BINARY_DIR}/xpbase/Source/cppunit-${CPP_UNIT_VER}\" autoreconf -if
+      COMMAND ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo/src/c/configure --without-cppunit
+    )
+    target_include_directories(zookeeper_build PRIVATE ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo/src/c)
+    add_dependencies(zookeeper_build zookeeper_configure)
+  endif()
+
+  # Copy the include files to the staging directory
+  foreach(hdrfile ${zookeeper_hdr_files})
+    get_filename_component(file_name_only ${hdrfile} NAME)
+    add_custom_command(TARGET zookeeper_build POST_BUILD
+      COMMENT "Moving ${hdrfile} to staging area"
+      COMMAND ${CMAKE_COMMAND} -E copy ${hdrfile} ${STAGE_DIR}/include/zookeeper/${file_name_only})
+  endforeach()
+
+  add_dependencies(zookeeper_build zookeeper_repo)
+
+  # Copy the find package cmake file to the staging directory
+  configure_file(${PRO_DIR}/use/useop-zookeeper-config.cmake
+                 ${STAGE_DIR}/share/cmake/useop-zookeeper-config.cmake
+                 COPYONLY)
 endfunction(build_zookeeper)
