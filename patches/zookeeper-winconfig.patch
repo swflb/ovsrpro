@@ -29,7 +29,7 @@ index cc92396..d3e9229 100644
  #include <Windows.h>
  #include <Winsock2.h>
 -#include <winstdint.h>
-+#include <stdint.h>
++#include "winstdint.h"
  #include <process.h>
  #include <ws2tcpip.h>
  #undef AF_INET6

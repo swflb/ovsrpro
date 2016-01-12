@@ -27,7 +27,7 @@ ADD_SECLIB=bufferoverflowU.lib
 !ENDIF
 
 !IFDEF DEBUG
-OPT=/Od /Zi /MTd
+OPT=/Od /Z7 /MTd
 LOPT=/DEBUG
 DEBUGDEF=/D _DEBUG
 OUTFILENAME=libpqd

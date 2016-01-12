@@ -13,13 +13,21 @@ set(Zookeeper_LIBS_DIR ${OP_ROOTDIR}/lib)
 
 # Windows needs the .lib and the winsock library
 if(WIN32)
-  set(Zookeeper_LIB
-    ${Zookeeper_LIBS_DIR}/libzookeeper-mt.lib
-    ws2_32.lib)
+  if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+    set(Zookeeper_LIB ${Zookeeper_LIBS_DIR}/libzookeeperd-mt.lib)
+  else()
+    set(Zookeeper_LIB ${Zookeeper_LIBS_DIR}/libzookeeper-mt.lib)
+  endif()
+  list(APPEND Zookeeper_LIB ws2_32.lib)
 else()
-# Unix just needs the .a
-  set(Zookeeper_LIB ${Zookeeper_LIBS_DIR}/libzookeeper-mt.a)
-endif(WIN32)
+  # Unix just needs the .a
+  if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+    set(Zookeeper_LIB ${Zookeeper_LIBS_DIR}/libzookeeperd-mt.a)
+  else()
+    set(Zookeeper_LIB ${Zookeeper_LIBS_DIR}/libzookeeper-mt.a)
+  endif()
+endif()
+
 
 # Add the zookeeper headers to the system includes
 include_directories(SYSTEM ${Zookeeper_INCLUDE_DIR})

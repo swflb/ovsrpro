@@ -69,6 +69,7 @@ function(build_psql)
       COMMENT "Configuring and building psql"
       WORKING_DIRECTORY ${PSQL_REPO_PATH}/src
       COMMAND nmake /f win32.mak CPU=AMD64 SSL_INC=${OPENSSL_INCLUDE_DIR} SSL_LIB_PATH=${XP_ROOTDIR}/lib LIB_ONLY
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/lib
       COMMAND ${CMAKE_COMMAND} -E copy_directory ${PSQL_REPO_PATH}/src/include ${STAGE_DIR}/include/psql
       COMMAND ${CMAKE_COMMAND} -E copy ${PSQL_REPO_PATH}/src/interfaces/libpq/pg_config_paths.h ${STAGE_DIR}/include/psql/pg_config_paths.h
       COMMAND ${CMAKE_COMMAND} -E copy ${PSQL_REPO_PATH}/src/interfaces/libpq/fe-auth.h ${STAGE_DIR}/include/psql/fe-auth.h
@@ -82,6 +83,7 @@ function(build_psql)
     )
 
     if(${XP_BUILD_STATIC})
+      # add the windows Secur32.lib to the static library
       add_custom_command(TARGET psql_build POST_BUILD
         WORKING_DIRECTORY ${PSQL_REPO_PATH}/src
         COMMAND lib /out:${STAGE_DIR}/lib/libpq.lib ${lib_path} Secur32.lib
@@ -101,8 +103,9 @@ function(build_psql)
         COMMAND ${CMAKE_COMMAND} -E copy ${PSQL_REPO_PATH}/src/interfaces/libpq/Debug/libpqd.lib ${STAGE_DIR}/lib/libpqd.lib
       )
 
-      set(lib_path ${PSQL_REPO_PATH}/src/interfaces/libpq/Release/libpqd.lib)
+      set(lib_path ${PSQL_REPO_PATH}/src/interfaces/libpq/Debug/libpqd.lib)
       if(${XP_BUILD_STATIC})
+        # add the windows Secur32.lib to the static library
         add_custom_command(TARGET psql_build POST_BUILD
           WORKING_DIRECTORY ${PSQL_REPO_PATH}/src
           COMMAND lib /out:${STAGE_DIR}/lib/libpqd.lib ${lib_path} Secur32.lib
