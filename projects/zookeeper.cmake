@@ -89,7 +89,7 @@ endmacro(downloadCppUnit)
 macro(getZookeeperFiles)
   # Gather the zookeeper source files
   set(zookeeper_src_files
-    ${ZK_SRC_PATH}/st_adaptor.c
+    ${ZK_SRC_PATH}/mt_adaptor.c
     ${ZK_SRC_PATH}/recordio.c
     ${ZK_SRC_PATH}/zk_hashtable.c
     ${ZK_SRC_PATH}/zk_log.c
@@ -162,15 +162,15 @@ macro(setWindowsCompileOptions target debug)
   if(WIN32)
     if(${XP_BUILD_STATIC})
       if(${debug})
-        target_compile_options(${target} PUBLIC "/MTd" "/Z7" "/O2" "/Ob2")
+        target_compile_options(${target} PUBLIC "/MTd" "/Z7")
       else()
-        target_compile_options(${target} PUBLIC "/MT" "/O2" "/Ob2")
+        target_compile_options(${target} PUBLIC "/MT")
       endif()
     else()
       if(${debug})
-        target_compile_options(${target} PUBLIC "/MDd" "/Z7" "/O2" "/Ob2")
+        target_compile_options(${target} PUBLIC "/MDd" "/Z7")
       else()
-        target_compile_options(${target} PUBLIC "/MD" "/O2" "/Ob2")
+        target_compile_options(${target} PUBLIC "/MD")
       endif()
     endif()
   endif()
