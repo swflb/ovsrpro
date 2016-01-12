@@ -62,16 +62,35 @@ function(build_hdf5)
     patch_hdf5()
   endif()
 
+  # Build hdf5
   add_custom_target(hdf5_build ALL
     WORKING_DIRECTORY ${HDF5_SRC_PATH}
     COMMAND ctest -S HDF518config.cmake,BUILD_GENERATOR=VS201364 INSTALLDIR=${STAGE_DIR}/hdf5 FORTRAN_LIBRARIES=YES -C Release
     DEPENDS hdf5
   )
 
+  # build the debug version of hdf5
   if(${XP_BUILD_DEBUG})
     add_custom_command(TARGET hdf5_build POST_BUILD
       WORKING_DIRECTORY ${HDF5_SRC_PATH}
       COMMAND ctest -S HDF518config.cmake,BUILD_GENERATOR=VS201364 INSTALLDIR=${STAGE_DIR}/hdf5 FORTRAN_LIBRARIES=YES -C Debug
+    )
+  endif()
+
+  # install hdf5 to the staging area
+  if(WIN32)
+    set(ZIP_NAME HDF5-1.8.16-win64)
+    add_custom_command(TARGET hdf5_build POST_BUILD
+      WORKING_DIRECTORY ${HDF5_SRC_PATH}
+      # Unzip the install folder
+      COMMAND ${CMAKE_COMMAND} -E tar xvf ${ZIP_NAME}.zip
+      # Move the files where they're needed
+      COMMAND ${CMAKE_COMMAND} -E make_diretory ${STAGE_DIR}/include/hdf5
+      COMMAND ${CMAKE_COMMAND} -E make_diretory ${STAGE_DIR}/bin
+      COMMAND ${CMAKE_COMMAND} -E make_diretory ${STAGE_DIR}/lib
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${ZIP_NAME}/include ${STAGE_DIR}/include/hdf5
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${ZIP_NAME}/bin ${STAGE_DIR}/bin
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${ZIP_NAME}/lib ${STAGE_DIR}/lib
     )
   endif()
 

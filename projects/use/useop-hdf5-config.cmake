@@ -7,7 +7,7 @@ unset(HDF5_INCLUDE_DIR CACHE)
 unset(HDF5_LIBRARY_DIR CACHE)
 
 # Set the HDF5 variables
-set(HDF5_INCLUDE_DIR ${OP_ROOTDIR}/hdf5/include)
+set(HDF5_INCLUDE_DIR ${OP_ROOTDIR}/include/hdf5)
 set(HDF5_LIB_DIR ${OP_ROOTDIR}/lib)
 
 if(WIN32)
@@ -24,3 +24,5 @@ if(WIN32)
     set(HDF5_HL_F90CSTRUB_LIBRARY ${HDF5_LIB_DIR}/libhdf5_hl_f90cstub.lib)
   endif()
 endif()
+
+include_directories(SYSTEM ${HDF5_INCLUDE_DIR})
