@@ -29,7 +29,7 @@ function(download_psql)
 endfunction()
 #######################################
 function(patch_psql)
-  if(NOT (XP_DEFULAT OR XP_PRO_PSQL))
+  if(NOT (XP_DEFAULT OR XP_PRO_PSQL))
     return()
   endif()
 
