@@ -59,7 +59,8 @@ function(patch_zookeeper)
   if(WIN32)
     ExternalProject_Add_Step(zookeeper_repo zookeeper_winconfigPatch
       COMMAND ${GIT_EXECUTABLE} apply ${PATCH_DIR}/zookeeper-winconfig.patch
-      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper-win32-gettimeofday.c ${ZK_SRC_PATH}/gettimeofday.c
+      COMMAND ${GIT_EXECUTABLE} apply ${PATCH_DIR}/zookeeper-winport.c.patch
+      COMMAND ${GIT_EXECUTABLE} apply ${PATCH_DIR}/zookeeper-winport.h.patch
       COMMENT "Applying winconfig patch"
       WORKING_DIRECTORY ${ZK_REPO_PATH}
       DEPENDEES download zookeeper_x64Patch
@@ -88,7 +89,7 @@ endmacro(downloadCppUnit)
 macro(getZookeeperFiles)
   # Gather the zookeeper source files
   set(zookeeper_src_files
-    ${ZK_SRC_PATH}/mt_adaptor.c
+    ${ZK_SRC_PATH}/st_adaptor.c
     ${ZK_SRC_PATH}/recordio.c
     ${ZK_SRC_PATH}/zk_hashtable.c
     ${ZK_SRC_PATH}/zk_log.c
@@ -114,7 +115,8 @@ macro(getZookeeperFiles)
   if(WIN32)
     list(APPEND zookeeper_src_files
       ${ZK_SRC_PATH}/winport.c
-      ${ZK_SRC_PATH}/gettimeofday.c)
+#      ${ZK_SRC_PATH}/gettimeofday.c
+      )
     list(APPEND zookeeper_hdr_files
       ${ZK_SRC_PATH}/winport.h
       ${ZK_INCLUDE_PATH}/winconfig.h
@@ -160,15 +162,15 @@ macro(setWindowsCompileOptions target debug)
   if(WIN32)
     if(${XP_BUILD_STATIC})
       if(${debug})
-        target_compile_options(${target} PUBLIC "/MTd" "/Z7")
+        target_compile_options(${target} PUBLIC "/MTd" "/Z7" "/O2" "/Ob2")
       else()
-        target_compile_options(${target} PUBLIC "/MT")
+        target_compile_options(${target} PUBLIC "/MT" "/O2" "/Ob2")
       endif()
     else()
       if(${debug})
-        target_compile_options(${target} PUBLIC "/MDd" "/Z7")
+        target_compile_options(${target} PUBLIC "/MDd" "/Z7" "/O2" "/Ob2")
       else()
-        target_compile_options(${target} PUBLIC "/MD")
+        target_compile_options(${target} PUBLIC "/MD" "/O2" "/Ob2")
       endif()
     endif()
   endif()

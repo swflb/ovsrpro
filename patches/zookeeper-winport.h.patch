@@ -1,0 +1,20 @@
+diff --git a/src/c/src/winport.h b/src/c/src/winport.h
+index 32272c0..d22c249 100644
+--- a/src/c/src/winport.h
++++ b/src/c/src/winport.h
+@@ -105,14 +105,7 @@ int pthread_key_delete(pthread_key_t key);
+ void *pthread_getspecific(pthread_key_t key);
+ int pthread_setspecific(pthread_key_t key, const void *value);
+ 
+-inline int gettimeofday(struct timeval *tp, void *tzp) {
+-        int64_t now = 0;
+-        if (tzp != 0) { errno = EINVAL; return -1; }
+-        GetSystemTimeAsFileTime( (LPFILETIME)&now );
+-        tp->tv_sec = (long)(now / 10000000 - 11644473600LL);
+-        tp->tv_usec = (now / 10) % 1000000;
+-        return 0;
+-}
++int gettimeofday(struct timeval *tp, void *tzp);
+ int close(SOCKET fd);
+ int Win32WSAStartup();
+ void Win32WSACleanup();

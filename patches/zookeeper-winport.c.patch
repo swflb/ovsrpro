@@ -1,0 +1,20 @@
+diff --git a/src/c/src/winport.c b/src/c/src/winport.c
+index aeef3a8..2ac4822 100644
+--- a/src/c/src/winport.c
++++ b/src/c/src/winport.c
+@@ -286,6 +286,15 @@ void Win32WSACleanup()
+        WSACleanup();
+ }
+ 
++int gettimeofday(struct timeval *tp, void *tzp) {
++        int64_t now = 0;
++        if (tzp != 0) { errno = EINVAL; return -1; }
++        GetSystemTimeAsFileTime( (LPFILETIME)&now );
++        tp->tv_sec = (long)(now / 10000000 - 11644473600LL);
++        tp->tv_usec = (now / 10) % 1000000;
++        return 0;
++}
++
+ #endif //WIN32
+ 
+ 
