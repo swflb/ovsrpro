@@ -38,6 +38,13 @@ function(patch_glew)
       COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/glew.sln ${GLEW_SRC_PATH}/build/vc12/glew.sln
       DEPENDEES download
     )
+  else()
+    ExternalProject_Add_Step(glew glew_installlocation
+      COMMENT "Updating glew install location"
+      WORKING_DIRECTORY ${GLEW_SRC_PATH}
+      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/glew-Makefile ${GLEW_SRC_PATH}/Makefile
+      DEPENDEES download
+    )
   endif()
 endfunction()
 ########################################
@@ -51,7 +58,7 @@ function(build_glew)
   endif()
 
   if(WIN32)
-    add_custom_target(glew_build
+    add_custom_target(glew_build ALL
       WORKING_DIRECTORY ${GLEW_SRC_PATH}
       COMMAND devenv ${GLEW_SRC_PATH}/build/vc12/glew.sln /build Release
       COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/include/GL
@@ -68,6 +75,32 @@ function(build_glew)
         COMMAND devenv ${GLEW_SRC_PATH}/build/vc12/glew.sln /build Debug
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${GLEW_SRC_PATH}/lib/Debug/Win32 ${STAGE_DIR}/lib
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${GLEW_SRC_PATH}/bin/Debug/Win32 ${STAGE_DIR}/bin
+        DEPENDS glew
+      )
+    endif()
+  else()
+    add_custom_target(glew_build ALL
+      WORKING_DIRECTORY ${GLEW_SRC_PATH}
+      COMMAND make
+      COMMAND make install.lib install.include install.bin
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/include/GL
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/bin
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/lib
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${GLEW_SRC_PATH}/install/GL ${STAGE_DIR}/include/GL
+      COMMAND ${CMAKE_COMMAND} -E copy ${GLEW_SRC_PATH}/install/lib64/libGLEW.a ${STAGE_DIR}/lib/libGLEW.a
+      COMMAND ${CMAKE_COMMAND} -E copy ${GLEW_SRC_PATH}/install/lib64/libGLEW.so.1.13.0 ${STAGE_DIR}/lib/libGLEW.so.1.13.0
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${GLEW_SRC_PATH}/install/bin ${STAGE_DIR}/bin
+      DEPENDS glew
+    )
+    if(${XP_BUILD_DEBUG})
+      add_custom_command(TARGET glew_build POST_BUILD
+        WORKING_DIRECTORY ${GLEW_SRC_PATH}
+        COMMAND rm -rf install
+        COMMAND make clean
+        COMMAND make debug
+        COMMAND make install.lib install.include install.bin
+        COMMAND ${CMAKE_COMMAND} -E copy ${GLEW_SRC_PATH}/install/lib64/libGLEW.a ${STAGE_DIR}/lib/libGLEWd.a
+        COMMAND ${CMAKE_COMMAND} -E copy ${GLEW_SRC_PATH}/install/lib64/libGLEW.so.1.13.0 ${STAGE_DIR}/lib/libGLEWd.so.1.13.0
         DEPENDS glew
       )
     endif()
