@@ -35,6 +35,12 @@ function(patch_hdf5)
 
   xpPatch(${PRO_HDF5})
 
+  ExternalProject_Add_Step(hdf5 hdf5_disableTests
+    WORKING_DIRECTORY ${HDF5_SRC_PATH}
+      # Update the configuration to disable tests
+      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/hdf5-HDF518config.cmake ${HDF5_SRC_PATH}/HDF518config.cmake
+      DEPENDEES download
+  )
   if(WIN32)
     ExternalProject_Add_Step(hdf5 hdf5_setFlags
       WORKING_DIRECTORY ${HDF5_SRC_PATH}
@@ -65,7 +71,7 @@ function(build_hdf5)
   # Build hdf5
   add_custom_target(hdf5_build ALL
     WORKING_DIRECTORY ${HDF5_SRC_PATH}
-    COMMAND ctest -S HDF518config.cmake,BUILD_GENERATOR=VS201364 INSTALLDIR=${STAGE_DIR}/hdf5 FORTRAN_LIBRARIES=YES -C Release
+    COMMAND ctest -S HDF518config.cmake,BUILD_GENERATOR=VS201364,INSTALLDIR=${STAGE_DIR}/hdf5,STATIC_LIBRARIES=YES,FORTRAN_LIBRARIES=YES -C Release
     DEPENDS hdf5
   )
 
@@ -73,7 +79,7 @@ function(build_hdf5)
   if(${XP_BUILD_DEBUG})
     add_custom_command(TARGET hdf5_build POST_BUILD
       WORKING_DIRECTORY ${HDF5_SRC_PATH}
-      COMMAND ctest -S HDF518config.cmake,BUILD_GENERATOR=VS201364 INSTALLDIR=${STAGE_DIR}/hdf5 FORTRAN_LIBRARIES=YES -C Debug
+      COMMAND ctest -S HDF518config.cmake,BUILD_GENERATOR=VS201364,INSTALLDIR=${STAGE_DIR}/hdf5,STATIC_LIBRARIES=YES,FORTRAN_LIBRARIES=YES -C Debug
     )
   endif()
 

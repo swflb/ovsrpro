@@ -22,6 +22,8 @@ if(WIN32)
     set(HDF5_F90CSTUB_LIBRARY ${HDF5_LIB_DIR}/libhdf5_f90cstub.lib)
     set(HDF5_HL_FORTRAN_LIBRARY ${HDF5_LIB_DIR}/libhdf5_hl_fortran.lib)
     set(HDF5_HL_F90CSTRUB_LIBRARY ${HDF5_LIB_DIR}/libhdf5_hl_f90cstub.lib)
+    set(HDF5_SZIP_LIBRARY ${HDF5_LIB_DIR}/libszip.lib)
+    set(HDF5_ZLIB_LIBRARY ${HDF5_LIB_DIR}/libzlib.lib)
   endif()
 endif()
 
