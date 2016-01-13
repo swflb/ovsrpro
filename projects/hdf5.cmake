@@ -35,12 +35,6 @@ function(patch_hdf5)
 
   xpPatch(${PRO_HDF5})
 
-#  ExternalProject_Add_Step(hdf5 hdf5_disableTests
-#    WORKING_DIRECTORY ${HDF5_SRC_PATH}
-#      # Update the configuration to disable tests
-#      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/hdf5-HDF518config.cmake ${HDF5_SRC_PATH}/HDF518config.cmake
-#      DEPENDEES download
-#  )
   if(WIN32)
     ExternalProject_Add_Step(hdf5 hdf5_setFlags
       WORKING_DIRECTORY ${HDF5_SRC_PATH}
@@ -70,35 +64,22 @@ function(build_hdf5)
 
   if(WIN32)
     set(generator VS201364)
+    set(ZIP_NAME HDF5-1.8.16-win64)
+    set(ZIP_EXT zip)
+    set(BASE_INSTALL_PATH ${ZIP_NAME})
   else()
     set(generator Unix)
+    set(ZIP_NAME HDF5-1.8.16-Linux)
+    set(ZIP_EXT tar.gz)
+    set(BASE_INSTALL_PATH ${ZIP_NAME}/HDF_Group/HDF5/1.8.16)
   endif()
 
   # Build hdf5
   add_custom_target(hdf5_build ALL
     WORKING_DIRECTORY ${HDF5_SRC_PATH}
-    COMMAND ctest -S HDF518config.cmake,BUILD_GENERATOR=${generator} INSTALLDIR=${STAGE_DIR}/hdf5 STATIC_LIBRARIES=YES FORTRAN_LIBRARIES=NO -C Release
+    COMMAND ctest -S HDF518config.cmake,BUILD_GENERATOR=${generator},INSTALLDIR=${STAGE_DIR}/hdf5 -C Release -VV
     DEPENDS hdf5
   )
-
-  # build the debug version of hdf5
-  if(${XP_BUILD_DEBUG})
-    add_custom_command(TARGET hdf5_build POST_BUILD
-      WORKING_DIRECTORY ${HDF5_SRC_PATH}
-      COMMAND ctest -S HDF518config.cmake,BUILD_GENERATOR=${generator} INSTALLDIR=${STAGE_DIR}/hdf5 STATIC_LIBRARIES=YES FORTRAN_LIBRARIES=NO -C Debug
-    )
-  endif()
-
-  # install hdf5 to the staging area
-  if(WIN32)
-    set(ZIP_NAME HDF5-1.8.16-win64)
-    set(ZIP_EXT zip)
-    set(BASE_INSTALL_PATH ${ZIP_NAME})
-  else()
-    set(ZIP_NAME HDF5-1.8.16-Linux)
-    set(ZIP_EXT tar.gz)
-    set(BASE_INSTALL_PATH ${ZIP_NAME}/HDF_Group/HDF5/1.8.16)
-  endif()
 
   add_custom_command(TARGET hdf5_build POST_BUILD
     WORKING_DIRECTORY ${HDF5_SRC_PATH}
@@ -112,6 +93,27 @@ function(build_hdf5)
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${BASE_INSTALL_PATH}/bin ${STAGE_DIR}/bin
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${BASE_INSTALL_PATH}/lib ${STAGE_DIR}/lib
   )
+
+  # build the debug version of hdf5
+  if(${XP_BUILD_DEBUG})
+    add_custom_target(hdf5_build_debug
+      WORKING_DIRECTORY ${HDF5_SRC_PATH}
+      COMMAND ctest -S HDF518config.cmake,BUILD_GENERATOR=${generator},INSTALLDIR=${STAGE_DIR}/hdf5,CTEST_BUILD_CONFIGURATION=Debug -C Debug -VV
+      DEPENDS hdf5
+    )
+    add_custom_command(TARGET hdf5_build_debug POST_BUILD
+      WORKING_DIRECTORY ${HDF5_SRC_PATH}
+      # Unzip the install folder
+      COMMAND ${CMAKE_COMMAND} -E tar xvf ${ZIP_NAME}.${ZIP_EXT}
+      # Move the files where they're needed
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/include/hdf5
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/bin
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/lib
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${BASE_INSTALL_PATH}/include ${STAGE_DIR}/include/hdf5
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${BASE_INSTALL_PATH}/bin ${STAGE_DIR}/bin
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${BASE_INSTALL_PATH}/lib ${STAGE_DIR}/lib
+    )
+  endif()
 
   configure_file(${PRO_DIR}/use/useop-hdf5-config.cmake
                  ${STAGE_DIR}/share/cmake/useop-hdf5-config.cmake
