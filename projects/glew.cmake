@@ -53,21 +53,23 @@ function(build_glew)
   if(WIN32)
     add_custom_target(glew_build
       WORKING_DIRECTORY ${GLEW_SRC_PATH}
-      COMMAND devenv ${GLEW_SRC_PATH}/build/vc12/glew.sln /build Release
+      #COMMAND devenv ${GLEW_SRC_PATH}/build/vc12/glew.sln /build "Release"
+      COMMAND msbuild ${GLEW_SRC_PATH}/build/vc12/glew.sln /p:Configuration=Release\;Platform=x64 /t:glew_static:rebuild\;glew_shared:rebuild
       COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/include/GL
       COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/bin
       COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/lib
       COMMAND ${CMAKE_COMMAND} -E copy_directory ${GLEW_SRC_PATH}/include/GL ${STAGE_DIR}/include/GL
-      COMMAND ${CMAKE_COMMAND} -E copy_directory ${GLEW_SRC_PATH}/lib/Release/Win32 ${STAGE_DIR}/lib
-      COMMAND ${CMAKE_COMMAND} -E copy_directory ${GLEW_SRC_PATH}/bin/Release/Win32 ${STAGE_DIR}/bin
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${GLEW_SRC_PATH}/lib/Release/x64 ${STAGE_DIR}/lib
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${GLEW_SRC_PATH}/bin/Release/x64 ${STAGE_DIR}/bin
       DEPENDS glew
     )
     if(${XP_BUILD_DEBUG})
       add_custom_command(TARGET glew_build POST_BUILD
         WORKING_DIRECTORY ${GLEW_SRC_PATH}
-        COMMAND devenv ${GLEW_SRC_PATH}/build/vc12/glew.sln /build Debug
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${GLEW_SRC_PATH}/lib/Debug/Win32 ${STAGE_DIR}/lib
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${GLEW_SRC_PATH}/bin/Debug/Win32 ${STAGE_DIR}/bin
+        #COMMAND devenv ${GLEW_SRC_PATH}/build/vc12/glew.sln /build "Debug"
+        COMMAND msbuild ${GLEW_SRC_PATH}/build/vc12/glew.sln /p:Configuration=Debug\;Platform=x64 /t:glew_static:rebuild\;glew_shared:rebuild
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${GLEW_SRC_PATH}/lib/Debug/x64 ${STAGE_DIR}/lib
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${GLEW_SRC_PATH}/bin/Debug/x64 ${STAGE_DIR}/bin
         DEPENDS glew
       )
     endif()
