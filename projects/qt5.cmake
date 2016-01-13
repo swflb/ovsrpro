@@ -140,18 +140,6 @@ function(patch_qt5)
   endif()
 endfunction(patch_qt5)
 ########################################
-# Decides which build command to use jom/nmake/make
-macro(findBuildCommand BUILD_COMMAND)
-  if(WIN32)
-    if(EXISTS "c:\\jom\\jom.exe")
-      set(${BUILD_COMMAND} "c:\\jom\\jom.exe")
-    else()
-      set(${BUILD_COMMAND} "nmake")
-    endif()
-  else()
-    set(${BUILD_COMMAND} "make")
-  endif()
-endmacro()
 # build - configure then build the libraries
 function(build_qt5)
   if(NOT (XP_DEFAULT OR XP_PRO_QT5))
@@ -170,9 +158,6 @@ function(build_qt5)
   endif()
 
   setConfigureOptions()
-
-  # Determine which build command to use (jom/nmake/make)
-  findBuildCommand(QT_BUILD_COMMAND)
 
   # Create a separate target to build and install...this is because for some
   # reason even though the configure succeeds just fine, it stops before
@@ -198,8 +183,8 @@ function(build_qt5)
       COMMAND set LIB=${OPENSSL_LIB_DIR}\;${STAGE_DIR}/lib\;%LIB%
       COMMAND echo %LIB%
       COMMAND echo %_CL_%
-      COMMAND ${QT_BUILD_COMMAND}
-      COMMAND ${QT_BUILD_COMMAND} install
+      COMMAND nmake
+      COMMAND nmake install
       COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake/useop-qt5-config.cmake
       COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin/qt.conf
       DEPENDS qt5 qt5_configure psql_build
@@ -208,7 +193,7 @@ function(build_qt5)
     add_custom_target(qt5_build ALL
       COMMENT "Configuration complete...building qt5"
       WORKING_DIRECTORY ${QT5_REPO_PATH}
-      COMMAND make -j5
+      COMMAND make -j
       COMMAND make install
       COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake/useop-qt5-config.cmake
       COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin/qt.conf

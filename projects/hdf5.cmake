@@ -77,7 +77,7 @@ function(build_hdf5)
   # Build hdf5
   add_custom_target(hdf5_build ALL
     WORKING_DIRECTORY ${HDF5_SRC_PATH}
-    COMMAND ctest -S HDF518config.cmake,BUILD_GENERATOR=${generator},INSTALLDIR=${STAGE_DIR}/hdf5 -C Release -VV
+    COMMAND ctest -S HDF518config.cmake,BUILD_GENERATOR=${generator},INSTALLDIR=${STAGE_DIR}/hdf5,CTEST_BUILD_CONFIGURATION=Release -C Release -VV
     DEPENDS hdf5
   )
 
