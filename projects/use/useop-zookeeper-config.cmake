@@ -10,6 +10,7 @@ unset(Zookeeper_LIB CACHE)
 # Set the include and libs paths
 set(Zookeeper_INCLUDE_DIR ${OP_ROOTDIR}/include/)
 set(Zookeeper_LIBS_DIR ${OP_ROOTDIR}/lib)
+include_directories(SYSTEM ${Zookeeper_INCLUDE_DIR}/zookeeper)
 
 # Windows needs the .lib and the winsock library
 if(WIN32)
@@ -21,11 +22,7 @@ if(WIN32)
   list(APPEND Zookeeper_LIB ws2_32.lib)
 else()
   # Unix just needs the .a
-  if(CMAKE_BUILD_TYPE MATCHES DEBUG)
-    set(Zookeeper_LIB ${Zookeeper_LIBS_DIR}/libzookeeperd-mt.a)
-  else()
-    set(Zookeeper_LIB ${Zookeeper_LIBS_DIR}/libzookeeper-mt.a)
-  endif()
+  set(Zookeeper_LIB ${Zookeeper_LIBS_DIR}/libzookeeper-mt.a)
 endif()
 
 
