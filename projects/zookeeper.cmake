@@ -54,13 +54,19 @@ function(patch_zookeeper)
 
   ExternalProject_Add_Step(zookeeper_repo zookeeper_patch
     WORKING_DIRECTORY ${ZK_REPO_PATH}
-    COMMAND ant compile_jute
     COMMAND ${GIT_EXECUTABLE} apply ${PATCH_DIR}/zookeeper-mt_adapter-x64-fix.patch
+    COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper-winconfig.h ${ZK_REPO_PATH}/src/c/include/zookeeper-winconfig.h
     COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper.sln ${ZK_REPO_PATH}/src/c/zookeeper.sln
     COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper.vcxproj ${ZK_REPO_PATH}/src/c/zookeeper.vcxproj
     COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper.vcxproj.filters ${ZK_REPO_PATH}/src/c/zookeeper.vcxproj.filters
     DEPENDEES patch
     ALWAYS 0
+  )
+  add_custom_target(zookeeper_ant ALL
+    WORKING_DIRECTORY ${ZK_REPO_PATH}
+    COMMAND ant compile_jute
+    DEPENDS zookeeper_repo
+    ALWAYS 1
   )
 endfunction(patch_zookeeper)
 ########################################
@@ -113,7 +119,7 @@ function(build_zookeeper)
       COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/lib
       COMMAND ${CMAKE_COMMAND} -E copy ${ZK_REPO_PATH}/src/c/x64/Debug/libzookeeperd-mt.lib ${STAGE_DIR}/lib/libzookeeperd-mt.lib
       COMMAND ${CMAKE_COMMAND} -E copy ${ZK_REPO_PATH}/src/c/x64/Release/libzookeeper-mt.lib ${STAGE_DIR}/lib/libzookeeper-mt.lib
-      DEPENDS zookeeper_repo
+      DEPENDS zookeeper_repo zookeeper_ant
     )
 
     foreach(hdr_file ${zookeeper_hdr_files})
@@ -134,7 +140,7 @@ function(build_zookeeper)
       COMMAND ${CMAKE_COMMAND} -E chdir ${ZK_REPO_PATH}/src/c configure --without-cppunit --prefix=${STAGE_DIR}
       COMMAND ${CMAKE_COMMAND} -E chdir ${ZK_REPO_PATH}/src/c make
       COMMADN ${CMAKE_COMMAND} -E chdir ${ZK_REPO_PATH}/src/c make install
-      DEPENDS zookeeper_repo download_cppunit-${CPP_UNIT_VER}.tar.gz
+      DEPENDS zookeeper_repo zookeeper_ant download_cppunit-${CPP_UNIT_VER}.tar.gz
     )
   endif()
 
