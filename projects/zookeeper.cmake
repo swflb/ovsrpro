@@ -60,13 +60,11 @@ function(patch_zookeeper)
     COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper.vcxproj ${ZK_REPO_PATH}/src/c/zookeeper.vcxproj
     COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper.vcxproj.filters ${ZK_REPO_PATH}/src/c/zookeeper.vcxproj.filters
     DEPENDEES patch
-    ALWAYS 0
   )
   add_custom_target(zookeeper_ant ALL
     WORKING_DIRECTORY ${ZK_REPO_PATH}
     COMMAND ant compile_jute
     DEPENDS zookeeper_repo
-    ALWAYS 1
   )
 endfunction(patch_zookeeper)
 ########################################
@@ -133,14 +131,18 @@ function(build_zookeeper)
       downloadCppUnit()
     endif()
 
-    add_custom_target(zookeeper_build ALL
-      WORKING_DIRECTORY ${ZK_REPO_PATH}
+    add_custom_target(zookeeper_configure
+      WORKING_DIRECTORY ${ZK_REPO_PATH}/src/c
       COMMAND ${CMAKE_COMMAND} -E tar xzf ${DWNLD_DIR}/cppunit-${CPP_UNIT_VER}.tar.gz
-      COMMAND ${CMAKE_COMMAND} -E env ACLOCAL=\"aclocal -I ${ZK_REPO_PATH}/cppunit-${CPP_UNIT_VER}\" autoreconf -if
-      COMMAND ${CMAKE_COMMAND} -E chdir ${ZK_REPO_PATH}/src/c configure --without-cppunit --prefix=${STAGE_DIR}
-      COMMAND ${CMAKE_COMMAND} -E chdir ${ZK_REPO_PATH}/src/c make
-      COMMADN ${CMAKE_COMMAND} -E chdir ${ZK_REPO_PATH}/src/c make install
+      COMMAND ${CMAKE_COMMAND} -E env ACLOCAL=\"aclocal -I ${ZK_REPO_PATH}/src/c/cppunit-${CPP_UNIT_VER}\" autoreconf -if -W none
       DEPENDS zookeeper_repo zookeeper_ant download_cppunit-${CPP_UNIT_VER}.tar.gz
+    )
+    add_custom_target(zookeeper_build ALL
+      WORKING_DIRECTORY ${ZK_REPO_PATH}/src/c
+      COMMAND ./configure --without-cppunit --prefix=${STAGE_DIR}
+      COMMAND make
+      COMMAND make install
+      DEPENDS zookeeper_repo zookeeper_configure download_cppunit-${CPP_UNIT_VER}.tar.gz
     )
   endif()
 
