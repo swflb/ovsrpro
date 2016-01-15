@@ -139,6 +139,17 @@ function(patch_qt5)
       DEPENDEES download)
   endif()
 endfunction(patch_qt5)
+macro(qt5CheckDependencies)
+  find_program(python python)
+  if(${python} MATCHES python-NOTFOUND)
+    message(FATAL_ERROR "python required for qt5")
+  endif()
+
+  find_program(perl perl)
+  if(${perl} MATCHES perl-NOTFOUND)
+    message(FATAL_ERROR "perl required for qt5")
+  endif()
+endmacro()
 ########################################
 # build - configure then build the libraries
 function(build_qt5)
@@ -156,6 +167,8 @@ function(build_qt5)
   if(NOT TARGET qt5)
     patch_qt5()
   endif()
+
+  qt5CheckDependencies()
 
   setConfigureOptions()
 

@@ -94,6 +94,17 @@ macro(getZookeeperFiles)
       ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo/src/c/config.h)
   endif()
 endmacro()
+macro(zookeepercheckDependencies)
+  find_program(javac javac)
+  if(${javac} MATCHES javac-NOTFOUND)
+    message(FATAL_ERROR "javac required for zookeeper")
+  endif()
+
+  find_program(ant ant)
+  if(${ant} MATCHES ant-NOTFOUND)
+    message(FATAL_ERROR "ant required for zookeeper")
+  endif()
+endmacro()
 ########################################
 # build
 function(build_zookeeper)
@@ -104,6 +115,8 @@ function(build_zookeeper)
   if(NOT TARGET zookeeper_repo)
     patch_zookeeper()
   endif()
+
+  zookeeperCheckDependencies()
 
   # Gather together all of the source files needed
   getZookeeperFiles()
