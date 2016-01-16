@@ -15,7 +15,7 @@ proExecuteStep()
 if(WIN32)
   find_program(nsis nsis)
   if(${nsis} MATCHES nsis-NOTFOUND)
-    message(FATAL_ERROR "nsis required top build install package")
+    message(WARNING "nsis required to build install package")
   endif()
 endif()
 # move some needed cmake files into place
