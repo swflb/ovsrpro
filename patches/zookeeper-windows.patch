@@ -1,0 +1,1729 @@
+diff --git a/src/c/configure.ac b/src/c/configure.ac
+index b4ed639..a3140a9 100644
+--- a/src/c/configure.ac
++++ b/src/c/configure.ac
+@@ -91,7 +91,7 @@ AC_ARG_WITH([syncapi],
+  [],[with_syncapi=yes])
+ 
+ # Checks for libraries.
+-AC_CHECK_LIB([pthread], [pthread_mutex_lock],[have_pthread=yes],[have_pthread=no])
++AC_CHECK_LIB([pthread], [zk_pthread_mutex_lock],[have_pthread=yes],[have_pthread=no])
+ 
+ if test "x$with_syncapi" != xno && test "x$have_pthread" = xno; then
+     AC_MSG_WARN([cannot build SyncAPI -- pthread not found])
+diff --git a/src/c/src/load_gen.c b/src/c/src/load_gen.c
+index 72b5950..c8fa617 100644
+--- a/src/c/src/load_gen.c
++++ b/src/c/src/load_gen.c
+@@ -45,41 +45,41 @@ static int counter;
+ 
+ 
+ void ensureConnected(){
+-    pthread_mutex_lock(&lock);
++    zk_pthread_mutex_lock(&lock);
+     while (zoo_state(zh)!=ZOO_CONNECTED_STATE) {
+-        pthread_cond_wait(&cond,&lock);
++        zk_pthread_cond_wait(&cond,&lock);
+     }
+-    pthread_mutex_unlock(&lock);
++    zk_pthread_mutex_unlock(&lock);
+ }
+ 
+ void incCounter(int delta){
+-    pthread_mutex_lock(&counterLock);
++    zk_pthread_mutex_lock(&counterLock);
+     counter+=delta;
+-    pthread_cond_broadcast(&counterCond);
+-    pthread_mutex_unlock(&counterLock);        
++    zk_pthread_cond_broadcast(&counterCond);
++    zk_pthread_mutex_unlock(&counterLock);        
+     
+ }
+ void setCounter(int cnt){
+-    pthread_mutex_lock(&counterLock);
++    zk_pthread_mutex_lock(&counterLock);
+     counter=cnt;
+-    pthread_cond_broadcast(&counterCond);
+-    pthread_mutex_unlock(&counterLock);        
++    zk_pthread_cond_broadcast(&counterCond);
++    zk_pthread_mutex_unlock(&counterLock);        
+     
+ }
+ void waitCounter(){
+-    pthread_mutex_lock(&counterLock);
++    zk_pthread_mutex_lock(&counterLock);
+     while (counter>0) {
+-        pthread_cond_wait(&counterCond,&counterLock);
++        zk_pthread_cond_wait(&counterCond,&counterLock);
+     }
+-    pthread_mutex_unlock(&counterLock);    
++    zk_pthread_mutex_unlock(&counterLock);    
+ }
+ 
+ void listener(zhandle_t *zzh, int type, int state, const char *path,void* ctx) {
+     if(type == ZOO_SESSION_EVENT){
+         if(state == ZOO_CONNECTED_STATE){
+-            pthread_mutex_lock(&lock);
+-            pthread_cond_broadcast(&cond);
+-            pthread_mutex_unlock(&lock);
++            zk_pthread_mutex_lock(&lock);
++            zk_pthread_cond_broadcast(&cond);
++            zk_pthread_mutex_unlock(&lock);
+         }
+         setCounter(0);
+     }
+diff --git a/src/c/src/mt_adaptor.c b/src/c/src/mt_adaptor.c
+index 974063f..c4af6f1 100644
+--- a/src/c/src/mt_adaptor.c
++++ b/src/c/src/mt_adaptor.c
+@@ -46,63 +46,63 @@
+ 
+ void zoo_lock_auth(zhandle_t *zh)
+ {
+-    pthread_mutex_lock(&zh->auth_h.lock);
++    zk_pthread_mutex_lock(&zh->auth_h.lock);
+ }
+ void zoo_unlock_auth(zhandle_t *zh)
+ {
+-    pthread_mutex_unlock(&zh->auth_h.lock);
++    zk_pthread_mutex_unlock(&zh->auth_h.lock);
+ }
+ void lock_buffer_list(buffer_head_t *l)
+ {
+-    pthread_mutex_lock(&l->lock);
++    zk_pthread_mutex_lock(&l->lock);
+ }
+ void unlock_buffer_list(buffer_head_t *l)
+ {
+-    pthread_mutex_unlock(&l->lock);
++    zk_pthread_mutex_unlock(&l->lock);
+ }
+ void lock_completion_list(completion_head_t *l)
+ {
+-    pthread_mutex_lock(&l->lock);
++    zk_pthread_mutex_lock(&l->lock);
+ }
+ void unlock_completion_list(completion_head_t *l)
+ {
+-    pthread_cond_broadcast(&l->cond);
+-    pthread_mutex_unlock(&l->lock);
++    zk_pthread_cond_broadcast(&l->cond);
++    zk_pthread_mutex_unlock(&l->lock);
+ }
+ struct sync_completion *alloc_sync_completion(void)
+ {
+     struct sync_completion *sc = (struct sync_completion*)calloc(1, sizeof(struct sync_completion));
+     if (sc) {
+-       pthread_cond_init(&sc->cond, 0);
+-       pthread_mutex_init(&sc->lock, 0);
++       zk_pthread_cond_init(&sc->cond, 0);
++       zk_pthread_mutex_init(&sc->lock, 0);
+     }
+     return sc;
+ }
+ int wait_sync_completion(struct sync_completion *sc)
+ {
+-    pthread_mutex_lock(&sc->lock);
++    zk_pthread_mutex_lock(&sc->lock);
+     while (!sc->complete) {
+-        pthread_cond_wait(&sc->cond, &sc->lock);
++        zk_pthread_cond_wait(&sc->cond, &sc->lock);
+     }
+-    pthread_mutex_unlock(&sc->lock);
++    zk_pthread_mutex_unlock(&sc->lock);
+     return 0;
+ }
+ 
+ void free_sync_completion(struct sync_completion *sc)
+ {
+     if (sc) {
+-        pthread_mutex_destroy(&sc->lock);
+-        pthread_cond_destroy(&sc->cond);
++        zk_pthread_mutex_destroy(&sc->lock);
++        zk_pthread_cond_destroy(&sc->cond);
+         free(sc);
+     }
+ }
+ 
+ void notify_sync_completion(struct sync_completion *sc)
+ {
+-    pthread_mutex_lock(&sc->lock);
++    zk_pthread_mutex_lock(&sc->lock);
+     sc->complete = 1;
+-    pthread_cond_broadcast(&sc->cond);
+-    pthread_mutex_unlock(&sc->lock);
++    zk_pthread_cond_broadcast(&sc->cond);
++    zk_pthread_mutex_unlock(&sc->lock);
+ }
+ 
+ int process_async(int outstanding_sync)
+@@ -189,21 +189,21 @@ static int set_nonblock(int fd){
+ void wait_for_others(zhandle_t* zh)
+ {
+     struct adaptor_threads* adaptor=zh->adaptor_priv;
+-    pthread_mutex_lock(&adaptor->lock);
++    zk_pthread_mutex_lock(&adaptor->lock);
+     while(adaptor->threadsToWait>0) 
+-        pthread_cond_wait(&adaptor->cond,&adaptor->lock);
+-    pthread_mutex_unlock(&adaptor->lock);    
++        zk_pthread_cond_wait(&adaptor->cond,&adaptor->lock);
++    zk_pthread_mutex_unlock(&adaptor->lock);    
+ }
+ 
+ void notify_thread_ready(zhandle_t* zh)
+ {
+     struct adaptor_threads* adaptor=zh->adaptor_priv;
+-    pthread_mutex_lock(&adaptor->lock);
++    zk_pthread_mutex_lock(&adaptor->lock);
+     adaptor->threadsToWait--;
+-    pthread_cond_broadcast(&adaptor->cond);
++    zk_pthread_cond_broadcast(&adaptor->cond);
+     while(adaptor->threadsToWait>0) 
+-        pthread_cond_wait(&adaptor->cond,&adaptor->lock);
+-    pthread_mutex_unlock(&adaptor->lock);
++        zk_pthread_cond_wait(&adaptor->cond,&adaptor->lock);
++    zk_pthread_mutex_unlock(&adaptor->lock);
+ }
+ 
+ 
+@@ -211,18 +211,18 @@ void start_threads(zhandle_t* zh)
+ {
+     int rc = 0;
+     struct adaptor_threads* adaptor=zh->adaptor_priv;
+-    pthread_cond_init(&adaptor->cond,0);
+-    pthread_mutex_init(&adaptor->lock,0);
++    zk_pthread_cond_init(&adaptor->cond,0);
++    zk_pthread_mutex_init(&adaptor->lock,0);
+     adaptor->threadsToWait=2;  // wait for 2 threads before opening the barrier
+     
+     // use api_prolog() to make sure zhandle doesn't get destroyed
+     // while initialization is in progress
+     api_prolog(zh);
+     LOG_DEBUG(("starting threads..."));
+-    rc=pthread_create(&adaptor->io, 0, do_io, zh);
+-    assert("pthread_create() failed for the IO thread"&&!rc);
+-    rc=pthread_create(&adaptor->completion, 0, do_completion, zh);
+-    assert("pthread_create() failed for the completion thread"&&!rc);
++    rc=zk_pthread_create(&adaptor->io, 0, do_io, zh);
++    assert("zk_pthread_create() failed for the IO thread"&&!rc);
++    rc=zk_pthread_create(&adaptor->completion, 0, do_completion, zh);
++    assert("zk_pthread_create() failed for the completion thread"&&!rc);
+     wait_for_others(zh);
+     api_epilog(zh, 0);    
+ }
+@@ -250,21 +250,21 @@ int adaptor_init(zhandle_t *zh)
+     set_nonblock(adaptor_threads->self_pipe[1]);
+     set_nonblock(adaptor_threads->self_pipe[0]);
+ 
+-    pthread_mutex_init(&zh->auth_h.lock,0);
++    zk_pthread_mutex_init(&zh->auth_h.lock,0);
+ 
+     zh->adaptor_priv = adaptor_threads;
+-    pthread_mutex_init(&zh->to_process.lock,0);
+-    pthread_mutex_init(&adaptor_threads->zh_lock,0);
++    zk_pthread_mutex_init(&zh->to_process.lock,0);
++    zk_pthread_mutex_init(&adaptor_threads->zh_lock,0);
+     // to_send must be recursive mutex    
+-    pthread_mutexattr_init(&recursive_mx_attr);
+-    pthread_mutexattr_settype(&recursive_mx_attr, PTHREAD_MUTEX_RECURSIVE);
+-    pthread_mutex_init(&zh->to_send.lock,&recursive_mx_attr);
+-    pthread_mutexattr_destroy(&recursive_mx_attr);
++    zk_pthread_mutexattr_init(&recursive_mx_attr);
++    zk_pthread_mutexattr_settype(&recursive_mx_attr, PTHREAD_MUTEX_RECURSIVE);
++    zk_pthread_mutex_init(&zh->to_send.lock,&recursive_mx_attr);
++    zk_pthread_mutexattr_destroy(&recursive_mx_attr);
+     
+-    pthread_mutex_init(&zh->sent_requests.lock,0);
+-    pthread_cond_init(&zh->sent_requests.cond,0);
+-    pthread_mutex_init(&zh->completions_to_process.lock,0);
+-    pthread_cond_init(&zh->completions_to_process.cond,0);
++    zk_pthread_mutex_init(&zh->sent_requests.lock,0);
++    zk_pthread_cond_init(&zh->sent_requests.cond,0);
++    zk_pthread_mutex_init(&zh->completions_to_process.lock,0);
++    zk_pthread_cond_init(&zh->completions_to_process.cond,0);
+     start_threads(zh);
+     return 0;
+ }
+@@ -280,19 +280,19 @@ void adaptor_finish(zhandle_t *zh)
+         return;
+     }
+ 
+-    if(!pthread_equal(adaptor_threads->io,pthread_self())){
++    if(!zk_pthread_equal(adaptor_threads->io,zk_pthread_self())){
+         wakeup_io_thread(zh);
+-        pthread_join(adaptor_threads->io, 0);
++        zk_pthread_join(adaptor_threads->io, 0);
+     }else
+-        pthread_detach(adaptor_threads->io);
++        zk_pthread_detach(adaptor_threads->io);
+     
+-    if(!pthread_equal(adaptor_threads->completion,pthread_self())){
+-        pthread_mutex_lock(&zh->completions_to_process.lock);
+-        pthread_cond_broadcast(&zh->completions_to_process.cond);
+-        pthread_mutex_unlock(&zh->completions_to_process.lock);
+-        pthread_join(adaptor_threads->completion, 0);
++    if(!zk_pthread_equal(adaptor_threads->completion,zk_pthread_self())){
++        zk_pthread_mutex_lock(&zh->completions_to_process.lock);
++        zk_pthread_cond_broadcast(&zh->completions_to_process.cond);
++        zk_pthread_mutex_unlock(&zh->completions_to_process.lock);
++        zk_pthread_join(adaptor_threads->completion, 0);
+     }else
+-        pthread_detach(adaptor_threads->completion);
++        zk_pthread_detach(adaptor_threads->completion);
+     
+     api_epilog(zh,0);
+ }
+@@ -302,17 +302,17 @@ void adaptor_destroy(zhandle_t *zh)
+     struct adaptor_threads *adaptor = zh->adaptor_priv;
+     if(adaptor==0) return;
+     
+-    pthread_cond_destroy(&adaptor->cond);
+-    pthread_mutex_destroy(&adaptor->lock);
+-    pthread_mutex_destroy(&zh->to_process.lock);
+-    pthread_mutex_destroy(&zh->to_send.lock);
+-    pthread_mutex_destroy(&zh->sent_requests.lock);
+-    pthread_cond_destroy(&zh->sent_requests.cond);
+-    pthread_mutex_destroy(&zh->completions_to_process.lock);
+-    pthread_cond_destroy(&zh->completions_to_process.cond);
+-    pthread_mutex_destroy(&adaptor->zh_lock);
+-
+-    pthread_mutex_destroy(&zh->auth_h.lock);
++    zk_pthread_cond_destroy(&adaptor->cond);
++    zk_pthread_mutex_destroy(&adaptor->lock);
++    zk_pthread_mutex_destroy(&zh->to_process.lock);
++    zk_pthread_mutex_destroy(&zh->to_send.lock);
++    zk_pthread_mutex_destroy(&zh->sent_requests.lock);
++    zk_pthread_cond_destroy(&zh->sent_requests.cond);
++    zk_pthread_mutex_destroy(&zh->completions_to_process.lock);
++    zk_pthread_cond_destroy(&zh->completions_to_process.cond);
++    zk_pthread_mutex_destroy(&adaptor->zh_lock);
++
++    zk_pthread_mutex_destroy(&zh->auth_h.lock);
+ 
+     close(adaptor->self_pipe[0]);
+     close(adaptor->self_pipe[1]);
+@@ -458,11 +458,11 @@ void *do_completion(void *v)
+     notify_thread_ready(zh);
+     LOG_DEBUG(("started completion thread"));
+     while(!zh->close_requested) {
+-        pthread_mutex_lock(&zh->completions_to_process.lock);
++        zk_pthread_mutex_lock(&zh->completions_to_process.lock);
+         while(!zh->completions_to_process.head && !zh->close_requested) {
+-            pthread_cond_wait(&zh->completions_to_process.cond, &zh->completions_to_process.lock);
++            zk_pthread_cond_wait(&zh->completions_to_process.cond, &zh->completions_to_process.lock);
+         }
+-        pthread_mutex_unlock(&zh->completions_to_process.lock);
++        zk_pthread_mutex_unlock(&zh->completions_to_process.lock);
+         process_completions(zh);
+     }
+     api_epilog(zh, 0);    
+@@ -483,25 +483,9 @@ int32_t inc_ref_counter(zhandle_t* zh,int i)
+ int32_t fetch_and_add(volatile int32_t* operand, int incr)
+ {
+ #ifndef WIN32
+-    int32_t result;
+-    asm __volatile__(
+-         "lock xaddl %0,%1\n"
+-         : "=r"(result), "=m"(*(int *)operand)
+-         : "0"(incr)
+-         : "memory");
+-   return result;
++   return __sync_fetch_and_add(operand, incr);
+ #else
+-    volatile int32_t result;
+-    _asm
+-    {
+-        mov eax, operand; //eax = v;
+-       mov ebx, incr; // ebx = i;
+-        mov ecx, 0x0; // ecx = 0;
+-        lock xadd dword ptr [eax], ecx; 
+-       lock xadd dword ptr [eax], ebx; 
+-        mov result, ecx; // result = ebx;        
+-     }
+-     return result;    
++  return InterlockedExchangeAdd(operand, incr);
+ #endif
+ }
+ 
+@@ -519,12 +503,12 @@ void enter_critical(zhandle_t* zh)
+ {
+     struct adaptor_threads *adaptor = zh->adaptor_priv;
+     if(adaptor)
+-        pthread_mutex_lock(&adaptor->zh_lock);
++        zk_pthread_mutex_lock(&adaptor->zh_lock);
+ }
+ 
+ void leave_critical(zhandle_t* zh)
+ {
+     struct adaptor_threads *adaptor = zh->adaptor_priv;
+     if(adaptor)
+-        pthread_mutex_unlock(&adaptor->zh_lock);    
++        zk_pthread_mutex_unlock(&adaptor->zh_lock);    
+ }
+diff --git a/src/c/src/winport.c b/src/c/src/winport.c
+index aeef3a8..400cb77 100644
+--- a/src/c/src/winport.c
++++ b/src/c/src/winport.c
+@@ -21,18 +21,18 @@
+ #include <winsock2.h>
+ #include <ws2tcpip.h>
+ 
+-int pthread_mutex_lock(pthread_mutex_t* _mutex ){      
++int zk_pthread_mutex_lock(pthread_mutex_t* _mutex ){      
+        int rc = WaitForSingleObject( *_mutex,    // handle to mutex
+             INFINITE);  // no time-out interval
+        return ((rc == WAIT_OBJECT_0) ? 0: rc); 
+ }
+ 
+-int pthread_mutex_unlock( pthread_mutex_t* _mutex ){   
++int zk_pthread_mutex_unlock( pthread_mutex_t* _mutex ){   
+        int rc = ReleaseMutex(*_mutex);
+        return ((rc != 0)? 0: GetLastError());  
+ }
+ 
+-int pthread_mutex_init(pthread_mutex_t* _mutex, void* ignoredAttr){
++int zk_pthread_mutex_init(pthread_mutex_t* _mutex, void* ignoredAttr){
+        //use CreateMutex as we are using the HANDLES in pthread_cond
+        *_mutex = CreateMutex( 
+         NULL,              // default security attributes
+@@ -41,13 +41,13 @@ int pthread_mutex_init(pthread_mutex_t* _mutex, void* ignoredAttr){
+        return ((*_mutex == NULL) ? GetLastError() : 0);
+ }
+ 
+-int pthread_mutex_destroy(pthread_mutex_t* _mutex)
++int zk_pthread_mutex_destroy(pthread_mutex_t* _mutex)
+ {
+        int rc = CloseHandle(*_mutex);
+        return ((rc != 0)? 0: GetLastError());  
+ }
+ 
+-int pthread_create(pthread_t *thread, const pthread_attr_t *attr, unsigned  (__stdcall* start_routine)(void* a), void *arg)
++int zk_pthread_create(pthread_t *thread, const pthread_attr_t *attr, unsigned  (__stdcall* start_routine)(void* a), void *arg)
+ {
+    int _intThreadId; 
+    (*thread).thread_handle = (HANDLE)_beginthreadex( NULL, 0, start_routine , arg, 0, (unsigned int*)&_intThreadId );
+@@ -56,36 +56,36 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr, unsigned  (__s
+ }
+ 
+ 
+-int pthread_equal(pthread_t t1, pthread_t t2){
++int zk_pthread_equal(pthread_t t1, pthread_t t2){
+ //Is there a better way to do this? GetThreadId(handle) is only supported Windows 2003 n above.
+        return ((t1.thread_id == t2.thread_id) ? 1:0);              
+ }
+ 
+-pthread_t pthread_self(){
++pthread_t zk_pthread_self(){
+     pthread_t thread_self;
+     thread_self.thread_handle = GetCurrentThread();
+     thread_self.thread_id     = GetCurrentThreadId();
+     return thread_self;
+ }
+ 
+-int pthread_join(pthread_t _thread, void** ignore)
++int zk_pthread_join(pthread_t _thread, void** ignore)
+ {
+        int rc = WaitForSingleObject( _thread.thread_handle, INFINITE );
+        return ((rc == WAIT_OBJECT_0) ? 0: rc); 
+ }
+ 
+-int pthread_detach(pthread_t _thread)
++int zk_pthread_detach(pthread_t _thread)
+ {
+        int rc = CloseHandle(_thread.thread_handle) ;
+        return  (rc != 0) ? 0: GetLastError();
+ }
+ 
+-void pthread_mutexattr_init(pthread_mutexattr_t* ignore){}
+-void pthread_mutexattr_settype(pthread_mutexattr_t* ingore_attr, int ignore){}
+-void pthread_mutexattr_destroy(pthread_mutexattr_t* ignore_attr){}
++void zk_pthread_mutexattr_init(pthread_mutexattr_t* ignore){}
++void zk_pthread_mutexattr_settype(pthread_mutexattr_t* ingore_attr, int ignore){}
++void zk_pthread_mutexattr_destroy(pthread_mutexattr_t* ignore_attr){}
+        
+ int 
+-pthread_cond_init (pthread_cond_t *cv,
++zk_pthread_cond_init (pthread_cond_t *cv,
+                    const pthread_condattr_t * ignore)
+ {
+   cv->waiters_count_ = 0;
+@@ -106,7 +106,7 @@ pthread_cond_init (pthread_cond_t *cv,
+ }
+ 
+ 
+-int pthread_cond_destroy(pthread_cond_t *cond)
++int zk_pthread_cond_destroy(pthread_cond_t *cond)
+ {
+        CloseHandle( cond->sema_);
+        DeleteCriticalSection(&cond->waiters_count_lock_);
+@@ -115,7 +115,7 @@ int pthread_cond_destroy(pthread_cond_t *cond)
+ 
+ 
+ int
+-pthread_cond_signal (pthread_cond_t *cv)
++zk_pthread_cond_signal (pthread_cond_t *cv)
+ {
+   int have_waiters;
+   EnterCriticalSection (& (cv->waiters_count_lock_));
+@@ -131,7 +131,7 @@ pthread_cond_signal (pthread_cond_t *cv)
+ 
+ 
+ int
+-pthread_cond_broadcast (pthread_cond_t *cv)
++zk_pthread_cond_broadcast (pthread_cond_t *cv)
+ {
+   // This is needed to ensure that <waiters_count_> and <was_broadcast_> are
+   // consistent relative to each other.
+@@ -141,7 +141,7 @@ pthread_cond_broadcast (pthread_cond_t *cv)
+   if (cv->waiters_count_ > 0) {
+     // We are broadcasting, even if there is just one waiter...
+     // Record that we are broadcasting, which helps optimize
+-    // <pthread_cond_wait> for the non-broadcast case.
++    // <zk_pthread_cond_wait> for the non-broadcast case.
+     cv->was_broadcast_ = 1;
+     have_waiters = 1;
+   }
+@@ -165,7 +165,7 @@ pthread_cond_broadcast (pthread_cond_t *cv)
+ 
+ 
+ int
+-pthread_cond_wait (pthread_cond_t *cv, 
++zk_pthread_cond_wait (pthread_cond_t *cv, 
+                    pthread_mutex_t *external_mutex)
+ {
+   int last_waiter;
+@@ -175,7 +175,7 @@ pthread_cond_wait (pthread_cond_t *cv,
+   LeaveCriticalSection (&cv->waiters_count_lock_);
+ 
+   // This call atomically releases the mutex and waits on the
+-  // semaphore until <pthread_cond_signal> or <pthread_cond_broadcast>
++  // semaphore until <zk_pthread_cond_signal> or <zk_pthread_cond_broadcast>
+   // are called by another thread.
+   SignalObjectAndWait (*external_mutex, cv->sema_, INFINITE, FALSE);
+ 
+@@ -185,7 +185,7 @@ pthread_cond_wait (pthread_cond_t *cv,
+   // We're no longer waiting...
+   cv->waiters_count_--;
+ 
+-  // Check to see if we're the last waiter after <pthread_cond_broadcast>.
++  // Check to see if we're the last waiter after <zk_pthread_cond_broadcast>.
+   last_waiter = cv->was_broadcast_ && cv->waiters_count_ == 0;
+ 
+   LeaveCriticalSection (&cv->waiters_count_lock_);
+@@ -202,7 +202,7 @@ pthread_cond_wait (pthread_cond_t *cv,
+     WaitForSingleObject (*external_mutex, INFINITE);
+ }
+ 
+-int pthread_key_create(pthread_key_t *key, void (*destructor)(void *) )
++int zk_pthread_key_create(pthread_key_t *key, void (*destructor)(void *) )
+ {
+   int result = 0;
+   pthread_key_t* newkey;
+@@ -227,7 +227,7 @@ int pthread_key_create(pthread_key_t *key, void (*destructor)(void *) )
+   return (result);     
+ }
+ 
+-int pthread_key_delete(pthread_key_t key)
++int zk_pthread_key_delete(pthread_key_t key)
+ {
+   int rc = 0;
+   LPVOID lpvData =  TlsGetValue(key.key);
+@@ -240,7 +240,7 @@ int pthread_key_delete(pthread_key_t key)
+   return (rc);
+ }
+ 
+-void *pthread_getspecific(pthread_key_t key)
++void *zk_pthread_getspecific(pthread_key_t key)
+ {
+        LPVOID lpvData =  TlsGetValue(key.key);
+        if ((lpvData == 0) && (GetLastError() != ERROR_SUCCESS)) 
+@@ -249,7 +249,7 @@ void *pthread_getspecific(pthread_key_t key)
+                return lpvData;
+ }
+ 
+-int pthread_setspecific(pthread_key_t key, const void *value)
++int zk_pthread_setspecific(pthread_key_t key, const void *value)
+ {
+        int rc = TlsSetValue (key.key, value);
+        return ((rc != 0 ) ? 0 : GetLastError());
+diff --git a/src/c/src/winport.h b/src/c/src/winport.h
+index 32272c0..12ffe71 100644
+--- a/src/c/src/winport.h
++++ b/src/c/src/winport.h
+@@ -47,19 +47,19 @@ typedef int pthread_condattr_t;
+ typedef int pthread_attr_t; 
+ #define PTHREAD_MUTEX_RECURSIVE 0
+ 
+-int pthread_mutex_lock(pthread_mutex_t* _mutex );
+-int pthread_mutex_unlock( pthread_mutex_t* _mutex );
+-int pthread_mutex_init(pthread_mutex_t* _mutex, void* ignoredAttr);
+-int pthread_mutex_destroy(pthread_mutex_t* _mutex);
+-int pthread_create(pthread_t *thread, const pthread_attr_t *attr, unsigned  (__stdcall* start_routine)(void* a), void *arg);
+-int pthread_equal(pthread_t t1, pthread_t t2);
+-pthread_t pthread_self();
+-int pthread_join(pthread_t _thread, void** ignore);
+-int pthread_detach(pthread_t _thread);
++int zk_pthread_mutex_lock(pthread_mutex_t* _mutex );
++int zk_pthread_mutex_unlock( pthread_mutex_t* _mutex );
++int zk_pthread_mutex_init(pthread_mutex_t* _mutex, void* ignoredAttr);
++int zk_pthread_mutex_destroy(pthread_mutex_t* _mutex);
++int zk_pthread_create(pthread_t *thread, const pthread_attr_t *attr, unsigned  (__stdcall* start_routine)(void* a), void *arg);
++int zk_pthread_equal(pthread_t t1, pthread_t t2);
++pthread_t zk_pthread_self();
++int zk_pthread_join(pthread_t _thread, void** ignore);
++int zk_pthread_detach(pthread_t _thread);
+ 
+-void pthread_mutexattr_init(pthread_mutexattr_t* ignore);
+-void pthread_mutexattr_settype(pthread_mutexattr_t* ingore_attr, int ignore);
+-void pthread_mutexattr_destroy(pthread_mutexattr_t* ignore_attr);
++void zk_pthread_mutexattr_init(pthread_mutexattr_t* ignore);
++void zk_pthread_mutexattr_settype(pthread_mutexattr_t* ingore_attr, int ignore);
++void zk_pthread_mutexattr_destroy(pthread_mutexattr_t* ignore_attr);
+ 
+ 
+ // http://www.cs.wustl.edu/~schmidt/win32-cv-1.html
+@@ -86,11 +86,11 @@ typedef struct
+     // allows us to optimize the code if we're just signaling.
+ }pthread_cond_t;
+        
+-int pthread_cond_init (pthread_cond_t *cv,const pthread_condattr_t * ignore);
+-int pthread_cond_destroy(pthread_cond_t *cond);
+-int pthread_cond_signal (pthread_cond_t *cv);
+-int pthread_cond_broadcast (pthread_cond_t *cv);
+-int pthread_cond_wait (pthread_cond_t *cv, pthread_mutex_t *external_mutex);
++int zk_pthread_cond_init (pthread_cond_t *cv,const pthread_condattr_t * ignore);
++int zk_pthread_cond_destroy(pthread_cond_t *cond);
++int zk_pthread_cond_signal (pthread_cond_t *cv);
++int zk_pthread_cond_broadcast (pthread_cond_t *cv);
++int zk_pthread_cond_wait (pthread_cond_t *cv, pthread_mutex_t *external_mutex);
+ 
+ 
+ struct pthread_key_t_
+@@ -100,10 +100,10 @@ struct pthread_key_t_
+ };
+ 
+ typedef struct pthread_key_t_ pthread_key_t;
+-int pthread_key_create(pthread_key_t *key, void (*destructor)(void *) );
+-int pthread_key_delete(pthread_key_t key);
+-void *pthread_getspecific(pthread_key_t key);
+-int pthread_setspecific(pthread_key_t key, const void *value);
++int zk_pthread_key_create(pthread_key_t *key, void (*destructor)(void *) );
++int zk_pthread_key_delete(pthread_key_t key);
++void *zk_pthread_getspecific(pthread_key_t key);
++int zk_pthread_setspecific(pthread_key_t key, const void *value);
+ 
+ inline int gettimeofday(struct timeval *tp, void *tzp) {
+         int64_t now = 0;
+diff --git a/src/c/src/zk_log.c b/src/c/src/zk_log.c
+index 4dc0f21..52bdaba 100644
+--- a/src/c/src/zk_log.c
++++ b/src/c/src/zk_log.c
+@@ -46,16 +46,16 @@ void freeBuffer(void* p){
+ }
+ 
+ __attribute__((constructor)) void prepareTSDKeys() {
+-    pthread_key_create (&time_now_buffer, freeBuffer);
+-    pthread_key_create (&format_log_msg_buffer, freeBuffer);
++    zk_pthread_key_create (&time_now_buffer, freeBuffer);
++    zk_pthread_key_create (&format_log_msg_buffer, freeBuffer);
+ }
+ 
+ char* getTSData(pthread_key_t key,int size){
+-    char* p=pthread_getspecific(key);
++    char* p=zk_pthread_getspecific(key);
+     if(p==0){
+         int res;
+         p=calloc(1,size);
+-        res=pthread_setspecific(key,p);
++        res=zk_pthread_setspecific(key,p);
+         if(res!=0){
+             fprintf(stderr,"Failed to set TSD key: %d",res);
+         }
+@@ -138,11 +138,11 @@ void log_message(ZooLogLevel curLevel,int line,const char* funcName,
+ #else
+ #ifdef WIN32
+     fprintf(LOGSTREAM, "%s:%d(0x%lx):%s@%s@%d: %s\n", time_now(timebuf),pid,
+-            (unsigned long int)(pthread_self().thread_id),
++            (unsigned long int)(zk_pthread_self().thread_id),
+             dbgLevelStr[curLevel],funcName,line,message);      
+ #else
+     fprintf(LOGSTREAM, "%s:%d(0x%lx):%s@%s@%d: %s\n", time_now(get_time_buffer()),pid,
+-            (unsigned long int)pthread_self(),
++            (unsigned long int)zk_pthread_self(),
+             dbgLevelStr[curLevel],funcName,line,message);      
+ #endif
+ #endif
+diff --git a/src/c/tests/LibCSymTable.cc b/src/c/tests/LibCSymTable.cc
+index 5378579..7c7401f 100644
+--- a/src/c/tests/LibCSymTable.cc
++++ b/src/c/tests/LibCSymTable.cc
+@@ -52,20 +52,20 @@ LibCSymTable::LibCSymTable()
+     LOAD_SYM(poll);
+     LOAD_SYM(gettimeofday);
+ #ifdef THREADED
+-    LOAD_SYM(pthread_create);
+-    LOAD_SYM(pthread_detach);
+-    LOAD_SYM(pthread_cond_broadcast);
+-    LOAD_SYM(pthread_cond_destroy);
+-    LOAD_SYM(pthread_cond_init);
+-    LOAD_SYM(pthread_cond_signal);
++    LOAD_SYM(zk_pthread_create);
++    LOAD_SYM(zk_pthread_detach);
++    LOAD_SYM(zk_pthread_cond_broadcast);
++    LOAD_SYM(zk_pthread_cond_destroy);
++    LOAD_SYM(zk_pthread_cond_init);
++    LOAD_SYM(zk_pthread_cond_signal);
+     LOAD_SYM(pthread_cond_timedwait);
+-    LOAD_SYM(pthread_cond_wait);
+-    LOAD_SYM(pthread_join);
+-    LOAD_SYM(pthread_mutex_destroy);
+-    LOAD_SYM(pthread_mutex_init);
+-    LOAD_SYM(pthread_mutex_lock);
++    LOAD_SYM(zk_pthread_cond_wait);
++    LOAD_SYM(zk_pthread_join);
++    LOAD_SYM(zk_pthread_mutex_destroy);
++    LOAD_SYM(zk_pthread_mutex_init);
++    LOAD_SYM(zk_pthread_mutex_lock);
+     LOAD_SYM(pthread_mutex_trylock);
+-    LOAD_SYM(pthread_mutex_unlock);
++    LOAD_SYM(zk_pthread_mutex_unlock);
+ #endif
+ }
+ 
+diff --git a/src/c/tests/LibCSymTable.h b/src/c/tests/LibCSymTable.h
+index 2f7e0c2..e187d23 100644
+--- a/src/c/tests/LibCSymTable.h
++++ b/src/c/tests/LibCSymTable.h
+@@ -81,22 +81,22 @@ struct LibCSymTable
+     DECLARE_SYM(int,poll,(struct pollfd*,POLL_NFDS_TYPE,int));
+     DECLARE_SYM(int,gettimeofday,(struct timeval*,GETTIMEOFDAY_ARG2_TYPE));
+ #ifdef THREADED
+-    DECLARE_SYM(int,pthread_create,(pthread_t *, const pthread_attr_t *,
++    DECLARE_SYM(int,zk_pthread_create,(pthread_t *, const pthread_attr_t *,
+                 void *(*)(void *), void *));
+-    DECLARE_SYM(int,pthread_detach,(pthread_t));
+-    DECLARE_SYM(int,pthread_cond_broadcast,(pthread_cond_t *));
+-    DECLARE_SYM(int,pthread_cond_destroy,(pthread_cond_t *));
+-    DECLARE_SYM(int,pthread_cond_init,(pthread_cond_t *, const pthread_condattr_t *));
+-    DECLARE_SYM(int,pthread_cond_signal,(pthread_cond_t *));
++    DECLARE_SYM(int,zk_pthread_detach,(pthread_t));
++    DECLARE_SYM(int,zk_pthread_cond_broadcast,(pthread_cond_t *));
++    DECLARE_SYM(int,zk_pthread_cond_destroy,(pthread_cond_t *));
++    DECLARE_SYM(int,zk_pthread_cond_init,(pthread_cond_t *, const pthread_condattr_t *));
++    DECLARE_SYM(int,zk_pthread_cond_signal,(pthread_cond_t *));
+     DECLARE_SYM(int,pthread_cond_timedwait,(pthread_cond_t *,
+                     pthread_mutex_t *, const struct timespec *));
+-    DECLARE_SYM(int,pthread_cond_wait,(pthread_cond_t *, pthread_mutex_t *));
+-    DECLARE_SYM(int,pthread_join,(pthread_t, void **));
+-    DECLARE_SYM(int,pthread_mutex_destroy,(pthread_mutex_t *));
+-    DECLARE_SYM(int,pthread_mutex_init,(pthread_mutex_t *, const pthread_mutexattr_t *));
+-    DECLARE_SYM(int,pthread_mutex_lock,(pthread_mutex_t *));
++    DECLARE_SYM(int,zk_pthread_cond_wait,(pthread_cond_t *, pthread_mutex_t *));
++    DECLARE_SYM(int,zk_pthread_join,(pthread_t, void **));
++    DECLARE_SYM(int,zk_pthread_mutex_destroy,(pthread_mutex_t *));
++    DECLARE_SYM(int,zk_pthread_mutex_init,(pthread_mutex_t *, const pthread_mutexattr_t *));
++    DECLARE_SYM(int,zk_pthread_mutex_lock,(pthread_mutex_t *));
+     DECLARE_SYM(int,pthread_mutex_trylock,(pthread_mutex_t *));
+-    DECLARE_SYM(int,pthread_mutex_unlock,(pthread_mutex_t *));
++    DECLARE_SYM(int,zk_pthread_mutex_unlock,(pthread_mutex_t *));
+ #endif
+     LibCSymTable();
+     
+diff --git a/src/c/tests/PthreadMocks.cc b/src/c/tests/PthreadMocks.cc
+index 490cebf..654b426 100644
+--- a/src/c/tests/PthreadMocks.cc
++++ b/src/c/tests/PthreadMocks.cc
+@@ -23,25 +23,25 @@ MockPthreadsBase* MockPthreadsBase::mock_=0;
+ #undef USING_DUMA
+ 
+ #ifndef USING_DUMA
+-int pthread_cond_broadcast (pthread_cond_t *c){
++int zk_pthread_cond_broadcast (pthread_cond_t *c){
+     if(!MockPthreadsBase::mock_)
+-        return LIBC_SYMBOLS.pthread_cond_broadcast(c);
+-    return MockPthreadsBase::mock_->pthread_cond_broadcast(c);
++        return LIBC_SYMBOLS.zk_pthread_cond_broadcast(c);
++    return MockPthreadsBase::mock_->zk_pthread_cond_broadcast(c);
+ }
+-int pthread_cond_destroy (pthread_cond_t *c){
++int zk_pthread_cond_destroy (pthread_cond_t *c){
+     if(!MockPthreadsBase::mock_)
+-        return LIBC_SYMBOLS.pthread_cond_destroy(c);
+-    return MockPthreadsBase::mock_->pthread_cond_destroy(c);
++        return LIBC_SYMBOLS.zk_pthread_cond_destroy(c);
++    return MockPthreadsBase::mock_->zk_pthread_cond_destroy(c);
+ }
+-int pthread_cond_init (pthread_cond_t *c, const pthread_condattr_t *a){
++int zk_pthread_cond_init (pthread_cond_t *c, const pthread_condattr_t *a){
+     if(!MockPthreadsBase::mock_)
+-        return LIBC_SYMBOLS.pthread_cond_init(c,a);
+-    return MockPthreadsBase::mock_->pthread_cond_init(c,a);
++        return LIBC_SYMBOLS.zk_pthread_cond_init(c,a);
++    return MockPthreadsBase::mock_->zk_pthread_cond_init(c,a);
+ }
+-int pthread_cond_signal (pthread_cond_t *c){
++int zk_pthread_cond_signal (pthread_cond_t *c){
+     if(!MockPthreadsBase::mock_)
+-        return LIBC_SYMBOLS.pthread_cond_signal(c);
+-    return MockPthreadsBase::mock_->pthread_cond_signal(c);
++        return LIBC_SYMBOLS.zk_pthread_cond_signal(c);
++    return MockPthreadsBase::mock_->zk_pthread_cond_signal(c);
+ }
+ int pthread_cond_timedwait (pthread_cond_t *c,
+                 pthread_mutex_t *m, const struct timespec *t){
+@@ -49,42 +49,42 @@ int pthread_cond_timedwait (pthread_cond_t *c,
+         return LIBC_SYMBOLS.pthread_cond_timedwait(c,m,t);
+     return MockPthreadsBase::mock_->pthread_cond_timedwait(c,m,t);
+ }
+-int pthread_cond_wait (pthread_cond_t *c, pthread_mutex_t *m){
++int zk_pthread_cond_wait (pthread_cond_t *c, pthread_mutex_t *m){
+     if(!MockPthreadsBase::mock_)
+-        return LIBC_SYMBOLS.pthread_cond_wait(c,m);
+-    return MockPthreadsBase::mock_->pthread_cond_wait(c,m);
++        return LIBC_SYMBOLS.zk_pthread_cond_wait(c,m);
++    return MockPthreadsBase::mock_->zk_pthread_cond_wait(c,m);
+ }
+-int pthread_create (pthread_t *t, const pthread_attr_t *a,
++int zk_pthread_create (pthread_t *t, const pthread_attr_t *a,
+             void *(*f)(void *), void *d){
+     if(!MockPthreadsBase::mock_)
+-        return LIBC_SYMBOLS.pthread_create(t,a,f,d);
+-    return MockPthreadsBase::mock_->pthread_create(t,a,f,d);
++        return LIBC_SYMBOLS.zk_pthread_create(t,a,f,d);
++    return MockPthreadsBase::mock_->zk_pthread_create(t,a,f,d);
+ }
+-int pthread_detach(pthread_t t){
++int zk_pthread_detach(pthread_t t){
+     if(!MockPthreadsBase::mock_)
+-        return LIBC_SYMBOLS.pthread_detach(t);
+-    return MockPthreadsBase::mock_->pthread_detach(t);    
++        return LIBC_SYMBOLS.zk_pthread_detach(t);
++    return MockPthreadsBase::mock_->zk_pthread_detach(t);    
+ }
+-int pthread_join (pthread_t t, void **r){
++int zk_pthread_join (pthread_t t, void **r){
+     if(!MockPthreadsBase::mock_)
+-        return LIBC_SYMBOLS.pthread_join(t,r);
+-    return MockPthreadsBase::mock_->pthread_join(t,r);
++        return LIBC_SYMBOLS.zk_pthread_join(t,r);
++    return MockPthreadsBase::mock_->zk_pthread_join(t,r);
+ }
+-int pthread_mutex_destroy (pthread_mutex_t *m){
++int zk_pthread_mutex_destroy (pthread_mutex_t *m){
+     if(!MockPthreadsBase::mock_)
+-        return LIBC_SYMBOLS.pthread_mutex_destroy(m);
+-    return MockPthreadsBase::mock_->pthread_mutex_destroy(m);
++        return LIBC_SYMBOLS.zk_pthread_mutex_destroy(m);
++    return MockPthreadsBase::mock_->zk_pthread_mutex_destroy(m);
+ }
+-int pthread_mutex_init (pthread_mutex_t *m, const pthread_mutexattr_t *a){
++int zk_pthread_mutex_init (pthread_mutex_t *m, const pthread_mutexattr_t *a){
+     if(!MockPthreadsBase::mock_)
+-        return LIBC_SYMBOLS.pthread_mutex_init(m,a);
+-    return MockPthreadsBase::mock_->pthread_mutex_init(m,a);
++        return LIBC_SYMBOLS.zk_pthread_mutex_init(m,a);
++    return MockPthreadsBase::mock_->zk_pthread_mutex_init(m,a);
+ }
+ 
+-DECLARE_WRAPPER(int,pthread_mutex_lock,(pthread_mutex_t *m)){
++DECLARE_WRAPPER(int,zk_pthread_mutex_lock,(pthread_mutex_t *m)){
+     if(!MockPthreadsBase::mock_)
+-        return CALL_REAL(pthread_mutex_lock,(m));
+-    return MockPthreadsBase::mock_->pthread_mutex_lock(m);
++        return CALL_REAL(zk_pthread_mutex_lock,(m));
++    return MockPthreadsBase::mock_->zk_pthread_mutex_lock(m);
+ }
+ 
+ int pthread_mutex_trylock (pthread_mutex_t *m){
+@@ -93,10 +93,10 @@ int pthread_mutex_trylock (pthread_mutex_t *m){
+     return MockPthreadsBase::mock_->pthread_mutex_trylock(m);
+ }
+ 
+-DECLARE_WRAPPER(int,pthread_mutex_unlock,(pthread_mutex_t *m)){
++DECLARE_WRAPPER(int,zk_pthread_mutex_unlock,(pthread_mutex_t *m)){
+     if(!MockPthreadsBase::mock_)
+-        return CALL_REAL(pthread_mutex_unlock,(m));
+-    return MockPthreadsBase::mock_->pthread_mutex_unlock(m);
++        return CALL_REAL(zk_pthread_mutex_unlock,(m));
++    return MockPthreadsBase::mock_->zk_pthread_mutex_unlock(m);
+ }
+ #endif
+ 
+diff --git a/src/c/tests/PthreadMocks.h b/src/c/tests/PthreadMocks.h
+index 8db8815..c40502a 100644
+--- a/src/c/tests/PthreadMocks.h
++++ b/src/c/tests/PthreadMocks.h
+@@ -37,22 +37,22 @@ public:
+     MockPthreadsBase(){mock_=this;}
+     virtual ~MockPthreadsBase(){mock_=0;}
+     
+-    virtual int pthread_create(pthread_t * t, const pthread_attr_t *a,
++    virtual int zk_pthread_create(pthread_t * t, const pthread_attr_t *a,
+             void *(*f)(void *), void *d) =0;
+-    virtual int pthread_join(pthread_t t, void ** r) =0;
+-    virtual int pthread_detach(pthread_t t) =0;
+-    virtual int pthread_cond_broadcast(pthread_cond_t *c) =0;
+-    virtual int pthread_cond_destroy(pthread_cond_t *c) =0;
+-    virtual int pthread_cond_init(pthread_cond_t *c, const pthread_condattr_t *a) =0;
+-    virtual int pthread_cond_signal(pthread_cond_t *c) =0;
++    virtual int zk_pthread_join(pthread_t t, void ** r) =0;
++    virtual int zk_pthread_detach(pthread_t t) =0;
++    virtual int zk_pthread_cond_broadcast(pthread_cond_t *c) =0;
++    virtual int zk_pthread_cond_destroy(pthread_cond_t *c) =0;
++    virtual int zk_pthread_cond_init(pthread_cond_t *c, const pthread_condattr_t *a) =0;
++    virtual int zk_pthread_cond_signal(pthread_cond_t *c) =0;
+     virtual int pthread_cond_timedwait(pthread_cond_t *c,
+             pthread_mutex_t *m, const struct timespec *t) =0;
+-    virtual int pthread_cond_wait(pthread_cond_t *c, pthread_mutex_t *m) =0;
+-    virtual int pthread_mutex_destroy(pthread_mutex_t *m) =0;
+-    virtual int pthread_mutex_init(pthread_mutex_t *m, const pthread_mutexattr_t *a) =0;
+-    virtual int pthread_mutex_lock(pthread_mutex_t *m) =0;
++    virtual int zk_pthread_cond_wait(pthread_cond_t *c, pthread_mutex_t *m) =0;
++    virtual int zk_pthread_mutex_destroy(pthread_mutex_t *m) =0;
++    virtual int zk_pthread_mutex_init(pthread_mutex_t *m, const pthread_mutexattr_t *a) =0;
++    virtual int zk_pthread_mutex_lock(pthread_mutex_t *m) =0;
+     virtual int pthread_mutex_trylock(pthread_mutex_t *m) =0;
+-    virtual int pthread_mutex_unlock(pthread_mutex_t *m) =0;
++    virtual int zk_pthread_mutex_unlock(pthread_mutex_t *m) =0;
+     
+     static MockPthreadsBase* mock_;
+ };
+@@ -63,53 +63,53 @@ class MockPthreadsNull: public MockPthreadsBase
+ {
+ public:
+     MockPthreadsNull():
+-    pthread_createReturns(0),pthread_createCounter(0),
+-    pthread_joinReturns(0),pthread_joinCounter(0),pthread_joinResultReturn(0),
+-    pthread_detachReturns(0),pthread_detachCounter(0),
+-    pthread_cond_broadcastReturns(0),pthread_cond_broadcastCounter(0),
+-    pthread_cond_destroyReturns(0),pthread_cond_destroyCounter(0),
+-    pthread_cond_initReturns(0),pthread_cond_initCounter(0),
+-    pthread_cond_signalReturns(0),pthread_cond_signalCounter(0),
++    zk_pthread_createReturns(0),zk_pthread_createCounter(0),
++    zk_pthread_joinReturns(0),zk_pthread_joinCounter(0),zk_pthread_joinResultReturn(0),
++    zk_pthread_detachReturns(0),zk_pthread_detachCounter(0),
++    zk_pthread_cond_broadcastReturns(0),zk_pthread_cond_broadcastCounter(0),
++    zk_pthread_cond_destroyReturns(0),zk_pthread_cond_destroyCounter(0),
++    zk_pthread_cond_initReturns(0),zk_pthread_cond_initCounter(0),
++    zk_pthread_cond_signalReturns(0),zk_pthread_cond_signalCounter(0),
+     pthread_cond_timedwaitReturns(0),pthread_cond_timedwaitCounter(0),
+-    pthread_cond_waitReturns(0),pthread_cond_waitCounter(0),
+-    pthread_mutex_destroyReturns(0),pthread_mutex_destroyCounter(0),
+-    pthread_mutex_initReturns(0),pthread_mutex_initCounter(0),
+-    pthread_mutex_lockReturns(0),pthread_mutex_lockCounter(0),
++    zk_pthread_cond_waitReturns(0),zk_pthread_cond_waitCounter(0),
++    zk_pthread_mutex_destroyReturns(0),zk_pthread_mutex_destroyCounter(0),
++    zk_pthread_mutex_initReturns(0),zk_pthread_mutex_initCounter(0),
++    zk_pthread_mutex_lockReturns(0),zk_pthread_mutex_lockCounter(0),
+     pthread_mutex_trylockReturns(0),pthread_mutex_trylockCounter(0),
+-    pthread_mutex_unlockReturns(0),pthread_mutex_unlockCounter(0)
++    zk_pthread_mutex_unlockReturns(0),zk_pthread_mutex_unlockCounter(0)
+     {
+         memset(threads,0,sizeof(threads));
+     }
+     
+     short threads[512];
+     
+-    int pthread_createReturns;
+-    int pthread_createCounter;
+-    virtual int pthread_create(pthread_t * t, const pthread_attr_t *a,
++    int zk_pthread_createReturns;
++    int zk_pthread_createCounter;
++    virtual int zk_pthread_create(pthread_t * t, const pthread_attr_t *a,
+             void *(*f)(void *), void *d){
+-        char* p=(char*)&threads[pthread_createCounter++];
++        char* p=(char*)&threads[zk_pthread_createCounter++];
+         p[0]='i'; // mark as created
+         *t=(pthread_t)p;
+-        return pthread_createReturns; 
++        return zk_pthread_createReturns; 
+     }
+-    int pthread_joinReturns;
+-    int pthread_joinCounter;
+-    void* pthread_joinResultReturn;
+-    virtual int pthread_join(pthread_t t, void ** r){
+-        pthread_joinCounter++;
++    int zk_pthread_joinReturns;
++    int zk_pthread_joinCounter;
++    void* zk_pthread_joinResultReturn;
++    virtual int zk_pthread_join(pthread_t t, void ** r){
++        zk_pthread_joinCounter++;
+         if(r!=0)
+-            *r=pthread_joinResultReturn;
++            *r=zk_pthread_joinResultReturn;
+         char* p=(char*)t;
+         p[0]='x';p[1]+=1;
+-        return pthread_joinReturns; 
++        return zk_pthread_joinReturns; 
+     }
+-    int pthread_detachReturns;
+-    int pthread_detachCounter;        
+-    virtual int pthread_detach(pthread_t t){
+-        pthread_detachCounter++;
++    int zk_pthread_detachReturns;
++    int zk_pthread_detachCounter;        
++    virtual int zk_pthread_detach(pthread_t t){
++        zk_pthread_detachCounter++;
+         char* p=(char*)t;
+         p[0]='x';p[1]+=1;        
+-        return pthread_detachReturns;
++        return zk_pthread_detachReturns;
+     }
+ 
+     template<class T>
+@@ -128,37 +128,37 @@ public:
+     static int getInvalidAccessCounter(const T& t){
+         return ((char*)t)[2];
+     }
+-    int pthread_cond_broadcastReturns;
+-    int pthread_cond_broadcastCounter;
+-    virtual int pthread_cond_broadcast(pthread_cond_t *c){
+-        pthread_cond_broadcastCounter++;
++    int zk_pthread_cond_broadcastReturns;
++    int zk_pthread_cond_broadcastCounter;
++    virtual int zk_pthread_cond_broadcast(pthread_cond_t *c){
++        zk_pthread_cond_broadcastCounter++;
+         if(isDestroyed(c))((char*)c)[2]++;
+-        return pthread_cond_broadcastReturns; 
++        return zk_pthread_cond_broadcastReturns; 
+     }
+-    int pthread_cond_destroyReturns;
+-    int pthread_cond_destroyCounter;
+-    virtual int pthread_cond_destroy(pthread_cond_t *c){
+-        pthread_cond_destroyCounter++;
++    int zk_pthread_cond_destroyReturns;
++    int zk_pthread_cond_destroyCounter;
++    virtual int zk_pthread_cond_destroy(pthread_cond_t *c){
++        zk_pthread_cond_destroyCounter++;
+         char* p=(char*)c;
+         p[0]='x';p[1]+=1;
+-        return pthread_cond_destroyReturns; 
++        return zk_pthread_cond_destroyReturns; 
+     }
+-    int pthread_cond_initReturns;
+-    int pthread_cond_initCounter;
+-    virtual int pthread_cond_init(pthread_cond_t *c, const pthread_condattr_t *a){
+-        pthread_cond_initCounter++;
++    int zk_pthread_cond_initReturns;
++    int zk_pthread_cond_initCounter;
++    virtual int zk_pthread_cond_init(pthread_cond_t *c, const pthread_condattr_t *a){
++        zk_pthread_cond_initCounter++;
+         char* p=(char*)c;
+         p[0]='i'; // mark as created
+         p[1]=0;   // destruction counter
+         p[2]=0;   // access after destruction counter
+-        return pthread_cond_initReturns; 
++        return zk_pthread_cond_initReturns; 
+     }
+-    int pthread_cond_signalReturns;
+-    int pthread_cond_signalCounter;
+-    virtual int pthread_cond_signal(pthread_cond_t *c){
+-        pthread_cond_signalCounter++;
++    int zk_pthread_cond_signalReturns;
++    int zk_pthread_cond_signalCounter;
++    virtual int zk_pthread_cond_signal(pthread_cond_t *c){
++        zk_pthread_cond_signalCounter++;
+         if(isDestroyed(c))((char*)c)[2]++;
+-        return pthread_cond_signalReturns; 
++        return zk_pthread_cond_signalReturns; 
+     }
+     int pthread_cond_timedwaitReturns;
+     int pthread_cond_timedwaitCounter;
+@@ -168,37 +168,37 @@ public:
+         if(isDestroyed(c))((char*)c)[2]++;
+         return pthread_cond_timedwaitReturns; 
+     }
+-    int pthread_cond_waitReturns;
+-    int pthread_cond_waitCounter;
+-    virtual int pthread_cond_wait(pthread_cond_t *c, pthread_mutex_t *m){
+-        pthread_cond_waitCounter++;
++    int zk_pthread_cond_waitReturns;
++    int zk_pthread_cond_waitCounter;
++    virtual int zk_pthread_cond_wait(pthread_cond_t *c, pthread_mutex_t *m){
++        zk_pthread_cond_waitCounter++;
+         if(isDestroyed(c))((char*)c)[2]++;
+-        return pthread_cond_waitReturns; 
++        return zk_pthread_cond_waitReturns; 
+     }
+-    int pthread_mutex_destroyReturns;
+-    int pthread_mutex_destroyCounter;
+-    virtual int pthread_mutex_destroy(pthread_mutex_t *m){
+-        pthread_mutex_destroyCounter++;
++    int zk_pthread_mutex_destroyReturns;
++    int zk_pthread_mutex_destroyCounter;
++    virtual int zk_pthread_mutex_destroy(pthread_mutex_t *m){
++        zk_pthread_mutex_destroyCounter++;
+         char* p=(char*)m;
+         p[0]='x';p[1]+=1;
+-        return pthread_mutex_destroyReturns; 
++        return zk_pthread_mutex_destroyReturns; 
+     }
+-    int pthread_mutex_initReturns;
+-    int pthread_mutex_initCounter;
+-    virtual int pthread_mutex_init(pthread_mutex_t *m, const pthread_mutexattr_t *a){
+-        pthread_mutex_initCounter++;
++    int zk_pthread_mutex_initReturns;
++    int zk_pthread_mutex_initCounter;
++    virtual int zk_pthread_mutex_init(pthread_mutex_t *m, const pthread_mutexattr_t *a){
++        zk_pthread_mutex_initCounter++;
+         char* p=(char*)m;
+         p[0]='i'; // mark as created
+         p[1]=0;   // destruction counter
+         p[2]=0;   // access after destruction counter
+-        return pthread_mutex_initReturns; 
++        return zk_pthread_mutex_initReturns; 
+     }
+-    int pthread_mutex_lockReturns;
+-    int pthread_mutex_lockCounter;
+-    virtual int pthread_mutex_lock(pthread_mutex_t *m){
+-        pthread_mutex_lockCounter++;
++    int zk_pthread_mutex_lockReturns;
++    int zk_pthread_mutex_lockCounter;
++    virtual int zk_pthread_mutex_lock(pthread_mutex_t *m){
++        zk_pthread_mutex_lockCounter++;
+         if(isDestroyed(m))((char*)m)[2]++;
+-        return pthread_mutex_lockReturns; 
++        return zk_pthread_mutex_lockReturns; 
+     }
+     int pthread_mutex_trylockReturns;
+     int pthread_mutex_trylockCounter;
+@@ -207,12 +207,12 @@ public:
+         if(isDestroyed(m))((char*)m)[2]++;
+         return pthread_mutex_trylockReturns; 
+     }
+-    int pthread_mutex_unlockReturns;
+-    int pthread_mutex_unlockCounter;
+-    virtual int pthread_mutex_unlock(pthread_mutex_t *m){
+-        pthread_mutex_unlockCounter++;
++    int zk_pthread_mutex_unlockReturns;
++    int zk_pthread_mutex_unlockCounter;
++    virtual int zk_pthread_mutex_unlock(pthread_mutex_t *m){
++        zk_pthread_mutex_unlockCounter++;
+         if(isDestroyed(m))((char*)m)[2]++;
+-        return pthread_mutex_unlockReturns; 
++        return zk_pthread_mutex_unlockReturns; 
+     }
+ };
+ 
+@@ -223,9 +223,9 @@ class MockPthreadZKNull: public MockPthreadsNull
+     typedef std::map<pthread_t,zhandle_t*> Map;
+     Map map_;
+ public:
+-    virtual int pthread_create(pthread_t * t, const pthread_attr_t *a,
++    virtual int zk_pthread_create(pthread_t * t, const pthread_attr_t *a,
+             void *(*f)(void *), void *d){
+-        int ret=MockPthreadsNull::pthread_create(t,a,f,d);
++        int ret=MockPthreadsNull::zk_pthread_create(t,a,f,d);
+         zhandle_t* zh=(zhandle_t*)d;
+         adaptor_threads* ad=(adaptor_threads*)zh->adaptor_priv;
+         api_prolog(zh);
+@@ -233,11 +233,11 @@ public:
+         putValue(map_,*t,zh);
+         return ret;
+     }
+-    virtual int pthread_join(pthread_t t, void ** r){
++    virtual int zk_pthread_join(pthread_t t, void ** r){
+         zhandle_t* zh=0;
+         if(getValue(map_,t,zh))
+             api_epilog(zh,0);
+-        return MockPthreadsNull::pthread_join(t,r);
++        return MockPthreadsNull::zk_pthread_join(t,r);
+     }
+ };
+ 
+@@ -368,80 +368,80 @@ public:
+     };
+     static void* threadFuncWrapper(void* v){
+         ThreadContext* ctx=(ThreadContext*)v;
+-        pthread_t t=pthread_self();
++        pthread_t t=zk_pthread_self();
+         markCreated(t);
+         void* res=ctx->func_(ctx->param_);
+-        setTerminated(pthread_self());
++        setTerminated(zk_pthread_self());
+         delete ctx;
+         return res;
+     }
+-    virtual int pthread_create(pthread_t * t, const pthread_attr_t *a,
++    virtual int zk_pthread_create(pthread_t * t, const pthread_attr_t *a,
+             void *(*f)(void *), void *d)
+     {
+-        int ret=LIBC_SYMBOLS.pthread_create(t,a,threadFuncWrapper,
++        int ret=LIBC_SYMBOLS.zk_pthread_create(t,a,threadFuncWrapper,
+                 new ThreadContext(f,d));
+         if(verbose)
+             TEST_TRACE(("thread created %p",*t));
+         return ret;
+     }
+-    virtual int pthread_join(pthread_t t, void ** r){
++    virtual int zk_pthread_join(pthread_t t, void ** r){
+         if(verbose) TEST_TRACE(("thread joined %p",t));
+-        int ret=LIBC_SYMBOLS.pthread_join(t,r);
++        int ret=LIBC_SYMBOLS.zk_pthread_join(t,r);
+         if(ret==0)
+             markDestroyed(t);
+         return ret;
+     }
+-    virtual int pthread_detach(pthread_t t){
++    virtual int zk_pthread_detach(pthread_t t){
+         if(verbose) TEST_TRACE(("thread detached %p",t));
+-        int ret=LIBC_SYMBOLS.pthread_detach(t);
++        int ret=LIBC_SYMBOLS.zk_pthread_detach(t);
+         if(ret==0)
+             markDestroyed(t);
+         return ret;
+     }
+-    virtual int pthread_cond_broadcast(pthread_cond_t *c){
++    virtual int zk_pthread_cond_broadcast(pthread_cond_t *c){
+         checkAccessed(c);
+-        return LIBC_SYMBOLS.pthread_cond_broadcast(c);
++        return LIBC_SYMBOLS.zk_pthread_cond_broadcast(c);
+     }
+-    virtual int pthread_cond_destroy(pthread_cond_t *c){
++    virtual int zk_pthread_cond_destroy(pthread_cond_t *c){
+         markDestroyed(c);
+-        return LIBC_SYMBOLS.pthread_cond_destroy(c);
++        return LIBC_SYMBOLS.zk_pthread_cond_destroy(c);
+     }
+-    virtual int pthread_cond_init(pthread_cond_t *c, const pthread_condattr_t *a){
++    virtual int zk_pthread_cond_init(pthread_cond_t *c, const pthread_condattr_t *a){
+         markCreated(c);
+-        return LIBC_SYMBOLS.pthread_cond_init(c,a);
++        return LIBC_SYMBOLS.zk_pthread_cond_init(c,a);
+     }
+-    virtual int pthread_cond_signal(pthread_cond_t *c){
++    virtual int zk_pthread_cond_signal(pthread_cond_t *c){
+         checkAccessed(c);
+-        return LIBC_SYMBOLS.pthread_cond_signal(c);
++        return LIBC_SYMBOLS.zk_pthread_cond_signal(c);
+     }
+     virtual int pthread_cond_timedwait(pthread_cond_t *c,
+             pthread_mutex_t *m, const struct timespec *t){
+         checkAccessed(c);
+         return LIBC_SYMBOLS.pthread_cond_timedwait(c,m,t);
+     }
+-    virtual int pthread_cond_wait(pthread_cond_t *c, pthread_mutex_t *m){
++    virtual int zk_pthread_cond_wait(pthread_cond_t *c, pthread_mutex_t *m){
+         checkAccessed(c);
+-        return LIBC_SYMBOLS.pthread_cond_wait(c,m);
++        return LIBC_SYMBOLS.zk_pthread_cond_wait(c,m);
+     }
+-    virtual int pthread_mutex_destroy(pthread_mutex_t *m){
++    virtual int zk_pthread_mutex_destroy(pthread_mutex_t *m){
+         markDestroyed(m);
+-        return LIBC_SYMBOLS.pthread_mutex_destroy(m);
++        return LIBC_SYMBOLS.zk_pthread_mutex_destroy(m);
+     }
+-    virtual int pthread_mutex_init(pthread_mutex_t *m, const pthread_mutexattr_t *a){
++    virtual int zk_pthread_mutex_init(pthread_mutex_t *m, const pthread_mutexattr_t *a){
+         markCreated(m);
+-        return LIBC_SYMBOLS.pthread_mutex_init(m,a);
++        return LIBC_SYMBOLS.zk_pthread_mutex_init(m,a);
+     }
+-    virtual int pthread_mutex_lock(pthread_mutex_t *m){
++    virtual int zk_pthread_mutex_lock(pthread_mutex_t *m){
+         checkAccessed(m);
+-        return LIBC_SYMBOLS.pthread_mutex_lock(m);
++        return LIBC_SYMBOLS.zk_pthread_mutex_lock(m);
+     }
+     virtual int pthread_mutex_trylock(pthread_mutex_t *m){
+         checkAccessed(m);
+         return LIBC_SYMBOLS.pthread_mutex_trylock(m);
+     }
+-    virtual int pthread_mutex_unlock(pthread_mutex_t *m){
++    virtual int zk_pthread_mutex_unlock(pthread_mutex_t *m){
+         checkAccessed(m);
+-        return LIBC_SYMBOLS.pthread_mutex_unlock(m);
++        return LIBC_SYMBOLS.zk_pthread_mutex_unlock(m);
+     }    
+ };
+ 
+diff --git a/src/c/tests/TestZookeeperInit.cc b/src/c/tests/TestZookeeperInit.cc
+index eadf41d..9962516 100644
+--- a/src/c/tests/TestZookeeperInit.cc
++++ b/src/c/tests/TestZookeeperInit.cc
+@@ -122,7 +122,7 @@ public:
+         // thread specific checks
+         adaptor_threads* adaptor=(adaptor_threads*)zh->adaptor_priv;
+         CPPUNIT_ASSERT(adaptor!=0);
+-        CPPUNIT_ASSERT(pthreadMock->pthread_createCounter==2);
++        CPPUNIT_ASSERT(pthreadMock->zk_pthread_createCounter==2);
+         CPPUNIT_ASSERT(MockPthreadsNull::isInitialized(adaptor->io));
+         CPPUNIT_ASSERT(MockPthreadsNull::isInitialized(adaptor->completion));
+         CPPUNIT_ASSERT(MockPthreadsNull::isInitialized(&zh->to_process.lock));
+diff --git a/src/c/tests/ThreadingUtil.cc b/src/c/tests/ThreadingUtil.cc
+index 3b5170a..9aacded 100644
+--- a/src/c/tests/ThreadingUtil.cc
++++ b/src/c/tests/ThreadingUtil.cc
+@@ -26,10 +26,10 @@
+ // Mutex wrapper
+ struct Mutex::Impl{
+     Impl(){
+-        LIBC_SYMBOLS.pthread_mutex_init(&mut_, 0);        
++        LIBC_SYMBOLS.zk_pthread_mutex_init(&mut_, 0);        
+     }
+     ~Impl(){
+-        LIBC_SYMBOLS.pthread_mutex_destroy(&mut_);        
++        LIBC_SYMBOLS.zk_pthread_mutex_destroy(&mut_);        
+     }
+     pthread_mutex_t mut_;
+ };
+@@ -37,10 +37,10 @@ struct Mutex::Impl{
+ Mutex::Mutex():impl_(new Impl) {}
+ Mutex::~Mutex() { delete impl_;}
+ void Mutex::acquire() {
+-    LIBC_SYMBOLS.pthread_mutex_lock(&impl_->mut_);
++    LIBC_SYMBOLS.zk_pthread_mutex_lock(&impl_->mut_);
+ }
+ void Mutex::release() {
+-    LIBC_SYMBOLS.pthread_mutex_unlock(&impl_->mut_);
++    LIBC_SYMBOLS.zk_pthread_mutex_unlock(&impl_->mut_);
+ }
+ 
+ // ****************************************************************************
+diff --git a/src/c/tests/ThreadingUtil.h b/src/c/tests/ThreadingUtil.h
+index 9165412..c0ec131 100644
+--- a/src/c/tests/ThreadingUtil.h
++++ b/src/c/tests/ThreadingUtil.h
+@@ -115,46 +115,46 @@ public:
+ class CountDownLatch: public Latch {
+ public:
+     CountDownLatch(int count):count_(count) {
+-        pthread_cond_init(&cond_,0);
+-        pthread_mutex_init(&mut_,0);
++        zk_pthread_cond_init(&cond_,0);
++        zk_pthread_mutex_init(&mut_,0);
+     }
+     virtual ~CountDownLatch() {
+-        pthread_mutex_lock(&mut_);
++        zk_pthread_mutex_lock(&mut_);
+         if(count_!=0) {
+             count_=0;
+-            pthread_cond_broadcast(&cond_);
++            zk_pthread_cond_broadcast(&cond_);
+         }
+-        pthread_mutex_unlock(&mut_);
++        zk_pthread_mutex_unlock(&mut_);
+ 
+-        pthread_cond_destroy(&cond_);
+-        pthread_mutex_destroy(&mut_);
++        zk_pthread_cond_destroy(&cond_);
++        zk_pthread_mutex_destroy(&mut_);
+     }
+ 
+     virtual void await() const {
+-        pthread_mutex_lock(&mut_);
++        zk_pthread_mutex_lock(&mut_);
+         awaitImpl();
+-        pthread_mutex_unlock(&mut_);
++        zk_pthread_mutex_unlock(&mut_);
+     }
+     virtual void signalAndWait() {
+-        pthread_mutex_lock(&mut_);
++        zk_pthread_mutex_lock(&mut_);
+         signalImpl();
+         awaitImpl();
+-        pthread_mutex_unlock(&mut_);
++        zk_pthread_mutex_unlock(&mut_);
+     }
+     virtual void signal() {
+-        pthread_mutex_lock(&mut_);
++        zk_pthread_mutex_lock(&mut_);
+         signalImpl();
+-        pthread_mutex_unlock(&mut_);
++        zk_pthread_mutex_unlock(&mut_);
+     }
+ private:
+     void awaitImpl() const{
+         while(count_!=0)
+-        pthread_cond_wait(&cond_,&mut_);
++        zk_pthread_cond_wait(&cond_,&mut_);
+     }
+     void signalImpl() {
+         if(count_>0) {
+             count_--;
+-            pthread_cond_broadcast(&cond_);
++            zk_pthread_cond_broadcast(&cond_);
+         }
+     }
+     int count_;
+@@ -177,7 +177,7 @@ public:
+     virtual void start(Latch* startLatch=0,Latch* endLatch=0) {
+         startLatch_=startLatch;endLatch_=endLatch;
+         hasRun_=true;
+-        pthread_create(&thread_, 0, thread, this);
++        zk_pthread_create(&thread_, 0, thread, this);
+     }
+     virtual JobId getJobId() const {
+         return (JobId)thread_;
+@@ -185,10 +185,10 @@ public:
+     virtual void join() {
+         if(!hasRun_)
+         return;
+-        if(!pthread_equal(thread_,pthread_self()))
+-        pthread_join(thread_,0);
++        if(!zk_pthread_equal(thread_,zk_pthread_self()))
++        zk_pthread_join(thread_,0);
+         else
+-        pthread_detach(thread_);
++        zk_pthread_detach(thread_);
+     }
+ private:
+     void awaitStart() {
+diff --git a/src/c/tests/wrappers-mt.opt b/src/c/tests/wrappers-mt.opt
+index 01046fb..99b8a7d 100644
+--- a/src/c/tests/wrappers-mt.opt
++++ b/src/c/tests/wrappers-mt.opt
+@@ -1,3 +1,3 @@
+--Wl,--wrap -Wl,pthread_mutex_lock
++-Wl,--wrap -Wl,zk_pthread_mutex_lock
+ -Wl,--wrap -Wl,pthread_mutex_trylock
+--Wl,--wrap -Wl,pthread_mutex_unlock
++-Wl,--wrap -Wl,zk_pthread_mutex_unlock
+diff --git a/src/c/zookeeper.sln b/src/c/zookeeper.sln
+index 42f41c9..04523c1 100644
+--- a/src/c/zookeeper.sln
++++ b/src/c/zookeeper.sln
+@@ -1,23 +1,19 @@
+-Microsoft Visual Studio Solution File, Format Version 10.00
+-# Visual Studio 2008
+-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zookeeper", "zookeeper.vcproj", "{5754FB2B-5EA5-4988-851D-908CA533A626}"
+-EndProject
+-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Cli", "Cli.vcproj", "{050228F9-070F-4806-A2B5-E6B95D8EC4AF}"
++Microsoft Visual Studio Solution File, Format Version 12.00
++# Visual Studio 2013
++VisualStudioVersion = 12.0.30723.0
++MinimumVisualStudioVersion = 10.0.40219.1
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zookeeper", "zookeeper.vcxproj", "{5754FB2B-5EA5-4988-851D-908CA533A626}"
+ EndProject
+ Global
+ 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+-		Debug|Win32 = Debug|Win32
+-		Release|Win32 = Release|Win32
++		Debug|x64 = Debug|x64
++		Release|x64 = Release|x64
+ 	EndGlobalSection
+ 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+-		{5754FB2B-5EA5-4988-851D-908CA533A626}.Debug|Win32.ActiveCfg = Debug|Win32
+-		{5754FB2B-5EA5-4988-851D-908CA533A626}.Debug|Win32.Build.0 = Debug|Win32
+-		{5754FB2B-5EA5-4988-851D-908CA533A626}.Release|Win32.ActiveCfg = Release|Win32
+-		{5754FB2B-5EA5-4988-851D-908CA533A626}.Release|Win32.Build.0 = Release|Win32
+-		{050228F9-070F-4806-A2B5-E6B95D8EC4AF}.Debug|Win32.ActiveCfg = Debug|Win32
+-		{050228F9-070F-4806-A2B5-E6B95D8EC4AF}.Debug|Win32.Build.0 = Debug|Win32
+-		{050228F9-070F-4806-A2B5-E6B95D8EC4AF}.Release|Win32.ActiveCfg = Release|Win32
+-		{050228F9-070F-4806-A2B5-E6B95D8EC4AF}.Release|Win32.Build.0 = Release|Win32
++		{5754FB2B-5EA5-4988-851D-908CA533A626}.Debug|x64.ActiveCfg = Debug|x64
++		{5754FB2B-5EA5-4988-851D-908CA533A626}.Debug|x64.Build.0 = Debug|x64
++		{5754FB2B-5EA5-4988-851D-908CA533A626}.Release|x64.ActiveCfg = Release|x64
++		{5754FB2B-5EA5-4988-851D-908CA533A626}.Release|x64.Build.0 = Release|x64
+ 	EndGlobalSection
+ 	GlobalSection(SolutionProperties) = preSolution
+ 		HideSolutionNode = FALSE
+diff --git a/src/c/zookeeper.vcxproj b/src/c/zookeeper.vcxproj
+new file mode 100644
+index 0000000..56855d6
+--- /dev/null
++++ b/src/c/zookeeper.vcxproj
+@@ -0,0 +1,201 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectGuid>{5754FB2B-5EA5-4988-851D-908CA533A626}</ProjectGuid>
++    <RootNamespace>zookeeper</RootNamespace>
++    <Keyword>Win32Proj</Keyword>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <PlatformToolset>v120</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <PlatformToolset>v120</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <PlatformToolset>v120</PlatformToolset>
++    <CharacterSet>MultiByte</CharacterSet>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <PlatformToolset>v120</PlatformToolset>
++    <CharacterSet>MultiByte</CharacterSet>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <OutDir>Debug\</OutDir>
++    <IntDir>Debug\</IntDir>
++    <LinkIncremental>false</LinkIncremental>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <LinkIncremental>false</LinkIncremental>
++    <TargetName>libzookeeperd-mt</TargetName>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <OutDir>Release\</OutDir>
++    <IntDir>Release\</IntDir>
++    <LinkIncremental>true</LinkIncremental>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <LinkIncremental>true</LinkIncremental>
++    <TargetName>libzookeeper-mt</TargetName>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>$(ZOOKEEPER_HOME)\src\c\include;$(ZOOKEEPER_HOME)\src\c\generated;$(ZOOKEEPER_HOME)\src\c;$(ZOOKEEPER_HOME)\src\c\src\hashtable;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;ZOOKEEPER_EXPORTS;DLL_EXPORT;THREADED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MinimalRebuild>true</MinimalRebuild>
++      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader />
++      <WarningLevel>Level3</WarningLevel>
++      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
++      <CompileAs>CompileAsC</CompileAs>
++    </ClCompile>
++    <Link>
++      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++      <RandomizedBaseAddress>false</RandomizedBaseAddress>
++      <DataExecutionPrevention />
++      <ImportLibrary>.\Debug/zookeeper_d.lib</ImportLibrary>
++      <TargetMachine>MachineX86</TargetMachine>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>src/;src/hashtable;include/;generated/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;ZOOKEEPER_EXPORTS;THREADED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <DebugInformationFormat>OldStyle</DebugInformationFormat>
++      <CompileAs>CompileAsC</CompileAs>
++    </ClCompile>
++    <Link>
++      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++      <RandomizedBaseAddress>false</RandomizedBaseAddress>
++      <DataExecutionPrevention>
++      </DataExecutionPrevention>
++      <ImportLibrary>.\Debug/zookeeper_d.lib</ImportLibrary>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <ClCompile>
++      <AdditionalIncludeDirectories>$(ZOOKEEPER_HOME)\src\c\generated;$(ZOOKEEPER_HOME)\src\c;$(ZOOKEEPER_HOME)\src\c\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;ZOOKEEPER_EXPORTS;DLL_EXPORT;THREADED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <PrecompiledHeader />
++      <WarningLevel>Level3</WarningLevel>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++      <CompileAs>CompileAsC</CompileAs>
++    </ClCompile>
++    <Link>
++      <AdditionalDependencies>WS2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++      <OptimizeReferences>true</OptimizeReferences>
++      <EnableCOMDATFolding>true</EnableCOMDATFolding>
++      <TargetMachine>MachineX86</TargetMachine>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <ClCompile>
++      <AdditionalIncludeDirectories>src;src/hashtable;include;generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;ZOOKEEPER_EXPORTS;THREADED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <DebugInformationFormat>None</DebugInformationFormat>
++      <CompileAs>CompileAsC</CompileAs>
++    </ClCompile>
++    <Link>
++      <AdditionalDependencies>WS2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++      <OptimizeReferences>true</OptimizeReferences>
++      <EnableCOMDATFolding>true</EnableCOMDATFolding>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <ClInclude Include="generated\zookeeper.jute.h" />
++    <ClInclude Include="include\proto.h" />
++    <ClInclude Include="include\recordio.h" />
++    <ClCompile Include="include\winconfig.h" />
++    <ClInclude Include="include\winstdint.h" />
++    <ClInclude Include="include\zookeeper.h" />
++    <ClInclude Include="include\zookeeper_log.h" />
++    <ClInclude Include="include\zookeeper_version.h" />
++    <ClInclude Include="src\hashtable\hashtable.h" />
++    <ClInclude Include="src\hashtable\hashtable_itr.h" />
++    <ClInclude Include="src\hashtable\hashtable_private.h" />
++    <ClInclude Include="src\winport.h" />
++    <ClInclude Include="src\zk_adaptor.h" />
++    <ClInclude Include="src\zk_hashtable.h" />
++  </ItemGroup>
++  <ItemGroup>
++    <ClCompile Include="generated\zookeeper.jute.c" />
++    <ClCompile Include="src\hashtable\hashtable.c" />
++    <ClCompile Include="src\hashtable\hashtable_itr.c" />
++    <ClCompile Include="src\mt_adaptor.c" />
++    <ClCompile Include="src\recordio.c" />
++    <ClCompile Include="src\winport.c" />
++    <ClCompile Include="src\zk_hashtable.c" />
++    <ClCompile Include="src\zk_log.c" />
++    <ClCompile Include="src\zookeeper.c" />
++  </ItemGroup>
++  <ItemGroup>
++    <None Include="ClassDiagram1.cd" />
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++  </ImportGroup>
++</Project>
+\ No newline at end of file
+diff --git a/src/c/zookeeper.vcxproj.filters b/src/c/zookeeper.vcxproj.filters
+new file mode 100644
+index 0000000..6eab71c
+--- /dev/null
++++ b/src/c/zookeeper.vcxproj.filters
+@@ -0,0 +1,93 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup>
++    <Filter Include="Header Files">
++      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
++      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
++    </Filter>
++    <Filter Include="Resource Files">
++      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
++      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx</Extensions>
++    </Filter>
++    <Filter Include="Source Files">
++      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
++      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
++    </Filter>
++  </ItemGroup>
++  <ItemGroup>
++    <ClInclude Include="src\hashtable\hashtable.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="src\hashtable\hashtable_itr.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="src\hashtable\hashtable_private.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="include\proto.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="include\recordio.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="src\winport.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="include\winstdint.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="src\zk_adaptor.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="src\zk_hashtable.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="include\zookeeper.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="generated\zookeeper.jute.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="include\zookeeper_log.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="include\zookeeper_version.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++  </ItemGroup>
++  <ItemGroup>
++    <ClCompile Include="src\hashtable\hashtable.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="src\hashtable\hashtable_itr.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="src\mt_adaptor.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="src\recordio.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="src\winport.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="src\zk_hashtable.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="src\zk_log.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="src\zookeeper.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="generated\zookeeper.jute.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="include\winconfig.h">
++      <Filter>Header Files</Filter>
++    </ClCompile>
++  </ItemGroup>
++  <ItemGroup>
++    <None Include="ClassDiagram1.cd" />
++  </ItemGroup>
++</Project>
+\ No newline at end of file

@@ -32,6 +32,26 @@ set(CPP_UNIT
   DLURL http://sourceforge.net/projects/cppunit/files/cppunit/1.12.1/cppunit-1.12.1.tar.gz
   DLMD5 bd30e9cf5523cdfc019b94f5e1d7fd19
 )
+
+#Get the path to the git usr directory
+get_filename_component(git_path ${GIT_EXECUTABLE} DIRECTORY)
+set(git_path ${git_path}/../usr/bin)
+get_filename_component(git_path ${git_path} ABSOLUTE)
+
+find_program(grep grep NAMES grep.exe HINTS ${git_path})
+if(${grep} MATCHES grep-NOTFOUND)
+  message(WARNING "grep could not be found for psql")
+endif()
+
+find_program(sed sed NAMES sed.exe HINTS ${git_path})
+if(${sed} MATCHES sed-NOTFOUND)
+  message(WARNING "sed could not be found for psql")
+endif()
+
+find_program(xargs xargs NAMES xargs.exe HINTS ${git_path})
+if(${xargs} MATCHES xargs-NOTFOUND)
+  message(WARNING "xargs could not be found for psql")
+endif()
 ########################################
 # mkpatch_zookeeper
 function(mkpatch_zookeeper)
@@ -53,56 +73,18 @@ function(patch_zookeeper)
     xpRepo(${PRO_ZOOKEEPER})
   endif()
 
-  ExternalProject_Add_Step(zookeeper_repo zookeeper_patch
-    WORKING_DIRECTORY ${ZK_REPO_PATH}
-    COMMAND ${GIT_EXECUTABLE} apply ${PATCH_DIR}/zookeeper-mt_adapter-x64-fix.patch
-    COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper-winconfig.h ${ZK_REPO_PATH}/src/c/include/zookeeper-winconfig.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper.sln ${ZK_REPO_PATH}/src/c/zookeeper.sln
-    COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper.vcxproj ${ZK_REPO_PATH}/src/c/zookeeper.vcxproj
-    COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper.vcxproj.filters ${ZK_REPO_PATH}/src/c/zookeeper.vcxproj.filters
-    DEPENDEES patch
-  )
+  if(WIN32)
+    ExternalProject_Add_Step(zookeeper_repo zookeeper_patch
+      WORKING_DIRECTORY ${ZK_REPO_PATH}/src/c
+      COMMAND ${GIT_EXECUTABLE} apply ${PATCH_DIR}/zookeeper-windows.patch
+      DEPENDEES patch
+    )
+  endif()
   add_custom_target(zookeeper_ant ALL
     WORKING_DIRECTORY ${ZK_REPO_PATH}
     COMMAND ant compile_jute
     DEPENDS zookeeper_repo
   )
-
-  # need to rename the pthread ports to avoid symbol collisions
-  set(rename_strings
-      pthread_mutex_lock
-      pthread_mutex_unlock
-      pthread_mutex_init
-      pthread_mutex_destroy
-      pthread_create
-      pthread_equal
-      pthread_self
-      pthread_join
-      pthread_detach
-      pthread_mutexattr_init
-      pthread_mutexattr_settype
-      pthread_mutexattr_destroy
-      pthread_cond_init
-      pthread_cond_destroy
-      pthread_cond_signal
-      pthread_cond_broadcast
-      pthread_cond_wait
-      pthread_key_create
-      pthread_key_delete
-      pthread_getspecific
-      pthread_setspecific
-    )
-  if(WIN32)
-    set(gnu32 "C:/Program Files (x86)/GnuWin32/bin/")
-  endif()
-  foreach(rename_string ${rename_strings})
-    message("rename: ${rename_string}")
-    add_custom_command(TARGET zookeeper_ant
-      COMMENT "Renaming pthread functions to avoid symbol collisions"
-      WORKING_DIRECTORY ${ZK_REPO_PATH}/src/c
-      COMMAND ${gnu32}find -type f ! -name 'sed*' -print0 | ${gnu32}xargs -0 ${gnu32}sed -i s/${rename_string}/zk_${rename_string}/g
-    )
-  endforeach()
 endfunction(patch_zookeeper)
 ########################################
 # download cpp unit
