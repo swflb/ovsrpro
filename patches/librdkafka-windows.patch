@@ -1,0 +1,801 @@
+diff --git a/src-cpp/rdkafkacpp.h b/src-cpp/rdkafkacpp.h
+index 3d44681..f8a0410 100644
+--- a/src-cpp/rdkafkacpp.h
++++ b/src-cpp/rdkafkacpp.h
+@@ -54,7 +54,9 @@
+ 
+ #ifdef _MSC_VER
+ #undef RD_EXPORT
+-#ifdef LIBRDKAFKACPP_EXPORTS
++#ifdef LIBRDKAFKA_STATIC
++#define RD_EXPORT
++#elif LIBRDKAFKACPP_EXPORTS
+ #define RD_EXPORT __declspec(dllexport)
+ #else
+ #define RD_EXPORT __declspec(dllimport)
+diff --git a/src/rdkafka.h b/src/rdkafka.h
+index 2694d18..2e81ee1 100644
+--- a/src/rdkafka.h
++++ b/src/rdkafka.h
+@@ -60,7 +60,9 @@ typedef SSIZE_T ssize_t;
+ #define RD_UNUSED
+ #define RD_DEPRECATED
+ #undef RD_EXPORT
+-#ifdef LIBRDKAFKA_EXPORTS
++#ifdef LIBRDKAFKA_STATIC
++#define RD_EXPORT
++#elif LIBRDKAFKA_EXPORTS
+ #define RD_EXPORT __declspec(dllexport)
+ #else
+ #define RD_EXPORT __declspec(dllimport)
+diff --git a/win32/librdkafka.sln b/win32/librdkafka.sln
+index 9389dbc..154166b 100644
+--- a/win32/librdkafka.sln
++++ b/win32/librdkafka.sln
+@@ -1,7 +1,7 @@
+ ﻿
+ Microsoft Visual Studio Solution File, Format Version 12.00
+ # Visual Studio 2013
+-VisualStudioVersion = 12.0.31101.0
++VisualStudioVersion = 12.0.30723.0
+ MinimumVisualStudioVersion = 10.0.40219.1
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "librdkafka", "librdkafka.vcxproj", "{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}"
+ EndProject
+@@ -23,123 +23,44 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rdkafka_example", "rdkafka_
+ EndProject
+ Global
+ 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+-		CD_ROM|Any CPU = CD_ROM|Any CPU
+-		CD_ROM|Mixed Platforms = CD_ROM|Mixed Platforms
+-		CD_ROM|Win32 = CD_ROM|Win32
+-		Debug|Any CPU = Debug|Any CPU
+-		Debug|Mixed Platforms = Debug|Mixed Platforms
+ 		Debug|Win32 = Debug|Win32
+-		DVD-5|Any CPU = DVD-5|Any CPU
+-		DVD-5|Mixed Platforms = DVD-5|Mixed Platforms
+-		DVD-5|Win32 = DVD-5|Win32
+-		Release|Any CPU = Release|Any CPU
+-		Release|Mixed Platforms = Release|Mixed Platforms
++		Debug|x64 = Debug|x64
+ 		Release|Win32 = Release|Win32
+-		SingleImage|Any CPU = SingleImage|Any CPU
+-		SingleImage|Mixed Platforms = SingleImage|Mixed Platforms
+-		SingleImage|Win32 = SingleImage|Win32
++		Release|x64 = Release|x64
+ 	EndGlobalSection
+ 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.CD_ROM|Any CPU.ActiveCfg = Release|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.CD_ROM|Mixed Platforms.ActiveCfg = Release|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.CD_ROM|Mixed Platforms.Build.0 = Release|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.CD_ROM|Win32.ActiveCfg = Release|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.CD_ROM|Win32.Build.0 = Release|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.Debug|Any CPU.ActiveCfg = Debug|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+ 		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.Debug|Win32.ActiveCfg = Debug|Win32
+ 		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.Debug|Win32.Build.0 = Debug|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.DVD-5|Any CPU.ActiveCfg = Debug|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.DVD-5|Mixed Platforms.ActiveCfg = Debug|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.DVD-5|Mixed Platforms.Build.0 = Debug|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.DVD-5|Win32.ActiveCfg = Debug|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.DVD-5|Win32.Build.0 = Debug|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.Release|Any CPU.ActiveCfg = Release|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.Release|Mixed Platforms.Build.0 = Release|Win32
++		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.Debug|x64.ActiveCfg = Debug|x64
++		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.Debug|x64.Build.0 = Debug|x64
+ 		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.Release|Win32.ActiveCfg = Release|Win32
+ 		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.Release|Win32.Build.0 = Release|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.SingleImage|Any CPU.ActiveCfg = Release|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.SingleImage|Mixed Platforms.ActiveCfg = Release|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.SingleImage|Mixed Platforms.Build.0 = Release|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.SingleImage|Win32.ActiveCfg = Release|Win32
+-		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.SingleImage|Win32.Build.0 = Release|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.CD_ROM|Any CPU.ActiveCfg = Release|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.CD_ROM|Mixed Platforms.ActiveCfg = Release|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.CD_ROM|Mixed Platforms.Build.0 = Release|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.CD_ROM|Win32.ActiveCfg = Release|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.CD_ROM|Win32.Build.0 = Release|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.Debug|Any CPU.ActiveCfg = Debug|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.Debug|Mixed Platforms.Build.0 = Debug|Win32
++		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.Release|x64.ActiveCfg = Release|x64
++		{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}.Release|x64.Build.0 = Release|x64
+ 		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.Debug|Win32.ActiveCfg = Debug|Win32
+ 		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.Debug|Win32.Build.0 = Debug|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.DVD-5|Any CPU.ActiveCfg = Debug|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.DVD-5|Mixed Platforms.ActiveCfg = Debug|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.DVD-5|Mixed Platforms.Build.0 = Debug|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.DVD-5|Win32.ActiveCfg = Debug|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.DVD-5|Win32.Build.0 = Debug|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.Release|Any CPU.ActiveCfg = Release|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.Release|Mixed Platforms.Build.0 = Release|Win32
++		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.Debug|x64.ActiveCfg = Debug|x64
++		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.Debug|x64.Build.0 = Debug|x64
+ 		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.Release|Win32.ActiveCfg = Release|Win32
+ 		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.Release|Win32.Build.0 = Release|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.SingleImage|Any CPU.ActiveCfg = Release|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.SingleImage|Mixed Platforms.ActiveCfg = Release|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.SingleImage|Mixed Platforms.Build.0 = Release|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.SingleImage|Win32.ActiveCfg = Release|Win32
+-		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.SingleImage|Win32.Build.0 = Release|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.CD_ROM|Any CPU.ActiveCfg = Release|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.CD_ROM|Mixed Platforms.ActiveCfg = Release|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.CD_ROM|Mixed Platforms.Build.0 = Release|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.CD_ROM|Win32.ActiveCfg = Release|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.CD_ROM|Win32.Build.0 = Release|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.Debug|Any CPU.ActiveCfg = Debug|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.Debug|Mixed Platforms.Build.0 = Debug|Win32
++		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.Release|x64.ActiveCfg = Release|x64
++		{E9641737-EE62-4EC8-88C8-792D2E3CE32D}.Release|x64.Build.0 = Release|x64
+ 		{BE4E1264-5D13-423D-8191-71F7041459E7}.Debug|Win32.ActiveCfg = Debug|Win32
+ 		{BE4E1264-5D13-423D-8191-71F7041459E7}.Debug|Win32.Build.0 = Debug|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.DVD-5|Any CPU.ActiveCfg = Debug|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.DVD-5|Mixed Platforms.ActiveCfg = Debug|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.DVD-5|Mixed Platforms.Build.0 = Debug|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.DVD-5|Win32.ActiveCfg = Debug|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.DVD-5|Win32.Build.0 = Debug|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.Release|Any CPU.ActiveCfg = Release|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.Release|Mixed Platforms.Build.0 = Release|Win32
++		{BE4E1264-5D13-423D-8191-71F7041459E7}.Debug|x64.ActiveCfg = Debug|x64
++		{BE4E1264-5D13-423D-8191-71F7041459E7}.Debug|x64.Build.0 = Debug|x64
+ 		{BE4E1264-5D13-423D-8191-71F7041459E7}.Release|Win32.ActiveCfg = Release|Win32
+ 		{BE4E1264-5D13-423D-8191-71F7041459E7}.Release|Win32.Build.0 = Release|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.SingleImage|Any CPU.ActiveCfg = Release|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.SingleImage|Mixed Platforms.ActiveCfg = Release|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.SingleImage|Mixed Platforms.Build.0 = Release|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.SingleImage|Win32.ActiveCfg = Release|Win32
+-		{BE4E1264-5D13-423D-8191-71F7041459E7}.SingleImage|Win32.Build.0 = Release|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.CD_ROM|Any CPU.ActiveCfg = Release|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.CD_ROM|Mixed Platforms.ActiveCfg = Release|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.CD_ROM|Mixed Platforms.Build.0 = Release|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.CD_ROM|Win32.ActiveCfg = Release|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.CD_ROM|Win32.Build.0 = Release|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.Debug|Any CPU.ActiveCfg = Debug|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.Debug|Mixed Platforms.Build.0 = Debug|Win32
++		{BE4E1264-5D13-423D-8191-71F7041459E7}.Release|x64.ActiveCfg = Release|x64
++		{BE4E1264-5D13-423D-8191-71F7041459E7}.Release|x64.Build.0 = Release|x64
+ 		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.Debug|Win32.ActiveCfg = Debug|Win32
+ 		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.Debug|Win32.Build.0 = Debug|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.DVD-5|Any CPU.ActiveCfg = Debug|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.DVD-5|Mixed Platforms.ActiveCfg = Debug|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.DVD-5|Mixed Platforms.Build.0 = Debug|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.DVD-5|Win32.ActiveCfg = Debug|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.DVD-5|Win32.Build.0 = Debug|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.Release|Any CPU.ActiveCfg = Release|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.Release|Mixed Platforms.Build.0 = Release|Win32
++		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.Debug|x64.ActiveCfg = Debug|x64
++		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.Debug|x64.Build.0 = Debug|x64
+ 		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.Release|Win32.ActiveCfg = Release|Win32
+ 		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.Release|Win32.Build.0 = Release|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.SingleImage|Any CPU.ActiveCfg = Release|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.SingleImage|Mixed Platforms.ActiveCfg = Release|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.SingleImage|Mixed Platforms.Build.0 = Release|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.SingleImage|Win32.ActiveCfg = Release|Win32
+-		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.SingleImage|Win32.Build.0 = Release|Win32
++		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.Release|x64.ActiveCfg = Release|x64
++		{84585784-5BDC-43BE-B714-23EA2E7AEA5B}.Release|x64.Build.0 = Release|x64
+ 	EndGlobalSection
+ 	GlobalSection(SolutionProperties) = preSolution
+ 		HideSolutionNode = FALSE
+diff --git a/win32/librdkafka.vcxproj b/win32/librdkafka.vcxproj
+index adb5c37..eec1fb3 100644
+--- a/win32/librdkafka.vcxproj
++++ b/win32/librdkafka.vcxproj
+@@ -1,14 +1,22 @@
+-<?xml version="1.0" encoding="utf-8"?>
++﻿<?xml version="1.0" encoding="utf-8"?>
+ <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+   <ItemGroup Label="ProjectConfigurations">
+     <ProjectConfiguration Include="Debug|Win32">
+       <Configuration>Debug</Configuration>
+       <Platform>Win32</Platform>
+     </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
+     <ProjectConfiguration Include="Release|Win32">
+       <Configuration>Release</Configuration>
+       <Platform>Win32</Platform>
+     </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
+   </ItemGroup>
+   <PropertyGroup Label="Globals">
+     <ProjectGuid>{4BEBB59C-477B-4F7A-8AE8-4228D0861E54}</ProjectGuid>
+@@ -17,13 +25,26 @@
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+-    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <UseDebugLibraries>true</UseDebugLibraries>
++    <PlatformToolset>v120</PlatformToolset>
++    <CharacterSet>Unicode</CharacterSet>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <PlatformToolset>v120</PlatformToolset>
+     <CharacterSet>Unicode</CharacterSet>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+-    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <UseDebugLibraries>false</UseDebugLibraries>
++    <PlatformToolset>v120</PlatformToolset>
++    <WholeProgramOptimization>true</WholeProgramOptimization>
++    <CharacterSet>Unicode</CharacterSet>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <PlatformToolset>v120</PlatformToolset>
+     <WholeProgramOptimization>true</WholeProgramOptimization>
+@@ -35,29 +56,68 @@
+   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+   </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
+   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+   </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
+   <PropertyGroup Label="UserMacros">
+-    <NuGetPackageImportStamp>a4491f4f</NuGetPackageImportStamp>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+     <LinkIncremental>true</LinkIncremental>
+-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\OpenSSL-Win32\include</IncludePath>
++    <IncludePath>${externpro_DIR}\include;${externpro_DIR}\include\zlib;$(IncludePath)</IncludePath>
++    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);C:\OpenSSL-Win32\lib\VC</LibraryPath>
++    <TargetName>librdkafkad</TargetName>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <LinkIncremental>true</LinkIncremental>
++    <IncludePath>C:\Program Files\externpro 15.10.2-vc120-64\include;C:\Program Files\externpro 15.10.2-vc120-64\include\zlib;$(IncludePath)</IncludePath>
+     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);C:\OpenSSL-Win32\lib\VC</LibraryPath>
++    <TargetName>librdkafkad</TargetName>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+     <LinkIncremental>false</LinkIncremental>
++    <TargetName>librdkafka</TargetName>
++    <IncludePath>C:\Program Files\externpro 15.10.2-vc120-64\include;C:\Program Files\externpro 15.10.2-vc120-64\include\zlib;$(IncludePath)</IncludePath>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <LinkIncremental>false</LinkIncremental>
++    <TargetName>librdkafka</TargetName>
++    <IncludePath>C:\Program Files\externpro 15.10.2-vc120-64\include;C:\Program Files\externpro 15.10.2-vc120-64\include\zlib;$(IncludePath)</IncludePath>
+   </PropertyGroup>
+   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+     <ClCompile>
+       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+       <WarningLevel>Level3</WarningLevel>
+-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LIBRDKAFKA_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <PreprocessorDefinitions>WIN32;LIBRDKAFKA_STATIC</PreprocessorDefinitions>
+       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+       <IntrinsicFunctions>true</IntrinsicFunctions>
+       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+       <AdditionalOptions>/J %(AdditionalOptions)</AdditionalOptions>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
++      <DebugInformationFormat>OldStyle</DebugInformationFormat>
++    </ClCompile>
++    <Link>
++      <SubSystem>Windows</SubSystem>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);libeay32MT.lib;ssleay32MT.lib</AdditionalDependencies>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <ClCompile>
++      <PrecompiledHeader>NotUsing</PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <PreprocessorDefinitions>WIN32;LIBRDKAFKA_STATIC</PreprocessorDefinitions>
++      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalOptions>/J %(AdditionalOptions)</AdditionalOptions>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
++      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+     </ClCompile>
+     <Link>
+       <SubSystem>Windows</SubSystem>
+@@ -73,7 +133,26 @@
+       <Optimization>MaxSpeed</Optimization>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
+       <IntrinsicFunctions>true</IntrinsicFunctions>
+-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBRDKAFKA_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <PreprocessorDefinitions>WIN32;LIBRDKAFKA_STATIC</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
++    </ClCompile>
++    <Link>
++      <SubSystem>Windows</SubSystem>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <EnableCOMDATFolding>true</EnableCOMDATFolding>
++      <OptimizeReferences>true</OptimizeReferences>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <ClCompile>
++      <WarningLevel>Level3</WarningLevel>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <Optimization>MaxSpeed</Optimization>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <PreprocessorDefinitions>WIN32;LIBRDKAFKA_STATIC</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+     </ClCompile>
+     <Link>
+       <SubSystem>Windows</SubSystem>
+@@ -160,18 +239,10 @@
+   </ItemGroup>
+   <ItemGroup>
+     <None Include="..\README.win32" />
+-    <None Include="packages.config" />
+   </ItemGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+   <ImportGroup Label="ExtensionTargets">
+     <Import Project="packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets" Condition="Exists('packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets')" />
+     <Import Project="packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets" Condition="Exists('packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" />
+   </ImportGroup>
+-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+-    <PropertyGroup>
+-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+-    </PropertyGroup>
+-    <Error Condition="!Exists('packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets'))" />
+-    <Error Condition="!Exists('packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets'))" />
+-  </Target>
+-</Project>
++</Project>
+\ No newline at end of file
+diff --git a/win32/librdkafkacpp/librdkafkacpp.vcxproj b/win32/librdkafkacpp/librdkafkacpp.vcxproj
+index b7f3977..27b7346 100644
+--- a/win32/librdkafkacpp/librdkafkacpp.vcxproj
++++ b/win32/librdkafkacpp/librdkafkacpp.vcxproj
+@@ -1,14 +1,22 @@
+-<?xml version="1.0" encoding="utf-8"?>
++﻿<?xml version="1.0" encoding="utf-8"?>
+ <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+   <ItemGroup Label="ProjectConfigurations">
+     <ProjectConfiguration Include="Debug|Win32">
+       <Configuration>Debug</Configuration>
+       <Platform>Win32</Platform>
+     </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
+     <ProjectConfiguration Include="Release|Win32">
+       <Configuration>Release</Configuration>
+       <Platform>Win32</Platform>
+     </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
+   </ItemGroup>
+   <PropertyGroup Label="Globals">
+     <ProjectGuid>{E9641737-EE62-4EC8-88C8-792D2E3CE32D}</ProjectGuid>
+@@ -18,13 +26,26 @@
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+-    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <UseDebugLibraries>true</UseDebugLibraries>
++    <PlatformToolset>v120</PlatformToolset>
++    <CharacterSet>Unicode</CharacterSet>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <PlatformToolset>v120</PlatformToolset>
+     <CharacterSet>Unicode</CharacterSet>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+-    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <UseDebugLibraries>false</UseDebugLibraries>
++    <PlatformToolset>v120</PlatformToolset>
++    <WholeProgramOptimization>true</WholeProgramOptimization>
++    <CharacterSet>Unicode</CharacterSet>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <PlatformToolset>v120</PlatformToolset>
+     <WholeProgramOptimization>true</WholeProgramOptimization>
+@@ -36,15 +57,35 @@
+   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+   </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
+   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+   </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
+   <PropertyGroup Label="UserMacros" />
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+     <LinkIncremental>true</LinkIncremental>
++    <TargetName>librdkafka++d</TargetName>
++    <IncludePath>C:\Program Files\externpro 15.10.2-vc120-64\include;C:\Program Files\externpro 15.10.2-vc120-64\include\zlib;$(IncludePath)</IncludePath>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <LinkIncremental>true</LinkIncremental>
++    <TargetName>librdkafka++d</TargetName>
++    <IncludePath>C:\Program Files\externpro 15.10.2-vc120-64\include;C:\Program Files\externpro 15.10.2-vc120-64\include\zlib;$(IncludePath)</IncludePath>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+     <LinkIncremental>false</LinkIncremental>
++    <TargetName>librdkafka++</TargetName>
++    <IncludePath>C:\Program Files\externpro 15.10.2-vc120-64\include;C:\Program Files\externpro 15.10.2-vc120-64\include\zlib;$(IncludePath)</IncludePath>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <LinkIncremental>false</LinkIncremental>
++    <TargetName>librdkafka++</TargetName>
++    <IncludePath>C:\Program Files\externpro 15.10.2-vc120-64\include;C:\Program Files\externpro 15.10.2-vc120-64\include\zlib;$(IncludePath)</IncludePath>
+   </PropertyGroup>
+   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+     <ClCompile>
+@@ -52,11 +93,34 @@
+       </PrecompiledHeader>
+       <WarningLevel>Level3</WarningLevel>
+       <Optimization>Disabled</Optimization>
+-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LIBRDKAFKACPP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <PreprocessorDefinitions>WIN32;LIBRDKAFKA_STATIC</PreprocessorDefinitions>
++      <SDLCheck>true</SDLCheck>
++      <AdditionalOptions>/J %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalIncludeDirectories>
++      </AdditionalIncludeDirectories>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
++      <DebugInformationFormat>OldStyle</DebugInformationFormat>
++    </ClCompile>
++    <Link>
++      <SubSystem>Windows</SubSystem>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <AdditionalDependencies>librdkafka.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <AdditionalLibraryDirectories>$(SolutionDir)\$(ConfigurationName)</AdditionalLibraryDirectories>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <ClCompile>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <Optimization>Disabled</Optimization>
++      <PreprocessorDefinitions>WIN32;LIBRDKAFKA_STATIC</PreprocessorDefinitions>
+       <SDLCheck>true</SDLCheck>
+       <AdditionalOptions>/J %(AdditionalOptions)</AdditionalOptions>
+       <AdditionalIncludeDirectories>
+       </AdditionalIncludeDirectories>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
++      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+     </ClCompile>
+     <Link>
+       <SubSystem>Windows</SubSystem>
+@@ -73,8 +137,28 @@
+       <Optimization>MaxSpeed</Optimization>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
+       <IntrinsicFunctions>true</IntrinsicFunctions>
+-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBRDKAFKACPP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <PreprocessorDefinitions>WIN32;LIBRDKAFKA_STATIC</PreprocessorDefinitions>
++      <SDLCheck>true</SDLCheck>
++      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
++    </ClCompile>
++    <Link>
++      <SubSystem>Windows</SubSystem>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <EnableCOMDATFolding>true</EnableCOMDATFolding>
++      <OptimizeReferences>true</OptimizeReferences>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <ClCompile>
++      <WarningLevel>Level3</WarningLevel>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <Optimization>MaxSpeed</Optimization>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <PreprocessorDefinitions>WIN32;LIBRDKAFKA_STATIC</PreprocessorDefinitions>
+       <SDLCheck>true</SDLCheck>
++      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+     </ClCompile>
+     <Link>
+       <SubSystem>Windows</SubSystem>
+@@ -103,4 +187,4 @@
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+   <ImportGroup Label="ExtensionTargets">
+   </ImportGroup>
+-</Project>
++</Project>
+\ No newline at end of file
+diff --git a/win32/packages.config b/win32/packages.config
+deleted file mode 100644
+index a12ef74..0000000
+--- a/win32/packages.config
++++ /dev/null
+@@ -1,6 +0,0 @@
+-﻿<?xml version="1.0" encoding="utf-8"?>
+-<packages>
+-  <package id="zlib" version="1.2.8.8" targetFramework="Native" />
+-  <package id="zlib.v120.windesktop.msvcstl.dyn.rt-dyn" version="1.2.8.8" targetFramework="Native" />
+-  <package id="zlib.v140.windesktop.msvcstl.dyn.rt-dyn" version="1.2.8.8" targetFramework="Native" />
+-</packages>
+\ No newline at end of file
+diff --git a/win32/rdkafka_example/rdkafka_example.vcxproj b/win32/rdkafka_example/rdkafka_example.vcxproj
+index 1bd0537..2c3c1da 100644
+--- a/win32/rdkafka_example/rdkafka_example.vcxproj
++++ b/win32/rdkafka_example/rdkafka_example.vcxproj
+@@ -5,10 +5,18 @@
+       <Configuration>Debug</Configuration>
+       <Platform>Win32</Platform>
+     </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
+     <ProjectConfiguration Include="Release|Win32">
+       <Configuration>Release</Configuration>
+       <Platform>Win32</Platform>
+     </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
+   </ItemGroup>
+   <PropertyGroup Label="Globals">
+     <ProjectGuid>{84585784-5BDC-43BE-B714-23EA2E7AEA5B}</ProjectGuid>
+@@ -22,6 +30,12 @@
+     <PlatformToolset>v120</PlatformToolset>
+     <CharacterSet>Unicode</CharacterSet>
+   </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseDebugLibraries>true</UseDebugLibraries>
++    <PlatformToolset>v120</PlatformToolset>
++    <CharacterSet>Unicode</CharacterSet>
++  </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <UseDebugLibraries>false</UseDebugLibraries>
+@@ -29,22 +43,41 @@
+     <WholeProgramOptimization>true</WholeProgramOptimization>
+     <CharacterSet>Unicode</CharacterSet>
+   </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseDebugLibraries>false</UseDebugLibraries>
++    <PlatformToolset>v120</PlatformToolset>
++    <WholeProgramOptimization>true</WholeProgramOptimization>
++    <CharacterSet>Unicode</CharacterSet>
++  </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+   </ImportGroup>
+   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+   </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
+   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+   </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
+   <PropertyGroup Label="UserMacros" />
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+     <LinkIncremental>true</LinkIncremental>
+   </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <LinkIncremental>true</LinkIncremental>
++  </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+     <LinkIncremental>false</LinkIncremental>
+   </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <LinkIncremental>false</LinkIncremental>
++  </PropertyGroup>
+   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+     <ClCompile>
+       <PrecompiledHeader>
+@@ -62,6 +95,23 @@
+       <AdditionalLibraryDirectories>$(SolutionDir)/$(ConfigurationName)</AdditionalLibraryDirectories>
+     </Link>
+   </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <ClCompile>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <Optimization>Disabled</Optimization>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <SDLCheck>true</SDLCheck>
++      <AdditionalIncludeDirectories>$(SolutionDir)/../src-cpp</AdditionalIncludeDirectories>
++    </ClCompile>
++    <Link>
++      <SubSystem>Console</SubSystem>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <AdditionalDependencies>librdkafkacpp.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <AdditionalLibraryDirectories>$(SolutionDir)/$(ConfigurationName)</AdditionalLibraryDirectories>
++    </Link>
++  </ItemDefinitionGroup>
+   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+     <ClCompile>
+       <WarningLevel>Level3</WarningLevel>
+@@ -80,6 +130,24 @@
+       <OptimizeReferences>true</OptimizeReferences>
+     </Link>
+   </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <ClCompile>
++      <WarningLevel>Level3</WarningLevel>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <Optimization>MaxSpeed</Optimization>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <SDLCheck>true</SDLCheck>
++    </ClCompile>
++    <Link>
++      <SubSystem>Console</SubSystem>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <EnableCOMDATFolding>true</EnableCOMDATFolding>
++      <OptimizeReferences>true</OptimizeReferences>
++    </Link>
++  </ItemDefinitionGroup>
+   <ItemGroup>
+     <ClCompile Include="..\..\examples\rdkafka_example.cpp" />
+     <ClCompile Include="..\wingetopt.c" />
+diff --git a/win32/tests/tests.vcxproj b/win32/tests/tests.vcxproj
+index 3b71fdc..f0e1f24 100644
+--- a/win32/tests/tests.vcxproj
++++ b/win32/tests/tests.vcxproj
+@@ -5,10 +5,18 @@
+       <Configuration>Debug</Configuration>
+       <Platform>Win32</Platform>
+     </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
+     <ProjectConfiguration Include="Release|Win32">
+       <Configuration>Release</Configuration>
+       <Platform>Win32</Platform>
+     </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
+   </ItemGroup>
+   <PropertyGroup Label="Globals">
+     <ProjectGuid>{BE4E1264-5D13-423D-8191-71F7041459E7}</ProjectGuid>
+@@ -22,6 +30,12 @@
+     <PlatformToolset>v120</PlatformToolset>
+     <CharacterSet>Unicode</CharacterSet>
+   </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseDebugLibraries>true</UseDebugLibraries>
++    <PlatformToolset>v120</PlatformToolset>
++    <CharacterSet>Unicode</CharacterSet>
++  </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <ConfigurationType>Application</ConfigurationType>
+     <UseDebugLibraries>false</UseDebugLibraries>
+@@ -29,24 +43,43 @@
+     <WholeProgramOptimization>true</WholeProgramOptimization>
+     <CharacterSet>Unicode</CharacterSet>
+   </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseDebugLibraries>false</UseDebugLibraries>
++    <PlatformToolset>v120</PlatformToolset>
++    <WholeProgramOptimization>true</WholeProgramOptimization>
++    <CharacterSet>Unicode</CharacterSet>
++  </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <ImportGroup Label="ExtensionSettings">
+   </ImportGroup>
+   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+   </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
+   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+   </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
+   <PropertyGroup Label="UserMacros">
+     <NuGetPackageImportStamp>8e214174</NuGetPackageImportStamp>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+     <LinkIncremental>true</LinkIncremental>
+   </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <LinkIncremental>true</LinkIncremental>
++  </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+     <LinkIncremental>false</LinkIncremental>
+   </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <LinkIncremental>false</LinkIncremental>
++  </PropertyGroup>
+   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+     <ClCompile>
+       <PrecompiledHeader>
+@@ -67,6 +100,26 @@
+       </AdditionalManifestDependencies>
+     </Link>
+   </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <ClCompile>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <Optimization>Disabled</Optimization>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <SDLCheck>true</SDLCheck>
++      <AdditionalIncludeDirectories>$(SolutionDir)\..\src;$(SolutionDir)\..\src-cpp</AdditionalIncludeDirectories>
++      <ShowIncludes>false</ShowIncludes>
++    </ClCompile>
++    <Link>
++      <SubSystem>Console</SubSystem>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <AdditionalDependencies>librdkafka.lib;librdkafkacpp.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <AdditionalLibraryDirectories>$(SolutionDir)\$(ConfigurationName)</AdditionalLibraryDirectories>
++      <AdditionalManifestDependencies>
++      </AdditionalManifestDependencies>
++    </Link>
++  </ItemDefinitionGroup>
+   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+     <ClCompile>
+       <WarningLevel>Level3</WarningLevel>
+@@ -85,6 +138,24 @@
+       <OptimizeReferences>true</OptimizeReferences>
+     </Link>
+   </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <ClCompile>
++      <WarningLevel>Level3</WarningLevel>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <Optimization>MaxSpeed</Optimization>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <SDLCheck>true</SDLCheck>
++    </ClCompile>
++    <Link>
++      <SubSystem>Console</SubSystem>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <EnableCOMDATFolding>true</EnableCOMDATFolding>
++      <OptimizeReferences>true</OptimizeReferences>
++    </Link>
++  </ItemDefinitionGroup>
+   <ItemGroup>
+     <ClCompile Include="..\..\tests\0001-multiobj.c" />
+     <ClCompile Include="..\..\tests\0002-unkpart.c" />

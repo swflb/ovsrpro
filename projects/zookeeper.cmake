@@ -32,26 +32,6 @@ set(CPP_UNIT
   DLURL http://sourceforge.net/projects/cppunit/files/cppunit/1.12.1/cppunit-1.12.1.tar.gz
   DLMD5 bd30e9cf5523cdfc019b94f5e1d7fd19
 )
-
-#Get the path to the git usr directory
-get_filename_component(git_path ${GIT_EXECUTABLE} DIRECTORY)
-set(git_path ${git_path}/../usr/bin)
-get_filename_component(git_path ${git_path} ABSOLUTE)
-
-find_program(grep grep NAMES grep.exe HINTS ${git_path})
-if(${grep} MATCHES grep-NOTFOUND)
-  message(WARNING "grep could not be found for psql")
-endif()
-
-find_program(sed sed NAMES sed.exe HINTS ${git_path})
-if(${sed} MATCHES sed-NOTFOUND)
-  message(WARNING "sed could not be found for psql")
-endif()
-
-find_program(xargs xargs NAMES xargs.exe HINTS ${git_path})
-if(${xargs} MATCHES xargs-NOTFOUND)
-  message(WARNING "xargs could not be found for psql")
-endif()
 ########################################
 # mkpatch_zookeeper
 function(mkpatch_zookeeper)
