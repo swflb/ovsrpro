@@ -18,6 +18,12 @@ if(WIN32)
     set(PSQL_LIBS
       ${PSQL_LIB_DIR}/libpq.lib)
   endif()
+else()
+  if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+    set(PSQL_LIBS ${PSQL_LIB_DIR}/libpqd.a)
+  else()
+    set(PSQL_LIBS ${PSQL_LIB_DIR}/libpq.a)
+  endif()
 endif()
 
 # Add the psql headers to the system includes

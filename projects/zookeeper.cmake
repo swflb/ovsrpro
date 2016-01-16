@@ -2,6 +2,7 @@
 # zookeeper
 # Note: Requires apache ant in the system path (http://ant.apache.org/)
 # Note: Requires JDK in the system path
+# Note: Requres gnu32 for windows to use sed, find, and xargs (c:\program files(x86)\gnuwin32)
 ########################################
 xpProOption(zookeeper)
 set(ZK_REPO https://github.com/apache/zookeeper.git)
@@ -31,6 +32,26 @@ set(CPP_UNIT
   DLURL http://sourceforge.net/projects/cppunit/files/cppunit/1.12.1/cppunit-1.12.1.tar.gz
   DLMD5 bd30e9cf5523cdfc019b94f5e1d7fd19
 )
+
+#Get the path to the git usr directory
+get_filename_component(git_path ${GIT_EXECUTABLE} DIRECTORY)
+set(git_path ${git_path}/../usr/bin)
+get_filename_component(git_path ${git_path} ABSOLUTE)
+
+find_program(grep grep NAMES grep.exe HINTS ${git_path})
+if(${grep} MATCHES grep-NOTFOUND)
+  message(WARNING "grep could not be found for psql")
+endif()
+
+find_program(sed sed NAMES sed.exe HINTS ${git_path})
+if(${sed} MATCHES sed-NOTFOUND)
+  message(WARNING "sed could not be found for psql")
+endif()
+
+find_program(xargs xargs NAMES xargs.exe HINTS ${git_path})
+if(${xargs} MATCHES xargs-NOTFOUND)
+  message(WARNING "xargs could not be found for psql")
+endif()
 ########################################
 # mkpatch_zookeeper
 function(mkpatch_zookeeper)
@@ -52,15 +73,13 @@ function(patch_zookeeper)
     xpRepo(${PRO_ZOOKEEPER})
   endif()
 
-  ExternalProject_Add_Step(zookeeper_repo zookeeper_patch
-    WORKING_DIRECTORY ${ZK_REPO_PATH}
-    COMMAND ${GIT_EXECUTABLE} apply ${PATCH_DIR}/zookeeper-mt_adapter-x64-fix.patch
-    COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper-winconfig.h ${ZK_REPO_PATH}/src/c/include/zookeeper-winconfig.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper.sln ${ZK_REPO_PATH}/src/c/zookeeper.sln
-    COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper.vcxproj ${ZK_REPO_PATH}/src/c/zookeeper.vcxproj
-    COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/zookeeper.vcxproj.filters ${ZK_REPO_PATH}/src/c/zookeeper.vcxproj.filters
-    DEPENDEES patch
-  )
+  if(WIN32)
+    ExternalProject_Add_Step(zookeeper_repo zookeeper_patch
+      WORKING_DIRECTORY ${ZK_REPO_PATH}/src/c
+      COMMAND ${GIT_EXECUTABLE} apply ${PATCH_DIR}/zookeeper-windows.patch
+      DEPENDEES patch
+    )
+  endif()
   add_custom_target(zookeeper_ant ALL
     WORKING_DIRECTORY ${ZK_REPO_PATH}
     COMMAND ant compile_jute
