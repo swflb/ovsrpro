@@ -33,14 +33,6 @@ include_directories(SYSTEM ${Zookeeper_INCLUDE_DIR})
 # @param[in] target The target to add zookeeper to
 # @param[in,opt] define whether to link the library as static
 macro(opAddZookeeperToTarget target static)
-  if(WIN32)
-    if(${static})
-      opSetWindowsStaticFlags("/MT")
-    else()
-      opSetWindowsStaticFlags("/MD")
-    endif()
-  endif(WIN32)
-
   if(${static})
     add_definitions(-DUSE_STATIC_LIB)
   endif()
