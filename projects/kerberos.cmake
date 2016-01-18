@@ -93,9 +93,8 @@ function(build_kerberos)
       COMMAND ${CMAKE_COMMAND} -E env CPU=AMD64 KRB_INSTALL_DIR=${STAGE_DIR}/kerberos nmake install NODEBUG=${NODEBUG}
       # re-arrange the installation a bit...
       COMMAND ${CMAKE_COMMAND} -E copy_directory ${STAGE_DIR}/kerberos/include ${STAGE_DIR}/include/kerberos
-      COMMAND ${CMAKE_COMMAND} -E copy ${KERBEROS_DOWNLOAD_PATH}/src/lib/gssapi/obj/AMD64/rel/gssapi.lib ${STAGE_DIR}/lib/gssapi.lib
-      COMMAND ${CMAKE_COMMAND} -E copy ${KERBEROS_DOWNLOAD_PATH}/src/lib/krb5/obj/AMD64/rel/krb5.lib ${STAGE_DIR}/lib/krb5.LIBRARY_OUTPUT_DIRECTORY
-      COMMAND ${CMAKE_COMMAND} -E copy ${KERBEROS_DOWNLOAD_PATH}/src/util/et/obj/AMD64/rel/comerr.lib ${STAGE_DIR}/lib/comerr.lib
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${STAGE_DIR}/kerberos/lib ${STAGE_DIR}/lib
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${STAGE_DIR}/kerberos/bin ${STAGE_DIR}/bin
       COMMAND ${CMAKE_COMMAND} -E remove_directory ${STAGE_DIR}/kerberos
       DEPENDS kerberos
     )

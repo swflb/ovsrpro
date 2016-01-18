@@ -30,6 +30,9 @@ MACRO (TARGET_STATIC_CRT_FLAGS)
       if (${flag_var} MATCHES "/MD")
         string (REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
       endif (${flag_var} MATCHES "/MD")
+      if (${flag_var} MATCHES "/Zi")
+        string (REGEX REPLACE "/Zi" "/Z7" ${flag_var} "${${flag_var}}")
+      endif()
     endforeach (flag_var)
     foreach (flag_var
         CMAKE_Fortran_FLAGS CMAKE_Fortran_FLAGS_DEBUG CMAKE_Fortran_FLAGS_RELEASE

@@ -43,6 +43,19 @@ function(patch_librdkafka)
   if(NOT TARGET librdkafka_repo)
     xpRepo(${PRO_KAFKA})
   endif()
+
+  if(WIN32)
+    # setup the patch file with knowledge of the externpro directory
+    set(tmpPatchFile ${CMAKE_BINARY_DIR}/xpbase/tmp/librdkafka_repo/librdkafka-windows.patch)
+    configure_file(${PATCH_DIR}/librdkafka-windows.patch
+                   ${tmpPatchFile} NEWLINE_STYLE UNIX)
+MESSAGE("CONFIGURED!!!")
+    ExternalProject_Add_Step(librdkafka_repo librdkafka_win_patch
+      WORKING_DIRECTORY ${KAFKA_REPO_PATH}
+      COMMAND ${GIT_EXECUTABLE} apply ${tmpPatchFile}
+      DEPENDEES patch
+    )
+  endif()
 endfunction(patch_librdkafka)
 ########################################
 # Add zlib to the desired target
@@ -63,53 +76,9 @@ function(build_librdkafka)
   endif()
 
   # Make sure the librdkafka target this depends on has been created
-  if(NOT TARGET librdkafka)
+  if(NOT TARGET librdkafka_repo)
     patch_librdkafka()
   endif()
-
-  # define the src files
-  set(c_files
-    ${KAFKA_REPO_PATH}/src/rdkafka.c
-    ${KAFKA_REPO_PATH}/src/rdkafka_broker.c
-    ${KAFKA_REPO_PATH}/src/rdkafka_msg.c
-    ${KAFKA_REPO_PATH}/src/rdkafka_topic.c
-    ${KAFKA_REPO_PATH}/src/rdkafka_conf.c
-    ${KAFKA_REPO_PATH}/src/rdkafka_timer.c
-    ${KAFKA_REPO_PATH}/src/rdkafka_offset.c
-    ${KAFKA_REPO_PATH}/src/rdkafka_transport.c
-    ${KAFKA_REPO_PATH}/src/rdkafka_buf.c
-    ${KAFKA_REPO_PATH}/src/rdkafka_queue.c
-    ${KAFKA_REPO_PATH}/src/rdkafka_op.c
-    ${KAFKA_REPO_PATH}/src/rdkafka_request.c
-    ${KAFKA_REPO_PATH}/src/rdkafka_cgrp.c
-    ${KAFKA_REPO_PATH}/src/rdkafka_pattern.c
-    ${KAFKA_REPO_PATH}/src/rdkafka_partition.c
-    ${KAFKA_REPO_PATH}/src/rdkafka_subscription.c
-    ${KAFKA_REPO_PATH}/src/rdkafka_assignor.c
-    ${KAFKA_REPO_PATH}/src/rdkafka_range_assignor.c
-    ${KAFKA_REPO_PATH}/src/rdkafka_roundrobin_assignor.c
-    ${KAFKA_REPO_PATH}/src/rdcrc32.c
-    ${KAFKA_REPO_PATH}/src/rdgz.c
-    ${KAFKA_REPO_PATH}/src/rdaddr.c
-    ${KAFKA_REPO_PATH}/src/rdrand.c
-    ${KAFKA_REPO_PATH}/src/rdlist.c
-    ${KAFKA_REPO_PATH}/src/tinycthread.c
-    ${KAFKA_REPO_PATH}/src/rdlog.c
-    ${KAFKA_REPO_PATH}/src/trex.c
-  )
-  set(cpp_files
-    ${KAFKA_REPO_PATH}/src-cpp/RdKafka.cpp
-    ${KAFKA_REPO_PATH}/src-cpp/ConfImpl.cpp
-    ${KAFKA_REPO_PATH}/src-cpp/HandleImpl.cpp
-    ${KAFKA_REPO_PATH}/src-cpp/ConsumerImpl.cpp
-    ${KAFKA_REPO_PATH}/src-cpp/ProducerImpl.cpp
-    ${KAFKA_REPO_PATH}/src-cpp/KafkaConsumerImpl.cpp
-    ${KAFKA_REPO_PATH}/src-cpp/TopicImpl.cpp
-    ${KAFKA_REPO_PATH}/src-cpp/TopicPartitionImpl.cpp
-    ${KAFKA_REPO_PATH}/src-cpp/MessageImpl.cpp
-    ${KAFKA_REPO_PATH}/src-cpp/QueueImpl.cpp
-    ${KAFKA_REPO_PATH}/src-cpp/MetadataImpl.cpp
-  )
 
   # define the header files
   set(hdr_files
@@ -117,43 +86,33 @@ function(build_librdkafka)
     ${KAFKA_REPO_PATH}/src-cpp/rdkafkacpp.h
   )
 
-  xpFindPkg(PKGS zlib)
-  include_directories(SYSTEM ${ZLIB_INCLUDE_DIRS})
-
-  # indicate that all the files are GENERATED so they don't need to exist when
-  # creating the target...they will be available after download
-  set_source_files_properties(${c_files} ${cpp_files} ${hdr_files}
-    PROPERTIES GENERATED TRUE)
-
-  # Create the c dll
-  add_library(librdkafka-shared SHARED ${c_files})
-  add_dependencies(librdkafka-shared librdkafka_repo)
-  set_target_properties(librdkafka-shared PROPERTIES
-    OUTPUT_NAME librdkafka)
-  addLibs(librdkafka-shared)
-
-  # Create the c++ dll
-  add_library(librdkafka++-shared SHARED ${cpp_files})
-  add_dependencies(librdkafka++-shared librdkafka_repo)
-  set_target_properties(librdkafka++-shared PROPERTIES
-    OUTPUT_NAME librdkafka++)
-  addLibs(librdkafka++-shared)
-
-  if(${XP_BUILD_STATIC})
-    # Create the c lib
-    add_library(librdkafka-mt STATIC ${c_files})
-    add_dependencies(librdkafka-mt librdkafka_repo)
-
-    # Create the c++ lib
-    add_library(librdkafka++-mt STATIC ${cpp_files})
-    add_dependencies(librdkafka++-mt librdkafka_repo)
-    link_libraries(librdkafka++-mt librdkafka-mt)
-
-    # Replace MD with MT in windows
-    if(WIN32)
-      target_compile_options(librdkafka-mt PUBLIC "/MT$<$<STREQUAL:$<CONFIGURATION>,Debug>:d>")
-      target_compile_options(librdkafka++-mt PUBLIC "/MT$<$<STREQUAL:$<CONFIGURATION>,Debug>:d>")
-    endif()
+  if(WIN32)
+    add_custom_target(librdkafka_build ALL
+      WORKING_DIRECTORY ${KAFKA_REPO_PATH}/win32
+      COMMAND msbuild librdkafka.sln /p:Configuration=Release\;Platform=x64 /t:librdkafka:rebuild
+      COMMAND msbuild librdkafka.sln /p:Configuration=Release\;Platform=x64 /t:librdkafkacpp:rebuild
+      COMMAND msbuild librdkafka.sln /p:Configuration=Debug\;Platform=x64 /t:librdkafka:rebuild
+      COMMAND msbuild librdkafka.sln /p:Configuration=Debug\;Platform=x64 /t:librdkafkacpp:rebuild
+      COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/win32/x64/Debug/librdkafkad.lib ${STAGE_DIR}/lib/librdkafkad.lib
+      COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/win32/x64/Debug/librdkafka++d.lib ${STAGE_DIR}/lib/librdkafka++d.lib
+      COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/win32/x64/Release/librdkafka.lib ${STAGE_DIR}/lib/librdkafka.lib
+      COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/win32/x64/Release/librdkafka++.lib ${STAGE_DIR}/lib/librdkafka++.lib
+      DEPENDS librdkafka_repo
+    )
+    # copy the header files to the staging area
+    foreach(hdr_file ${hdr_files})
+      get_filename_component(hdr_name ${hdr_file} NAME)
+      add_custom_command(TARGET librdkafka_build POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${hdr_file} ${STAGE_DIR}/include/librdkafka/${hdr_name}
+      )
+    endforeach()
+  else()
+    add_custom_target(librdkafka_build ALL
+      WORKING_DIRECTORY ${KAFKA_REPO_PATH}
+      COMMAND ./configure --prefix=${STAGE_DIR}
+      COMMAND make
+      COMMAND make install
+    )
   endif()
 
 endfunction(build_librdkafka)

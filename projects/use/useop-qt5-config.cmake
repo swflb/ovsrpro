@@ -60,3 +60,9 @@ find_package(Qt5 REQUIRED COMPONENTS
              NO_CMAKE_SYSTEM_PATH
              NO_CMAKE_SYSTEM_PACKAGE_REGISTRY)
 
+if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+  set(QT5_MAIN_LIB ${QT5_BASE_PATH}/lib/qtmaind.lib)
+else()
+  set(QT5_MAIN_LIB ${QT5_BASE_PATH}/lib/qtmain.lib)
+endif()
+

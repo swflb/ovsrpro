@@ -12,12 +12,6 @@ proInit()
 proAddProjectDir(projects)
 proExecuteStep()
 
-if(WIN32)
-  find_program(nsis nsis)
-  if(${nsis} MATCHES nsis-NOTFOUND)
-    message(WARNING "nsis required to build install package")
-  endif()
-endif()
 # move some needed cmake files into place
 configure_file(Findovsrpro.cmake ${STAGE_DIR}/share/cmake/Findovsrpro.cmake COPYONLY)
 configure_file(opfunmac.cmake ${STAGE_DIR}/share/cmake/opfunmac.cmake COPYONLY)

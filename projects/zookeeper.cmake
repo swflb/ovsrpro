@@ -32,7 +32,6 @@ set(CPP_UNIT
   DLURL http://sourceforge.net/projects/cppunit/files/cppunit/1.12.1/cppunit-1.12.1.tar.gz
   DLMD5 bd30e9cf5523cdfc019b94f5e1d7fd19
 )
-
 ########################################
 # mkpatch_zookeeper
 function(mkpatch_zookeeper)
