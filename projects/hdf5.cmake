@@ -36,20 +36,22 @@ function(patch_hdf5)
   xpPatch(${PRO_HDF5})
 
   if(WIN32)
-    ExternalProject_Add_Step(hdf5 hdf5_setFlags
-      WORKING_DIRECTORY ${HDF5_SRC_PATH}
-      # Update hdf5 to use /MT
-      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/hdf5-windows-static-UserMacros.cmake ${HDF5_SRC_PATH}/hdf5-1.8.16/UserMacros.cmake
-      # Decompress SZip, update to use /MT, then re-zip
-      COMMAND ${CMAKE_COMMAND} -E tar xvf ${HDF5_SRC_PATH}/SZip.tar.gz
-      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/hdf5-windows-static-UserMacros.cmake ${HDF5_SRC_PATH}/SZip/UserMacros.cmake
-      COMMAND ${CMAKE_COMMAND} -E tar cfvz ${HDF5_SRC_PATH}/SZip.tar.gz ${HDF5_SRC_PATH}/SZip
-      # Decompress ZLib, update to use /MT, then re-zip
-      COMMAND ${CMAKE_COMMAND} -E tar xvf ${HDF5_SRC_PATH}/ZLib.tar.gz
-      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/hdf5-windows-static-UserMacros.cmake ${HDF5_SRC_PATH}/ZLib/UserMacros.cmake
-      COMMAND ${CMAKE_COMMAND} -E tar cfvz ${HDF5_SRC_PATH}/ZLib.tar.gz ${HDF5_SRC_PATH}/ZLib
-      DEPENDEES download
-    )
+    if(${XP_BUILD_STATIC})
+      ExternalProject_Add_Step(hdf5 hdf5_setFlags
+        WORKING_DIRECTORY ${HDF5_SRC_PATH}
+        # Update hdf5 to use /MT
+        COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/hdf5-windows-static-UserMacros.cmake ${HDF5_SRC_PATH}/hdf5-1.8.16/UserMacros.cmake
+        # Decompress SZip, update to use /MT, then re-zip
+        COMMAND ${CMAKE_COMMAND} -E tar xvf ${HDF5_SRC_PATH}/SZip.tar.gz
+        COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/hdf5-windows-static-UserMacros.cmake ${HDF5_SRC_PATH}/SZip/UserMacros.cmake
+        COMMAND ${CMAKE_COMMAND} -E tar cfvz ${HDF5_SRC_PATH}/SZip.tar.gz ${HDF5_SRC_PATH}/SZip
+        # Decompress ZLib, update to use /MT, then re-zip
+        COMMAND ${CMAKE_COMMAND} -E tar xvf ${HDF5_SRC_PATH}/ZLib.tar.gz
+        COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/hdf5-windows-static-UserMacros.cmake ${HDF5_SRC_PATH}/ZLib/UserMacros.cmake
+        COMMAND ${CMAKE_COMMAND} -E tar cfvz ${HDF5_SRC_PATH}/ZLib.tar.gz ${HDF5_SRC_PATH}/ZLib
+        DEPENDEES download
+      )
+    endif()
   endif()
 endfunction()
 ########################################
@@ -77,7 +79,7 @@ function(build_hdf5)
   # Build hdf5
   add_custom_target(hdf5_build ALL
     WORKING_DIRECTORY ${HDF5_SRC_PATH}
-    COMMAND ctest -S HDF518config.cmake,BUILD_GENERATOR=${generator},INSTALLDIR=${STAGE_DIR}/hdf5,CTEST_BUILD_CONFIGURATION=Release -C Release -VV
+    COMMAND ctest -S HDF518config.cmake,BUILD_GENERATOR=${generator},INSTALLDIR=${STAGE_DIR}/hdf5,CTEST_BUILD_CONFIGURATION=Release -C Release -VV - N
     DEPENDS hdf5
   )
 

@@ -30,10 +30,8 @@ endmacro()
 macro(opSetWindowsStaticFlags STATIC_FLAG)
   if(WIN32)
     set(CompilerFlags
-            CMAKE_CXX_FLAGS
             CMAKE_CXX_FLAGS_DEBUG
             CMAKE_CXX_FLAGS_RELEASE
-            CMAKE_C_FLAGS
             CMAKE_C_FLAGS_DEBUG
             CMAKE_C_FLAGS_RELEASE)
     if(${STATIC_FLAG} MATCHES "/MT")
