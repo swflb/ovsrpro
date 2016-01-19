@@ -22,7 +22,7 @@ if(WIN32)
   list(APPEND Zookeeper_LIB ws2_32.lib)
 else()
   # Unix just needs the .a
-  set(Zookeeper_LIB ${Zookeeper_LIBS_DIR}/libzookeeper-mt.a)
+  set(Zookeeper_LIB ${Zookeeper_LIBS_DIR}/libzookeeper_mt.a)
 endif()
 
 
@@ -33,9 +33,11 @@ include_directories(SYSTEM ${Zookeeper_INCLUDE_DIR})
 # @param[in] target The target to add zookeeper to
 # @param[in,opt] define whether to link the library as static
 macro(opAddZookeeperToTarget target static)
-  if(${static})
-    add_definitions(-DUSE_STATIC_LIB)
+  if(WIN32)
+    if(${static})
+      add_definitions(-DUSE_STATIC_LIB)
+    endif()
   endif()
 
-  target_link_libraries(${target} PUBLIC ${Zookeeper_LIB})
+  target_link_libraries(${target} ${Zookeeper_LIB})
 endmacro()

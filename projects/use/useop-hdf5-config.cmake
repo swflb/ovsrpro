@@ -30,12 +30,22 @@ if(WIN32)
   endif()
 else()
   if(CMAKE_BUILD_TYPE MATCHES DEBUG)
-    set(HDF5_C_LIBRARY ${HDF5_LIB_DIR}/libhdf5_debug.a)
-    set(HDF5_CXX_LIBRARY ${HDF5_LIB_DIR}/libhdf5_cpp_debug.a)
-    set(HDF5_HL_LIBRARY ${HDF5_LIB_DIR}/libhdf5_hl_debug.a)
-    set(HDF5_HL_CXX_LIBRARY ${HDF5_LIB_DIR}/libhdf5_hl_cpp_debug.a)
-    set(HDF5_TOOLS_LIBRARY ${HDF5_LIB_DIR}/libhdf5_tools_debug.a)
+    set(HDF5_LIBS
+      ${HDF5_LIB_DIR}/libz_debug.a
+      ${HDF5_LIB_DIR}/libszip_debug.a
+      dl
+    )
+    set(HDF5_C_LIBRARY ${HDF5_LIB_DIR}/libhdf5_debug.a ${HDF5_LIBS})
+    set(HDF5_CXX_LIBRARY ${HDF5_LIB_DIR}/libhdf5_cpp_debug.a ${HDF5_LIBS})
+    set(HDF5_HL_LIBRARY ${HDF5_LIB_DIR}/libhdf5_hl_debug.a ${HDF5_LIBS})
+    set(HDF5_HL_CXX_LIBRARY ${HDF5_LIB_DIR}/libhdf5_hl_cpp_debug.a ${HDF5_LIBS})
+    set(HDF5_TOOLS_LIBRARY ${HDF5_LIB_DIR}/libhdf5_tools_debug.a ${HDF5_LIBS})
   else()
+    set(HDF5_LIBS
+      ${HDF5_LIB_DIR}/libz.a
+      ${HDF5_LIB_DIR}/libszip.a
+      dl
+    )
     set(HDF5_C_LIBRARY ${HDF5_LIB_DIR}/libhdf5.a)
     set(HDF5_CXX_LIBRARY ${HDF5_LIB_DIR}/libhdf5_cpp.a)
     set(HDF5_HL_LIBRARY ${HDF5_LIB_DIR}/libhdf5_hl.a)

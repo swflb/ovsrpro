@@ -7,7 +7,9 @@ get_filename_component(OP_ROOTDIR ${CMAKE_CURRENT_LIST_DIR}/../.. ABSOLUTE)
 get_filename_component(OP_ROOTDIR ${OP_ROOTDIR} ABSOLUTE)
 set(QT5_BASE_PATH ${OP_ROOTDIR}/qt5)
 if(WIN32)
+
   if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+    set(QT5_MAIN_LIB ${QT5_BASE_PATH}/lib/qtmaind.lib)
     set(QT5_PLATFORM_LIB
       ${QT5_BASE_PATH}/plugins/platforms/qwindowsd.lib
       ${QT5_BASE_PATH}/plugins/imageformats/qicod.lib
@@ -21,6 +23,7 @@ if(WIN32)
       imm32.lib
       opengl32.lib)
   else()
+    set(QT5_MAIN_LIB ${QT5_BASE_PATH}/lib/qtmain.lib)
     set(QT5_PLATFORM_LIB
       ${QT5_BASE_PATH}/plugins/platforms/qwindows.lib
       ${QT5_BASE_PATH}/plugins/imageformats/qico.lib
@@ -34,6 +37,53 @@ if(WIN32)
       imm32.lib
       opengl32.lib)
   endif()
+
+    # define the qtpcre and qtharfbuzzng libraries as dependencies to QtWidgets
+    get_target_property(linked_libs
+      Qt5::Widgets INTERFACE_LINK_LIBRARIES
+    )
+    get_target_property(QT5WIDGETS_LOCATION
+      Qt5::Widgets LOCATION)
+    get_filename_component(QT5_LIB_PATH ${QT5WIDGETS_LOCATION} DIRECTORY)
+
+    set(debugpcre "${QT5_LIB_PATH}/qtpcred.lib")
+    set(debugharfbuzzng "${QT5_LIB_PATH}/qtharfbuzzngd.lib")
+    set(releasepcre "${QT5_LIB_PATH}/qtpcre.lib")
+    set(releaseharfbuzzng "${QT5_LIB_PATH}/qtharfbuzzng.lib")
+    set(releaseqwindows "${QT5_BASE_PATH}/plugins/platforms/qwindows.lib")
+    set(debugqwindows "${QT5_BASE_PATH}/plugins/platforms/qwindowsd.lib")
+
+    set(debug_gen_expr "$<$<CONFIG:Debug>:${debugpcre}>;$<$<CONFIG:Debug>:${debugharfbuzzng}>;$<$<CONFIG:Debug>:${debugqwindows}>")
+    set(nondebug_gen_expr "$<$<NOT:$<CONFIG:Debug>>:${releasepcre}>;$<$<NOT:$<CONFIG:Debug>>:${releaseharfbuzzng}>;$<$<NOT:$<CONFIG:Debug>>:${releaseqwindows}>")
+    set(gen_expr "${debug_gen_expr};${nondebug_gen_expr}")
+    set(ssl_lib ssl-s$<$<CONFIG:Debug>:d>.lib)
+    set(crypto_lib crypto-s$<$<CONFIG:Debug>:d>.lib)
+
+    set_target_properties(
+      Qt5::Widgets
+      PROPERTIES
+      INTERFACE_LINK_LIBRARIES "${gen_expr};${linked_libs}"
+    )
+    set_target_properties(
+      Qt5::Core
+      PROPERTIES
+      INTERFACE_LINK_LIBRARIES "${gen_expr};${linked_libs}"
+    )
+    set_target_properties(
+      Qt5::Network
+      PROPERTIES
+      INTERFACE_LINK_LIBRARIES "ws2_32;${ssl_lib};crypt32;msi"
+    )
+    set_target_properties(
+      Qt5::Gui
+      PROPERTIES
+      INTERFACE_LINK_LIBRARIES "${externpro_DIR}/lib/glew32.lib;glu32;opengl32"
+    )
+    set_target_properties(
+      Qt5::Sql
+      PROPERTIES
+      INTERFACE_LINK_LIBRARIES "${PSQL_LIBS}"
+    )
 endif()
 
 # find the Qt5 package
@@ -59,10 +109,4 @@ find_package(Qt5 REQUIRED COMPONENTS
              NO_CMAKE_PACKAGE_REGISTRY
              NO_CMAKE_SYSTEM_PATH
              NO_CMAKE_SYSTEM_PACKAGE_REGISTRY)
-
-if(CMAKE_BUILD_TYPE MATCHES DEBUG)
-  set(QT5_MAIN_LIB ${QT5_BASE_PATH}/lib/qtmaind.lib)
-else()
-  set(QT5_MAIN_LIB ${QT5_BASE_PATH}/lib/qtmain.lib)
-endif()
 

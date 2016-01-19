@@ -8,7 +8,7 @@ unset(PSQL_LIBRARY_DIRS CACHE)
 
 # Set the PSQL variables...
 set(PSQL_ROOT_DIR ${OP_ROOTDIR}/psql)
-set(PSQL_INCLUDE_DIR ${OP_ROOTDIR}/include/psql)
+set(PSQL_INCLUDE_DIR ${OP_ROOTDIR}/include/psql ${OPENSSL_INCLUDE_DIR})
 set(PSQL_LIB_DIR ${OP_ROOTDIR}/lib)
 
 if(WIN32)
@@ -20,9 +20,13 @@ if(WIN32)
   endif()
 else()
   if(CMAKE_BUILD_TYPE MATCHES DEBUG)
-    set(PSQL_LIBS ${PSQL_LIB_DIR}/libpqd.a)
+    set(PSQL_LIBS
+      ${PSQL_LIB_DIR}/psqldebug/libpqd.a
+    )
   else()
-    set(PSQL_LIBS ${PSQL_LIB_DIR}/libpq.a)
+    set(PSQL_LIBS
+      ${PSQL_LIB_DIR}/libpq.a
+    )
   endif()
 endif()
 

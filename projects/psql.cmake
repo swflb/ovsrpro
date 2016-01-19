@@ -121,13 +121,22 @@ function(build_psql)
     add_custom_target(psql_build ALL
       COMMENT "Configuring and building psql"
       WORKING_DIRECTORY ${PSQL_REPO_PATH}
-      COMMAND ./configure --prefix=${STAGE_DIR}/psql --libdir=${STAGE_DIR}/lib --includedir ${STAGE_DIR}/include/psql --without-readline --with-openssl
+      COMMAND ./configure --prefix=${STAGE_DIR}/psql --libdir=${STAGE_DIR}/lib --includedir ${STAGE_DIR}/include/psql --without-readline
       COMMAND make -j5
-      COMMAND make -C src/bin install
       COMMAND make -C src/include install
       COMMAND make -C src/interfaces install
       DEPENDS psql
     )
+
+    if(${XP_BUILD_DEBUG})
+      add_custom_command(TARGET psql_build POST_BUILD
+        WORKING_DIRECTORY ${PSQL_REPO_PATH}
+        COMMAND make clean
+        COMMAND ./configure --prefix=${STAGE_DIR}/psql --libdir=${STAGE_DIR}/lib/psqldebug --includedir ${STAGE_DIR}/include/psql --without-readline --enable-debug
+        COMMAND make -j5
+        COMMAND make -C src/interfaces install
+      )
+    endif()
   endif()
 
   configure_file(${PRO_DIR}/use/useop-psql-config.cmake
