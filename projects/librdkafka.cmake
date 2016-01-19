@@ -112,6 +112,7 @@ function(build_librdkafka)
       COMMAND ./configure --prefix=${STAGE_DIR}
       COMMAND make
       COMMAND make install
+      DEPENDS librdkafka_repo
     )
   endif()
 

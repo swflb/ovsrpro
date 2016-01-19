@@ -34,7 +34,7 @@ function(download_kerberos)
 endfunction()
 #######################################
 function(patch_kerberos)
-  if(NOT (XP_DEFULAT OR XP_PRO_KERBEROS))
+  if(NOT (XP_DEFAULT OR XP_PRO_KERBEROS))
     return()
   endif()
 

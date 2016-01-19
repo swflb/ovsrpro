@@ -98,7 +98,7 @@ function(build_hdf5)
 
   # build the debug version of hdf5
   if(${XP_BUILD_DEBUG})
-    add_custom_target(hdf5_build_debug
+    add_custom_target(hdf5_build_debug ALL
       WORKING_DIRECTORY ${HDF5_SRC_PATH}
       COMMAND ctest -S HDF518config.cmake,BUILD_GENERATOR=${generator},INSTALLDIR=${STAGE_DIR}/hdf5,CTEST_BUILD_CONFIGURATION=Debug -C Debug -V
       DEPENDS hdf5

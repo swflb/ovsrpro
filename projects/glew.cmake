@@ -88,7 +88,7 @@ function(build_glew)
       COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/include/GL
       COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/bin
       COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/lib
-      COMMAND ${CMAKE_COMMAND} -E copy_directory ${GLEW_SRC_PATH}/install/GL ${STAGE_DIR}/include/GL
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${GLEW_SRC_PATH}/include/GL ${STAGE_DIR}/include/GL
       COMMAND ${CMAKE_COMMAND} -E copy ${GLEW_SRC_PATH}/install/lib64/libGLEW.a ${STAGE_DIR}/lib/libGLEW.a
       COMMAND ${CMAKE_COMMAND} -E copy ${GLEW_SRC_PATH}/install/lib64/libGLEW.so.1.13.0 ${STAGE_DIR}/lib/libGLEW.so.1.13.0
       COMMAND ${CMAKE_COMMAND} -E copy_directory ${GLEW_SRC_PATH}/install/bin ${STAGE_DIR}/bin
