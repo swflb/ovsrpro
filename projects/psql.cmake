@@ -129,4 +129,8 @@ function(build_psql)
       DEPENDS psql
     )
   endif()
+
+  configure_file(${PRO_DIR}/use/useop-psql-config.cmake
+                 ${STAGE_DIR}/share/cmake/useop-psql-config.cmake
+                 COPYONLY)
 endfunction()

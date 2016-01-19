@@ -116,4 +116,8 @@ function(build_librdkafka)
     )
   endif()
 
+  configure_file(${PRO_DIR}/use/useop-librdkafka-config.cmake
+                 ${STAGE_DIR}/share/cmake/useop-librdkafka-config.cmake
+                 COPYONLY)
+
 endfunction(build_librdkafka)

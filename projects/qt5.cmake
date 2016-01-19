@@ -214,4 +214,8 @@ function(build_qt5)
     )
 
   endif()
+
+  configure_file(${PRO_DIR}/use/useop-qt5-config.cmake
+                 ${STAGE_DIR}/share/cmake/useop-qt5-config.cmake
+                 COPYONLY)
 endfunction(build_qt5)

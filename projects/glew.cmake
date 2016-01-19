@@ -107,4 +107,8 @@ function(build_glew)
       )
     endif()
   endif()
+
+  configure_file(${PRO_DIR}/use/useop-glew-config.cmake
+                 ${STAGE_DIR}/share/cmake/useop-glew-config.cmake
+                 COPYONLY)
 endfunction()

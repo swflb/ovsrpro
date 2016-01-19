@@ -159,4 +159,7 @@ function(build_zookeeper)
     )
   endif()
 
+  configure_file(${PRO_DIR}/use/useop-zookeeper-config.cmake
+                 ${STAGE_DIR}/share/cmake/useop-zookeeper-config.cmake
+                 COPYONLY)
 endfunction(build_zookeeper)
