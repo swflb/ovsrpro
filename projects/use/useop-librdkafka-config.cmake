@@ -28,14 +28,13 @@ if(WIN32)
       ${externpro_DIR}/lib/ssl-s.lib)
   endif()
 else()
-  if (CMAKE_BUILD_TYPE MATCHES DEBUG)
-    set(LIBRDKAFKA_LIBS
-      ${LIBRDKAFKA_LIBS_DIR}/librdkafka++d.a
-      ${LIBRDKAFKA_LIBS_DIR}/librdkafkad.a)
-  else()
-    set(LIBRDKAFKA_LIBS
-      ${LIBRDKAFKA_LIBS_DIR}/librdkafka++.a
-      ${LIBRDKAFKA_LIBS_DIR}/librdkafka.a)
-  endif()
-  list(APPEND LIBRDKAFKA_LIBS sasl2 z pthread rt ssl crypto)
+  set(LIBRDKAFKA_LIBS
+    ${LIBRDKAFKA_LIBS_DIR}/librdkafka++.a
+    ${LIBRDKAFKA_LIBS_DIR}/librdkafka.a
+    sasl2
+    ${ZLIB_LIBRARIES}
+    pthread
+    rt
+    ${OPENSSL_LIBRARIES}
+    crypto)
 endif()
