@@ -206,7 +206,7 @@ function(build_qt5)
     add_custom_target(qt5_build ALL
       COMMENT "Configuration complete...building qt5"
       WORKING_DIRECTORY ${QT5_REPO_PATH}
-      COMMAND make -j
+      COMMAND make -j2
       COMMAND make install
       COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake/useop-qt5-config.cmake
       COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin/qt.conf
