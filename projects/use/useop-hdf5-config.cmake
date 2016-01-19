@@ -46,11 +46,11 @@ else()
       ${HDF5_LIB_DIR}/libszip.a
       dl
     )
-    set(HDF5_C_LIBRARY ${HDF5_LIB_DIR}/libhdf5.a)
-    set(HDF5_CXX_LIBRARY ${HDF5_LIB_DIR}/libhdf5_cpp.a)
-    set(HDF5_HL_LIBRARY ${HDF5_LIB_DIR}/libhdf5_hl.a)
-    set(HDF5_HL_CXX_LIBRARY ${HDF5_LIB_DIR}/libhdf5_hl_cpp.a)
-    set(HDF5_TOOLS_LIBRARY ${HDF5_LIB_DIR}/libhdf5_tools.a)
+    set(HDF5_C_LIBRARY ${HDF5_LIB_DIR}/libhdf5.a ${HDF5_LIBS})
+    set(HDF5_CXX_LIBRARY ${HDF5_LIB_DIR}/libhdf5_cpp.a ${HDF5_LIBS})
+    set(HDF5_HL_LIBRARY ${HDF5_LIB_DIR}/libhdf5_hl.a ${HDF5_LIBS})
+    set(HDF5_HL_CXX_LIBRARY ${HDF5_LIB_DIR}/libhdf5_hl_cpp.a ${HDF5_LIBS})
+    set(HDF5_TOOLS_LIBRARY ${HDF5_LIB_DIR}/libhdf5_tools.a ${HDF5_LIBS})
   endif()
 endif()
 

@@ -30,11 +30,12 @@ if(WIN32)
 else()
   if (CMAKE_BUILD_TYPE MATCHES DEBUG)
     set(LIBRDKAFKA_LIBS
-      ${LIBRDKAFKA_LIBS_DIR}/librdkafkad.lib
-      ${LIBRDKAFKA_LIBS_DIR}/librdkafka++d.a)
+      ${LIBRDKAFKA_LIBS_DIR}/librdkafka++d.a
+      ${LIBRDKAFKA_LIBS_DIR}/librdkafkad.a)
   else()
     set(LIBRDKAFKA_LIBS
-      ${LIBRDKAFKA_LIBS_DIR}/librdkafka.lib
-      ${LIBRDKAFKA_LIBS_DIR}/librdkafka++.a)
+      ${LIBRDKAFKA_LIBS_DIR}/librdkafka++.a
+      ${LIBRDKAFKA_LIBS_DIR}/librdkafka.a)
   endif()
+  list(APPEND LIBRDKAFKA_LIBS sasl2 z pthread rt ssl crypto)
 endif()

@@ -21,7 +21,7 @@ if(WIN32)
 else()
   if(CMAKE_BUILD_TYPE MATCHES DEBUG)
     set(PSQL_LIBS
-      ${PSQL_LIB_DIR}/psqldebug/libpqd.a
+      ${PSQL_LIB_DIR}/psqldebug/libpq.a
     )
   else()
     set(PSQL_LIBS
