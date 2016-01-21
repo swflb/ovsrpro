@@ -17,11 +17,11 @@ All projects can be built as static or shared libraries.  For static windows
 builds, libraries are compiled with the /MT flag.
 
 To build an install package with these packages, perform the following steps:
-$ git clone https://github.com/distributePro/ovsrpro.git
-$ mkdir ovsrpro-build
-$ cd ovsrpro-build
-$ cmake ../ovsrpro -DXP_STEP=build -DXP_DEFAULT=1
-$ make package
+- $ git clone https://github.com/distributePro/ovsrpro.git
+- $ mkdir ovsrpro-build
+- $ cd ovsrpro-build
+- $ cmake ../ovsrpro -DXP_STEP=build -DXP_DEFAULT=1
+- $ make package
 
 For custom builds, the following cmake options are available (via the -D option)
 - XP_BUILD_DEBUG - build a debug version of the libraries along with the release
