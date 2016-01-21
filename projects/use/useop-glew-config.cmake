@@ -9,6 +9,7 @@ set(GLEW_INCLUDE_DIR ${OP_ROOTDIR}/include/GL)
 set(GLEW_LIB_DIR ${OP_ROOTDIR}/lib)
 
 if(WIN32)
+  add_definitions(/DGLEW_STATIC=1)
   if(CMAKE_BUILD_TYPE MATCHES DEBUG)
     set(GLEW_LIB ${GLEW_LIB_DIR}/glew32sd.lib)
   else()
