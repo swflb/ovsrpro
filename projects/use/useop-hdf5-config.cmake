@@ -10,8 +10,10 @@ unset(HDF5_LIBRARY_DIR CACHE)
 set(HDF5_INCLUDE_DIR ${OP_ROOTDIR}/include/hdf5)
 set(HDF5_LIB_DIR ${OP_ROOTDIR}/lib)
 
+string(TOLOWER ${CMAKE_BUILD_TYPE} build_type)
+
 if(WIN32)
-  if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+  if(${build_type} STREQUAL debug)
     set(HDF5_C_LIBRARY ${HDF5_LIB_DIR}/libhdf5_D.lib)
     set(HDF5_CXX_LIBRARY ${HDF5_LIB_DIR}/libhdf5_cpp_D.lib)
     set(HDF5_HL_LIBRARY ${HDF5_LIB_DIR}/libhdf5_hl_D.lib)
@@ -29,7 +31,7 @@ if(WIN32)
     set(HDF5_ZLIB_LIBRARY ${HDF5_LIB_DIR}/libzlib.lib)
   endif()
 else()
-  if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+  if(${build_type} STREQUAL debug)
     set(HDF5_LIBS
       ${HDF5_LIB_DIR}/libz_debug.a
       ${HDF5_LIB_DIR}/libszip_debug.a

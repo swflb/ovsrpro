@@ -11,15 +11,17 @@ set(PSQL_ROOT_DIR ${OP_ROOTDIR}/psql)
 set(PSQL_INCLUDE_DIR ${OP_ROOTDIR}/include/psql ${OPENSSL_INCLUDE_DIR})
 set(PSQL_LIB_DIR ${OP_ROOTDIR}/lib)
 
+string(TOLOWER ${CMAKE_BUILD_TYPE} build_type)
+
 if(WIN32)
-  if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+  if(${build_type} STREQUAL debug)
     set(PSQL_LIBS ${PSQL_LIB_DIR}/libpqd.lib)
   else()
     set(PSQL_LIBS
       ${PSQL_LIB_DIR}/libpq.lib)
   endif()
 else()
-  if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+  if(${build_type} STREQUAL debug)
     set(PSQL_LIBS
       ${PSQL_LIB_DIR}/psqldebug/libpq.a
     )

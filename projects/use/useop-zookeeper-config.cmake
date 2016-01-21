@@ -12,9 +12,11 @@ set(Zookeeper_INCLUDE_DIR ${OP_ROOTDIR}/include/)
 set(Zookeeper_LIBS_DIR ${OP_ROOTDIR}/lib)
 include_directories(SYSTEM ${Zookeeper_INCLUDE_DIR}/zookeeper)
 
+string(TOLOWER ${CMAKE_BUILD_TYPE} build_type)
+
 # Windows needs the .lib and the winsock library
 if(WIN32)
-  if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+  if(${build_type} STREQUAL debug)
     set(Zookeeper_LIB ${Zookeeper_LIBS_DIR}/libzookeeperd-mt.lib)
   else()
     set(Zookeeper_LIB ${Zookeeper_LIBS_DIR}/libzookeeper-mt.lib)

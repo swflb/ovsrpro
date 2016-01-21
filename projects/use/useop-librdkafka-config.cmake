@@ -13,8 +13,10 @@ include_directories(SYSTEM ${LIBRDKAFKA_INCLUDE_DIR})
 
 xpFindPkg(PKGS openssl zlib)
 
+string(TOLOWER ${CMAKE_BUILD_TYPE} build_type)
+
 if(WIN32)
-  if (CMAKE_BUILD_TYPE MATCHES DEBUG)
+  if(${build_type} STREQUAL debug)
     set(LIBRDKAFKA_LIBS
       ${LIBRDKAFKA_LIBS_DIR}/librdkafkad.lib
       ${LIBRDKAFKA_LIBS_DIR}/librdkafka++d.lib

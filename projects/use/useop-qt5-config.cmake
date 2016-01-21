@@ -6,9 +6,12 @@ endif()
 get_filename_component(OP_ROOTDIR ${CMAKE_CURRENT_LIST_DIR}/../.. ABSOLUTE)
 get_filename_component(OP_ROOTDIR ${OP_ROOTDIR} ABSOLUTE)
 set(QT5_BASE_PATH ${OP_ROOTDIR}/qt5)
+
+string(TOLOWER ${CMAKE_BUILD_TYPE} build_type)
+
 if(WIN32)
 
-  if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+  if(${build_type} STREQUAL debug)
     set(QT5_MAIN_LIB ${QT5_BASE_PATH}/lib/qtmaind.lib)
     set(QT5_PLATFORM_LIB
       ${QT5_BASE_PATH}/plugins/platforms/qwindowsd.lib
