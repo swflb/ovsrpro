@@ -53,7 +53,7 @@ function(getCompilerPrefix _ret)
   set(${_ret} ${prefix} PARENT_SCOPE)
 endfunction()
 function(getNumBits _ret)
-  if(${CMAKE_SYSTEM_NAME} STREQUAL SunOS OR CMAKE_SIZEOF_VOID_P EQUAL 8)
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(numBits 64)
   elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
     set(numBits 32)
@@ -87,6 +87,8 @@ find_path(ovsrpro_DIR
     "$ENV{${PFX86}}/ovsrpro ${ovsrpro_SIG}"
     "~/ovsrpro/ovsrpro-${ovsrpro_SIG}-${CMAKE_SYSTEM_NAME}"
     "/opt/ovsrpro/ovsrpro-${ovsrpro_SIG}-${CMAKE_SYSTEM_NAME}"
+    # symbolic link install option
+    "/opt/ovsrpro/ovsrpro"
   DOC "ovsrpro directory"
   )
 if(NOT ovsrpro_DIR)
