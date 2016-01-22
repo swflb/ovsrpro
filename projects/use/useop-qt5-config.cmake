@@ -112,3 +112,19 @@ find_package(Qt5 REQUIRED COMPONENTS
              NO_CMAKE_PACKAGE_REGISTRY
              NO_CMAKE_SYSTEM_PATH
              NO_CMAKE_SYSTEM_PACKAGE_REGISTRY)
+
+# copy the qt5 plugins to the output directory
+# @param plugin_dirs a list of plugin directories to copy
+macro(opDeployQt5Plugins plugin_dirs)
+  foreach(plugindir IN LISTS plugin_dirs)
+    get_filename_component(plugindirname ${plugindir} NAME)
+
+    file(GLOB pluginfiles ${QT5_BASE_PATH}/plugins/${plugindir}/*)
+    foreach(pluginfile ${pluginfiles})
+      get_filename_component(pluginfilename ${pluginfile} NAME)
+      file(COPY ${pluginfile}
+           DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${plugindirname}
+      )
+    endforeach()
+  endforeach()
+endmacro()
