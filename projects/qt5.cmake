@@ -11,10 +11,10 @@
 # path (e.g. C:/Program Files/ovsrpro 0.0.1-vc120-64/qt5)
 ########################################
 xpProOption(qt5)
-set(QT5_VER v5.5.0)
+set(QT5_VER v5.5.1)
 set(QT5_REPO http://code.qt.io/qt/qt5.git)
 set(QT5_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/qt5)
-set(QT5_DOWNLOAD_FILE qt-everywhere-opensource-src-5.5.0.tar.gz)
+set(QT5_DOWNLOAD_FILE qt-everywhere-opensource-src-5.5.1.tar.gz)
 set(PRO_QT5
   NAME qt5
   WEB "Qt" http://qt.io/ "Qt - Home"
@@ -24,8 +24,8 @@ set(PRO_QT5
   VER ${QT5_VER}
   GIT_ORIGIN ${QT5_REPO}
   GIT_TAG ${QT5_VER}
-  DLURL http://download.qt.io/archive/qt/5.5/5.5.0/single/${QT5_DOWNLOAD_FILE}
-  DLMD5 828594c91ba736ce2cd3e1e8a6146452
+  DLURL http://download.qt.io/archive/qt/5.5/5.5.1/single/${QT5_DOWNLOAD_FILE}
+  DLMD5 59f0216819152b77536cf660b015d784
 )
 set(QT5_REMOVE_SUBMODULES
   qtandroidextras
@@ -62,13 +62,21 @@ macro(setConfigureOptions)
   else()
     list(APPEND QT5_CONFIGURE -release)
   endif()
-  # Check if this is a static build
-  if(${XP_BUILD_STATIC})
-    list(APPEND QT5_CONFIGURE -static)
-  endif()
   if(WIN32)
+    # Check if this is a static build
+    if(${XP_BUILD_STATIC})
+      list(APPEND QT5_CONFIGURE -static)
+    endif()
     list(APPEND QT5_CONFIGURE -platform win32-msvc2013 -qmake -mp)
   else()
+    # This will be populated in the static case
+    set(PSQL_STATIC)
+    if(${XP_BUILD_STATIC})
+      list(APPEND QT5_CONFIGURE -static)
+      # Add include and library paths for postgres for static builds
+      list(APPEND PSQL_STATIC -I ${STAGE_DIR}/include/psql -L ${STAGE_DIR}/lib -lpq)
+    endif()
+    list(APPEND QT5_CONFIGURE -platform win32-msvc2013 -qmake -mp)
     list(APPEND QT5_CONFIGURE -platform linux-g++
       -c++11
       -qt-xcb
@@ -82,8 +90,12 @@ macro(setConfigureOptions)
       -no-tslib
       -no-icu
       -no-android-style-assets
-      -no-gstreamer)
+      -no-gstreamer
+      # Empty if it's not a static build
+      ${PSQL_STATIC}
+      )
   endif() # OS type
+message("The QT5 configure line is " ${QT5_CONFIGURE})
 endmacro(setConfigureOptions)
 #######################################
 # mkpatch_qt5 - initialize and clone the main repository
