@@ -5,7 +5,7 @@
 # build/configure tools: Perl >= 5.14
 #                        Python >= 2.6
 # depends: openssl from externpro
-#          psql from overseer pro
+#          psql from ovsrpro
 # After installation, the qt.conf file in OVSRPRO_INSTALL_PATH/qt5/bin
 # must be manually modified setting the "Prefix" value to the qt5 installation
 # path (e.g. C:/Program Files/ovsrpro 0.0.1-vc120-64/qt5)
@@ -62,21 +62,19 @@ macro(setConfigureOptions)
   else()
     list(APPEND QT5_CONFIGURE -release)
   endif()
+  # Check if this is a static build
+  if(${XP_BUILD_STATIC})
+    list(APPEND QT5_CONFIGURE -static)
+  endif()
   if(WIN32)
-    # Check if this is a static build
-    if(${XP_BUILD_STATIC})
-      list(APPEND QT5_CONFIGURE -static)
-    endif()
     list(APPEND QT5_CONFIGURE -platform win32-msvc2013 -qmake -mp)
   else()
-    # This will be populated in the static case
-    set(PSQL_STATIC)
     if(${XP_BUILD_STATIC})
-      list(APPEND QT5_CONFIGURE -static)
+      list(APPEND QT5_CONFIGURE
       # Add include and library paths for postgres for static builds
-      list(APPEND PSQL_STATIC -I ${STAGE_DIR}/include/psql -L ${STAGE_DIR}/lib -lpq)
+      -I ${STAGE_DIR}/include/psql
+      -L ${STAGE_DIR}/lib -lpq)
     endif()
-    list(APPEND QT5_CONFIGURE -platform win32-msvc2013 -qmake -mp)
     list(APPEND QT5_CONFIGURE -platform linux-g++
       -c++11
       -qt-xcb
@@ -90,12 +88,8 @@ macro(setConfigureOptions)
       -no-tslib
       -no-icu
       -no-android-style-assets
-      -no-gstreamer
-      # Empty if it's not a static build
-      ${PSQL_STATIC}
-      )
+      -no-gstreamer)
   endif() # OS type
-message("The QT5 configure line is " ${QT5_CONFIGURE})
 endmacro(setConfigureOptions)
 #######################################
 # mkpatch_qt5 - initialize and clone the main repository

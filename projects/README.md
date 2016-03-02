@@ -2,9 +2,10 @@
 
 |project|license|description|version|repository|patch/diff|
 |-------|-------|-----------|-------|----------|----------|
-|[GLES](http://glew.sourceforge.net/ 'The OpenGL Extension Wrangler Library')|unknown|The OpenGL Extension Wrangler Library (GLEW) is a cross-platform open-source C/C++ extension loading library.|1.13.0|none|none|
-|[HDF GROUP](http://www.hdfgroup.org 'The HDF Group')|unknown|HDF5 is a data model, library, and file format for storing and managing data|1.8.16|none|none|
-|[Kerberos](http://web.mit.edu/kerberos/ 'Kerberos')|unknown|Kerberos is a network authentication protocol|4.0.1|none|none|
-|[PostgreSQL](http://www.postgresql.org/ 'PostgreSQL')|unknown|PostgreSQL redistributable binaries|9.4.5|none|none|
-|[Qt](http://qt.io/ 'Qt - Home')|[lgpl](http://www.qt.io/qt-licensing-terms/ 'LGPL')|One Qt Code: Create Powerful Applications & Devices|v5.5.0|[repo](http://code.qt.io/qt/qt5.git 'Qt5 main repo')|none|
-|[Zookeeper](https://zookeeper.apache.org/ 'Zookeeper - Home')|[Apache V2.0](http://www.apache.org/licenses/ 'Apache V2.0')|Apache ZooKeeper is an effort to develop and maintain an open-source server which enables highly reliable distributed coordination.|release-3.4.6|[repo](https://github.com/apache/zookeeper.git 'Zookeeper main repo')|none|
+|[GLEW](http://glew.sourceforge.net/ 'The OpenGL Extension Wrangler Library')|[open](http://glew.sourceforge.net/credits.html 'Modified BSD, Mesa 3-D (MIT), and Khronos (MIT)')|The OpenGL Extension Wrangler Library (GLEW) is a cross-platform open-source C/C++ extension loading library.|1.13.0|[repo](https://github.com/nigels-com/glew 'GLEW repo on github')|none|
+|[HDF-GROUP](http://www.hdfgroup.org 'The HDF Group')|[open](https://www.hdfgroup.org/ftp/HDF5/current/src/unpacked/COPYING 'HDF5 License')|HDF5 is a data model, library, and file format for storing and managing data|1.8.16|none|none|
+|[Kerberos](http://web.mit.edu/kerberos/ 'Kerberos')|[open](http://web.mit.edu/kerberos/krb5-1.14/doc/mitK5license.html# 'MIT Kerberos License information')|Kerberos is a network authentication protocol|5.1.14|none|none|
+|[librdkafka](https://github.com/edenhill/librdkafka 'librdkafka on github')|[open](https://github.com/edenhill/librdkafka/blob/master/LICENSE 'librdkafka LICENSE file')|Apache Kafka C/C++ client library|master|[repo](https://github.com/edenhill/librdkafka 'librdkafka repo on github')|none
+|[PostgreSQL](http://www.postgresql.org/ 'PostgreSQL')|[open](http://www.postgresql.org/about/licence/ 'Postgresql license')|PostgreSQL redistributable binaries|9.4.5|[repo](https://github.com/postgres/postgres 'Mirror of the official PostgreSQL GIT repository on github')|none|
+|[Qt](http://qt.io/ 'Qt - Home')|[LGPL](http://www.qt.io/qt-licensing-terms/ 'LGPL')|One Qt Code: Create Powerful Applications & Devices|5.5.1|[repo](http://code.qt.io/cgit/qt/qt5.git 'Qt5 main repo')|none|
+|[Zookeeper](https://zookeeper.apache.org/ 'Zookeeper - Home')|[open](http://www.apache.org/licenses/ 'Apache V2.0')|Apache ZooKeeper is an effort to develop and maintain an open-source server which enables highly reliable distributed coordination.|release-3.4.6|[repo](https://github.com/apache/zookeeper.git 'Zookeeper repo on github')|none|

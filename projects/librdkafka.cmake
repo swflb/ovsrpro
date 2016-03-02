@@ -2,12 +2,12 @@
 # qt5
 ########################################
 xpProOption(librdkafka)
-set(KAFKA_VER 0.9.0)
+set(KAFKA_VER master)
 set(KAFKA_REPO https://github.com/edenhill/librdkafka)
 set(KAFKA_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/librdkafka_repo)
 set(PRO_KAFKA
   NAME librdkafka
-  WEB "librdkafk" https://github.com/edenhill/librdkafka "librdkafka"
+  WEB "librdkafka" https://github.com/edenhill/librdkafka "librdkafka"
   LICENSE "bsd2" https://github.com/edenhill/librdkafka "BSD2"
   DESC "librdkafka is a C library implementation of the Apache Kafka protocol, containing both Producer and Consumer support"
   REPO "repo" ${KAFKA_REPO}

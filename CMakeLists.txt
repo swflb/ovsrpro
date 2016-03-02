@@ -15,4 +15,7 @@ proExecuteStep()
 # move some needed cmake files into place
 configure_file(Findovsrpro.cmake ${STAGE_DIR}/share/cmake/Findovsrpro.cmake COPYONLY)
 configure_file(opfunmac.cmake ${STAGE_DIR}/share/cmake/opfunmac.cmake COPYONLY)
+configure_file(opopts.cmake.in
+  ${STAGE_DIR}/share/cmake/opopts.cmake
+  @ONLY NEWLINE_STYLE LF)
 configure_file(useop-ovsrpro.cmake ${STAGE_DIR}/share/cmake/useop-ovsrpro.cmake COPYONLY)
