@@ -10,17 +10,19 @@ set(KERBEROS_DOWNLOAD_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/kerberos)
 if(WIN32)
   set(KERBEROS_DL_URL http://web.mit.edu/kerberos/dist/kfw/4.0/kfw-4.0.1-src.zip)
   set(KERBEROS_DL_MD5 6d58ca865beb5b5c145dc4f579753d33)
+  set(KERBEROS_VER 4.0.1)
 else()
   set(KERBEROS_DL_URL http://web.mit.edu/kerberos/dist/krb5/1.14/krb5-1.14.tar.gz)
   set(KERBEROS_DL_MD5 0727968764d0208388b85ad31aafde24)
+  set(KERBEROS_VER 5.1.14)
 endif()
 #######################################
 set(PRO_KERBEROS
   NAME kerberos
   WEB "Kerberos" http://web.mit.edu/kerberos/ "Kerberos"
-  LICENSE "" "" ""
+  LICENSE "open" http://web.mit.edu/kerberos/krb5-1.14/doc/mitK5license.html "MIT Kerberos License information"
   DESC "Kerberos is a network authentication protocol"
-  VER 4.0.1
+  VER ${KERBEROS_VER}
   DLURL ${KERBEROS_DL_URL}
   DLMD5 ${KERBEROS_DL_MD5}
 )
@@ -98,11 +100,13 @@ function(build_kerberos)
       COMMAND ${CMAKE_COMMAND} -E remove_directory ${STAGE_DIR}/kerberos
       DEPENDS kerberos
     )
-  else()
+  else()    
+    # Put data where it won't be in the STAGE_DIR and copy over what is wanted later
+    set(DATA_DIR ${KERBEROS_DOWNLOAD_PATH}/data)
     add_custom_target(kerberos_build ALL
       COMMENT "Building kerberos"
       WORKING_DIRECTORY ${KERBEROS_DOWNLOAD_PATH}/src
-      COMMAND ./configure --prefix=${STAGE_DIR} --includedir=${STAGE_DIR}/include/kerberos
+      COMMAND ./configure --prefix=${STAGE_DIR} --includedir=${STAGE_DIR}/include/kerberos --datadir=${DATA_DIR} --localedir=${DATA_DIR} --mandir=${DATA_DIR} --localstatedir=${DATA_DIR}
       COMMAND make
       COMMAND make install
       DEPENDS kerberos
@@ -113,5 +117,14 @@ function(build_kerberos)
   if(CMAKE_SIZEOF_VOID_P EQUAL 4)
     set(numBits 32)
   endif()
+
+  # Copy NOTICE and README files to STAGE_DIR
+  add_custom_command(TARGET kerberos_build POST_BUILD
+    WORKING_DIRECTORY ${KERBEROS_DOWNLOAD_PATH}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/kerberos
+    COMMAND ${CMAKE_COMMAND} -E copy ${KERBEROS_DOWNLOAD_PATH}/NOTICE ${STAGE_DIR}/share/kerberos
+    COMMAND ${CMAKE_COMMAND} -E copy ${KERBEROS_DOWNLOAD_PATH}/README ${STAGE_DIR}/share/kerberos
+  )
+
   configure_file(${PRO_DIR}/use/useop-kerberos-config.cmake ${STAGE_DIR}/share/cmake/useop-kerberos-config.cmake)
 endfunction()

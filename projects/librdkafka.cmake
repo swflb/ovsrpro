@@ -1,5 +1,5 @@
 ########################################
-# qt5
+# librdkafka
 ########################################
 xpProOption(librdkafka)
 set(KAFKA_VER master)
@@ -115,6 +115,21 @@ function(build_librdkafka)
       DEPENDS librdkafka_repo
     )
   endif()
+
+  # Copy CONFIGURATION.md, INTRODUCTION.md, README.md and LICENSE files to STAGE_DIR
+  add_custom_command(TARGET librdkafka_build POST_BUILD
+    WORKING_DIRECTORY ${KAFKA_REPO_PATH}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/CONFIGURATION.md ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/INTRODUCTION.md ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/LICENSE ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/LICENSE.pycrc ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/LICENSE.queue ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/LICENSE.snappy ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/LICENSE.tinycthread ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/LICENSE.wingetopt ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/README.md ${STAGE_DIR}/share/librdkafka
+  )
 
   configure_file(${PRO_DIR}/use/useop-librdkafka-config.cmake
                  ${STAGE_DIR}/share/cmake/useop-librdkafka-config.cmake

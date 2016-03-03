@@ -221,6 +221,19 @@ function(build_qt5)
 
   endif()
 
+  # Copy the various LICENSE files to STAGE_DIR
+  add_custom_command(TARGET qt5_build POST_BUILD
+    WORKING_DIRECTORY ${QT5_REPO_PATH}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/qt5
+    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LGPL_EXCEPTION.txt ${STAGE_DIR}/share/qt5
+    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.FDL ${STAGE_DIR}/share/qt5
+    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.GPLv2 ${STAGE_DIR}/share/qt5
+    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.GPLv3 ${STAGE_DIR}/share/qt5
+    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.LGPLv21 ${STAGE_DIR}/share/qt5
+    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.LGPLv3 ${STAGE_DIR}/share/qt5
+    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.PREVIEW.COMMERCIAL ${STAGE_DIR}/share/qt5
+  )
+
   configure_file(${PRO_DIR}/use/useop-qt5-config.cmake
                  ${STAGE_DIR}/share/cmake/useop-qt5-config.cmake
                  COPYONLY)
