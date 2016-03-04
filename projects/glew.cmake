@@ -6,7 +6,7 @@ xpProOption(glew)
 set(GLEW_SRC_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/glew)
 set(PRO_GLEW
   NAME glew
-  WEB "GLES" http://glew.sourceforge.net/ "The OpenGL Extension Wrangler Library"
+  WEB "GLEW" http://glew.sourceforge.net/ "The OpenGL Extension Wrangler Library"
   LICENSE "open" http://glew.sourceforge.net/credits.html "Modified BSD, Mesa 3-D (MIT), and Khronos (MIT)"
   DESC "The OpenGL Extension Wrangler Library (GLEW) is a cross-platform open-source C/C++ extension loading library."
   REPO "repo" https://github.com/nigels-com/glew "GLEW repo on github"
