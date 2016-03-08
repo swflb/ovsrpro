@@ -5,16 +5,16 @@
 # build/configure tools: Perl >= 5.14
 #                        Python >= 2.6
 # depends: openssl from externpro
-#          psql from overseer pro
+#          psql from ovsrpro
 # After installation, the qt.conf file in OVSRPRO_INSTALL_PATH/qt5/bin
 # must be manually modified setting the "Prefix" value to the qt5 installation
 # path (e.g. C:/Program Files/ovsrpro 0.0.1-vc120-64/qt5)
 ########################################
 xpProOption(qt5)
-set(QT5_VER v5.5.0)
+set(QT5_VER v5.5.1)
 set(QT5_REPO http://code.qt.io/qt/qt5.git)
 set(QT5_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/qt5)
-set(QT5_DOWNLOAD_FILE qt-everywhere-opensource-src-5.5.0.tar.gz)
+set(QT5_DOWNLOAD_FILE qt-everywhere-opensource-src-5.5.1.tar.gz)
 set(PRO_QT5
   NAME qt5
   WEB "Qt" http://qt.io/ "Qt - Home"
@@ -24,8 +24,8 @@ set(PRO_QT5
   VER ${QT5_VER}
   GIT_ORIGIN ${QT5_REPO}
   GIT_TAG ${QT5_VER}
-  DLURL http://download.qt.io/archive/qt/5.5/5.5.0/single/${QT5_DOWNLOAD_FILE}
-  DLMD5 828594c91ba736ce2cd3e1e8a6146452
+  DLURL http://download.qt.io/archive/qt/5.5/5.5.1/single/${QT5_DOWNLOAD_FILE}
+  DLMD5 59f0216819152b77536cf660b015d784
 )
 set(QT5_REMOVE_SUBMODULES
   qtandroidextras
@@ -69,6 +69,12 @@ macro(setConfigureOptions)
   if(WIN32)
     list(APPEND QT5_CONFIGURE -platform win32-msvc2013 -qmake -mp)
   else()
+    if(${XP_BUILD_STATIC})
+      list(APPEND QT5_CONFIGURE
+      # Add include and library paths for postgres for static builds
+      -I ${STAGE_DIR}/include/psql
+      -L ${STAGE_DIR}/lib -lpq)
+    endif()
     list(APPEND QT5_CONFIGURE -platform linux-g++
       -c++11
       -qt-xcb
@@ -214,6 +220,19 @@ function(build_qt5)
     )
 
   endif()
+
+  # Copy the various LICENSE files to STAGE_DIR
+  add_custom_command(TARGET qt5_build POST_BUILD
+    WORKING_DIRECTORY ${QT5_REPO_PATH}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/qt5
+    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LGPL_EXCEPTION.txt ${STAGE_DIR}/share/qt5
+    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.FDL ${STAGE_DIR}/share/qt5
+    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.GPLv2 ${STAGE_DIR}/share/qt5
+    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.GPLv3 ${STAGE_DIR}/share/qt5
+    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.LGPLv21 ${STAGE_DIR}/share/qt5
+    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.LGPLv3 ${STAGE_DIR}/share/qt5
+    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.PREVIEW.COMMERCIAL ${STAGE_DIR}/share/qt5
+  )
 
   configure_file(${PRO_DIR}/use/useop-qt5-config.cmake
                  ${STAGE_DIR}/share/cmake/useop-qt5-config.cmake

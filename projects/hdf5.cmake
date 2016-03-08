@@ -117,6 +117,14 @@ function(build_hdf5)
     )
   endif()
 
+  # Copy COPYING and RELEASE.txt from the hdf5 install share folder to STAGE_DIR
+  add_custom_command(TARGET hdf5_build POST_BUILD
+    WORKING_DIRECTORY ${HDF5_SRC_PATH}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/hdf5
+    COMMAND ${CMAKE_COMMAND} -E copy ${BASE_INSTALL_PATH}/share/COPYING ${STAGE_DIR}/share/hdf5
+    COMMAND ${CMAKE_COMMAND} -E copy ${BASE_INSTALL_PATH}/share/RELEASE.txt ${STAGE_DIR}/share/hdf5
+  )
+
   configure_file(${PRO_DIR}/use/useop-hdf5-config.cmake
                  ${STAGE_DIR}/share/cmake/useop-hdf5-config.cmake
                  COPYONLY)

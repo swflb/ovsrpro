@@ -6,9 +6,10 @@ xpProOption(glew)
 set(GLEW_SRC_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/glew)
 set(PRO_GLEW
   NAME glew
-  WEB "GLES" http://glew.sourceforge.net/ "The OpenGL Extension Wrangler Library"
-  LICENSE "" "" ""
+  WEB "GLEW" http://glew.sourceforge.net/ "The OpenGL Extension Wrangler Library"
+  LICENSE "open" http://glew.sourceforge.net/credits.html "Modified BSD, Mesa 3-D (MIT), and Khronos (MIT)"
   DESC "The OpenGL Extension Wrangler Library (GLEW) is a cross-platform open-source C/C++ extension loading library."
+  REPO "repo" https://github.com/nigels-com/glew "GLEW repo on github"
   VER 1.13.0
   DLURL https://sourceforge.net/projects/glew/files/glew/1.13.0/glew-1.13.0.tgz/download
   DLMD5 7cbada3166d2aadfc4169c4283701066
@@ -107,6 +108,13 @@ function(build_glew)
       )
     endif()
   endif()
+
+  # Copy LICENSE file to STAGE_DIR
+  add_custom_command(TARGET glew_build POST_BUILD
+    WORKING_DIRECTORY ${GLEW_SRC_PATH}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/glew   
+    COMMAND ${CMAKE_COMMAND} -E copy ${GLEW_SRC_PATH}/LICENSE.txt ${STAGE_DIR}/share/glew    
+  )
 
   configure_file(${PRO_DIR}/use/useop-glew-config.cmake
                  ${STAGE_DIR}/share/cmake/useop-glew-config.cmake

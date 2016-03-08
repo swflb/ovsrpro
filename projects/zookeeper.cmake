@@ -159,6 +159,14 @@ function(build_zookeeper)
     )
   endif()
 
+  # Copy LICENSE.txt and NOTICE.txt files to STAGE_DIR
+  add_custom_command(TARGET zookeeper_build POST_BUILD
+    WORKING_DIRECTORY ${ZK_REPO_PATH}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/zookeeper
+    COMMAND ${CMAKE_COMMAND} -E copy ${ZK_REPO_PATH}/LICENSE.txt ${STAGE_DIR}/share/zookeeper
+    COMMAND ${CMAKE_COMMAND} -E copy ${ZK_REPO_PATH}/NOTICE.txt ${STAGE_DIR}/share/zookeeper
+  )
+
   configure_file(${PRO_DIR}/use/useop-zookeeper-config.cmake
                  ${STAGE_DIR}/share/cmake/useop-zookeeper-config.cmake
                  COPYONLY)

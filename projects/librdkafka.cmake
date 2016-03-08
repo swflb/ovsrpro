@@ -1,13 +1,13 @@
 ########################################
-# qt5
+# librdkafka
 ########################################
 xpProOption(librdkafka)
-set(KAFKA_VER 0.9.0)
-set(KAFKA_REPO https://github.com/edenhill/librdkafka)
+set(KAFKA_VER 16.03.1)
+set(KAFKA_REPO https://github.com/distributePro/librdkafka)
 set(KAFKA_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/librdkafka_repo)
 set(PRO_KAFKA
   NAME librdkafka
-  WEB "librdkafk" https://github.com/edenhill/librdkafka "librdkafka"
+  WEB "librdkafka" https://github.com/edenhill/librdkafka "librdkafka"
   LICENSE "bsd2" https://github.com/edenhill/librdkafka "BSD2"
   DESC "librdkafka is a C library implementation of the Apache Kafka protocol, containing both Producer and Consumer support"
   REPO "repo" ${KAFKA_REPO}
@@ -115,6 +115,21 @@ function(build_librdkafka)
       DEPENDS librdkafka_repo
     )
   endif()
+
+  # Copy CONFIGURATION.md, INTRODUCTION.md, README.md and LICENSE files to STAGE_DIR
+  add_custom_command(TARGET librdkafka_build POST_BUILD
+    WORKING_DIRECTORY ${KAFKA_REPO_PATH}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/CONFIGURATION.md ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/INTRODUCTION.md ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/LICENSE ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/LICENSE.pycrc ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/LICENSE.queue ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/LICENSE.snappy ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/LICENSE.tinycthread ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/LICENSE.wingetopt ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/README.md ${STAGE_DIR}/share/librdkafka
+  )
 
   configure_file(${PRO_DIR}/use/useop-librdkafka-config.cmake
                  ${STAGE_DIR}/share/cmake/useop-librdkafka-config.cmake

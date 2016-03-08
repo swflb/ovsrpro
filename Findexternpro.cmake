@@ -74,7 +74,6 @@ getCompilerPrefix(COMPILER)
 getNumBits(BITS)
 set(externpro_SIG ${externpro_REV}-${COMPILER}-${BITS})
 set(PFX86 "ProgramFiles(x86)")
-message("looking: $ENV{ProgramW6432}/externpro ${externpro_SIG}")
 find_path(externpro_DIR
   NAMES
     externpro_${externpro_SIG}.txt
