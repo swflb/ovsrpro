@@ -2,8 +2,8 @@
 # librdkafka
 ########################################
 xpProOption(librdkafka)
-set(KAFKA_VER master)
-set(KAFKA_REPO https://github.com/edenhill/librdkafka)
+set(KAFKA_VER 16.03.1)
+set(KAFKA_REPO https://github.com/distributePro/librdkafka)
 set(KAFKA_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/librdkafka_repo)
 set(PRO_KAFKA
   NAME librdkafka
