@@ -2,18 +2,18 @@
 # librdkafka
 ########################################
 xpProOption(librdkafka)
-set(KAFKA_VER 16.03.1)
-set(KAFKA_REPO https://github.com/distributePro/librdkafka)
-set(KAFKA_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/librdkafka_repo)
-set(PRO_KAFKA
+set(LIBRDKAFKA_VER 16.03.1)
+set(LIBRDKAFKA_REPO https://github.com/distributePro/librdkafka)
+set(LIBRDKAFKA_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/librdkafka_repo)
+set(PRO_LIBRDKAFKA
   NAME librdkafka
-  WEB "librdkafka" https://github.com/edenhill/librdkafka "librdkafka"
-  LICENSE "bsd2" https://github.com/edenhill/librdkafka "BSD2"
+  WEB "librdkafka" https://github.com/edenhill/librdkafka "librdkafka on github"
+  LICENSE "open" https://github.com/edenhill/librdkafka/blob/master/LICENSE "2-clause BSD license"
   DESC "librdkafka is a C library implementation of the Apache Kafka protocol, containing both Producer and Consumer support"
-  REPO "repo" ${KAFKA_REPO}
-  VER ${KAFKA_VER}
-  GIT_ORIGIN ${KAFKA_REPO}
-  GIT_TAG ${KAFKA_VER}
+  REPO "repo" ${LIBRDKAFKA_REPO} "distributePro fork of librdkafka repo on github"
+  VER ${LIBRDKAFKA_VER}
+  GIT_ORIGIN ${LIBRDKAFKA_REPO}
+  GIT_TAG ${LIBRDKAFKA_VER}  
 )
 ########################################
 # mkpatch_librdkafka
@@ -22,7 +22,7 @@ function(mkpatch_librdkafka)
     return()
   endif()
 
-  xpRepo(${PRO_KAFKA})
+  xpRepo(${PRO_LIBRDKAFKA})
 endfunction(mkpatch_librdkafka)
 ########################################
 # download
@@ -31,7 +31,7 @@ function(download_librdkafka)
     return()
   endif()
 
-  xpRepo(${PRO_KAFKA})
+  xpRepo(${PRO_LIBRDKAFKA})
 endfunction(download_librdkafka)
 ########################################
 # patch
@@ -41,7 +41,7 @@ function(patch_librdkafka)
   endif()
 
   if(NOT TARGET librdkafka_repo)
-    xpRepo(${PRO_KAFKA})
+    xpRepo(${PRO_LIBRDKAFKA})
   endif()
 
   if(WIN32)
@@ -51,7 +51,7 @@ function(patch_librdkafka)
                    ${tmpPatchFile} NEWLINE_STYLE UNIX)
 MESSAGE("CONFIGURED!!!")
     ExternalProject_Add_Step(librdkafka_repo librdkafka_win_patch
-      WORKING_DIRECTORY ${KAFKA_REPO_PATH}
+      WORKING_DIRECTORY ${LIBRDKAFKA_REPO_PATH}
       COMMAND ${GIT_EXECUTABLE} apply ${tmpPatchFile}
       DEPENDEES patch
     )
@@ -82,21 +82,21 @@ function(build_librdkafka)
 
   # define the header files
   set(hdr_files
-    ${KAFKA_REPO_PATH}/src/rdkafka.h
-    ${KAFKA_REPO_PATH}/src-cpp/rdkafkacpp.h
+    ${LIBRDKAFKA_REPO_PATH}/src/rdkafka.h
+    ${LIBRDKAFKA_REPO_PATH}/src-cpp/rdkafkacpp.h
   )
 
   if(WIN32)
     add_custom_target(librdkafka_build ALL
-      WORKING_DIRECTORY ${KAFKA_REPO_PATH}/win32
+      WORKING_DIRECTORY ${LIBRDKAFKA_REPO_PATH}/win32
       COMMAND msbuild librdkafka.sln /p:Configuration=Release\;Platform=x64 /t:librdkafka:rebuild
       COMMAND msbuild librdkafka.sln /p:Configuration=Release\;Platform=x64 /t:librdkafkacpp:rebuild
       COMMAND msbuild librdkafka.sln /p:Configuration=Debug\;Platform=x64 /t:librdkafka:rebuild
       COMMAND msbuild librdkafka.sln /p:Configuration=Debug\;Platform=x64 /t:librdkafkacpp:rebuild
-      COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/win32/x64/Debug/librdkafkad.lib ${STAGE_DIR}/lib/librdkafkad.lib
-      COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/win32/x64/Debug/librdkafka++d.lib ${STAGE_DIR}/lib/librdkafka++d.lib
-      COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/win32/x64/Release/librdkafka.lib ${STAGE_DIR}/lib/librdkafka.lib
-      COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/win32/x64/Release/librdkafka++.lib ${STAGE_DIR}/lib/librdkafka++.lib
+      COMMAND ${CMAKE_COMMAND} -E copy ${LIBRDKAFKA_REPO_PATH}/win32/x64/Debug/librdkafkad.lib ${STAGE_DIR}/lib/librdkafkad.lib
+      COMMAND ${CMAKE_COMMAND} -E copy ${LIBRDKAFKA_REPO_PATH}/win32/x64/Debug/librdkafka++d.lib ${STAGE_DIR}/lib/librdkafka++d.lib
+      COMMAND ${CMAKE_COMMAND} -E copy ${LIBRDKAFKA_REPO_PATH}/win32/x64/Release/librdkafka.lib ${STAGE_DIR}/lib/librdkafka.lib
+      COMMAND ${CMAKE_COMMAND} -E copy ${LIBRDKAFKA_REPO_PATH}/win32/x64/Release/librdkafka++.lib ${STAGE_DIR}/lib/librdkafka++.lib
       DEPENDS librdkafka_repo
     )
     # copy the header files to the staging area
@@ -108,7 +108,7 @@ function(build_librdkafka)
     endforeach()
   else()
     add_custom_target(librdkafka_build ALL
-      WORKING_DIRECTORY ${KAFKA_REPO_PATH}
+      WORKING_DIRECTORY ${LIBRDKAFKA_REPO_PATH}
       COMMAND ./configure --prefix=${STAGE_DIR}
       COMMAND make
       COMMAND make install
@@ -118,17 +118,17 @@ function(build_librdkafka)
 
   # Copy CONFIGURATION.md, INTRODUCTION.md, README.md and LICENSE files to STAGE_DIR
   add_custom_command(TARGET librdkafka_build POST_BUILD
-    WORKING_DIRECTORY ${KAFKA_REPO_PATH}
+    WORKING_DIRECTORY ${LIBRDKAFKA_REPO_PATH}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/librdkafka
-    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/CONFIGURATION.md ${STAGE_DIR}/share/librdkafka
-    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/INTRODUCTION.md ${STAGE_DIR}/share/librdkafka
-    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/LICENSE ${STAGE_DIR}/share/librdkafka
-    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/LICENSE.pycrc ${STAGE_DIR}/share/librdkafka
-    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/LICENSE.queue ${STAGE_DIR}/share/librdkafka
-    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/LICENSE.snappy ${STAGE_DIR}/share/librdkafka
-    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/LICENSE.tinycthread ${STAGE_DIR}/share/librdkafka
-    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/LICENSE.wingetopt ${STAGE_DIR}/share/librdkafka
-    COMMAND ${CMAKE_COMMAND} -E copy ${KAFKA_REPO_PATH}/README.md ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${LIBRDKAFKA_REPO_PATH}/CONFIGURATION.md ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${LIBRDKAFKA_REPO_PATH}/INTRODUCTION.md ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${LIBRDKAFKA_REPO_PATH}/LICENSE ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${LIBRDKAFKA_REPO_PATH}/LICENSE.pycrc ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${LIBRDKAFKA_REPO_PATH}/LICENSE.queue ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${LIBRDKAFKA_REPO_PATH}/LICENSE.snappy ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${LIBRDKAFKA_REPO_PATH}/LICENSE.tinycthread ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${LIBRDKAFKA_REPO_PATH}/LICENSE.wingetopt ${STAGE_DIR}/share/librdkafka
+    COMMAND ${CMAKE_COMMAND} -E copy ${LIBRDKAFKA_REPO_PATH}/README.md ${STAGE_DIR}/share/librdkafka
   )
 
   configure_file(${PRO_DIR}/use/useop-librdkafka-config.cmake

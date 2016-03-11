@@ -10,16 +10,16 @@ set(ZK_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo)
 set(ZK_SRC_PATH ${ZK_REPO_PATH}/src/c/src)
 set(ZK_INCLUDE_PATH ${ZK_REPO_PATH}/src/c/include)
 set(ZK_INSTALL_PATH ${CMAKE_BINARY_DIR}/xpbase/Install/zookeeper)
-set(ZK_VER "release-3.4.6")
+set(ZK_VER 3.4.6)
 set(PRO_ZOOKEEPER
   NAME zookeeper
   WEB "Zookeeper" https://zookeeper.apache.org/ "Zookeeper - Home"
-  LICENSE "Apache V2.0" http://www.apache.org/licenses/ "Apache V2.0"
+  LICENSE "open" http://www.apache.org/licenses/ "Apache V2.0"
   DESC "Apache ZooKeeper is an effort to develop and maintain an open-source server which enables highly reliable distributed coordination."
   REPO "repo" ${ZK_REPO} "Zookeeper main repo"
   VER ${ZK_VER}
   GIT_ORIGIN ${ZK_REPO}
-  GIT_TAG ${ZK_VER}
+  GIT_TAG release-${ZK_VER}
 )
 set(CPP_UNIT_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/cppunit)
 set(CPP_UNIT_VER 1.12.1)

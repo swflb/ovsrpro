@@ -132,7 +132,7 @@ if(WIN32)
       INTERFACE_LINK_LIBRARIES "${PSQL_LIBS}"
     )
 else() # Not WIN32
-  if(OP_BUILD_STATIC)    
+  if(OP_BUILD_STATIC)
     # Link libs for using Qt plugins (should cover all of them but not all have been tested)
     # To statically link the plugins should just need to include Q_IMPORT_PLUGIN(thePlugin)
     # to the source file needing the plugin, then add ${QT5_PLUGIN_LIBS} to the executable

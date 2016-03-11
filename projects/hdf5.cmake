@@ -12,8 +12,8 @@ else()
 endif()
 set(PRO_HDF5
   NAME hdf5
-  WEB "HDF GROUP" http://www.hdfgroup.org "The HDF Group"
-  LICENSE "" "" ""
+  WEB "HDF-GROUP" http://www.hdfgroup.org "The HDF Group"
+  LICENSE "open" https://www.hdfgroup.org/ftp/HDF5/current/src/unpacked/COPYING "HDF5 License"
   DESC "HDF5 is a data model, library, and file format for storing and managing data"
   VER 1.8.16
   DLURL ${HDF5_DLURL}

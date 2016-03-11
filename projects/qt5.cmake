@@ -11,19 +11,19 @@
 # path (e.g. C:/Program Files/ovsrpro 0.0.1-vc120-64/qt5)
 ########################################
 xpProOption(qt5)
-set(QT5_VER v5.5.1)
-set(QT5_REPO http://code.qt.io/qt/qt5.git)
+set(QT5_VER 5.5.1)
+set(QT5_REPO http://code.qt.io/cgit/qt/qt5.git)
 set(QT5_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/qt5)
 set(QT5_DOWNLOAD_FILE qt-everywhere-opensource-src-5.5.1.tar.gz)
 set(PRO_QT5
   NAME qt5
   WEB "Qt" http://qt.io/ "Qt - Home"
-  LICENSE "lgpl" http://www.qt.io/qt-licensing-terms/ "LGPL"
+  LICENSE "LGPL" http://www.qt.io/qt-licensing-terms/ "LGPL"
   DESC "One Qt Code: Create Powerful Applications & Devices"
   REPO "repo" ${QT5_REPO} "Qt5 main repo"
   VER ${QT5_VER}
   GIT_ORIGIN ${QT5_REPO}
-  GIT_TAG ${QT5_VER}
+  GIT_TAG v${QT5_VER}
   DLURL http://download.qt.io/archive/qt/5.5/5.5.1/single/${QT5_DOWNLOAD_FILE}
   DLMD5 59f0216819152b77536cf660b015d784
 )
@@ -165,7 +165,7 @@ function(build_qt5)
 
   # Make sure the psql target this depends on has been created
   if(NOT (XP_DEFAULT OR XP_PRO_PSQL))
-    message(FATAL "qt5 requires psql")
+    message(FATAL_ERROR "qt5 requires psql")
     return()
   endif()
 
@@ -212,7 +212,7 @@ function(build_qt5)
     add_custom_target(qt5_build ALL
       COMMENT "Configuration complete...building qt5"
       WORKING_DIRECTORY ${QT5_REPO_PATH}
-      COMMAND make -j2
+      COMMAND make -j4
       COMMAND make install
       COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake/useop-qt5-config.cmake
       COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin/qt.conf
