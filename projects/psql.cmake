@@ -6,16 +6,20 @@ xpProOption(psql)
 # setup some pathing variables
 set(PSQL_DOWNLOAD_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/psql)
 set(PSQL_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/psql)
+set(PSQL_REPO https://github.com/postgres/postgres)
+set(VER 9.4.5)
+string(REPLACE "." "_" VER_ ${VER})
 #######################################
 # setup the postgres sql download
 set(PRO_PSQL
   NAME psql
   WEB "PostgreSQL" http://www.postgresql.org/ "PostgreSQL"
-  LICENSE "" "" ""
-  DESC "PostgreSQL redistributable binaries"
-  VER 9.4.5
-  GIT_ORIGIN https://github.com/postgres/postgres.git
-  GIT_TAG REL9_4_5
+  LICENSE "open" http://www.postgresql.org/about/licence "PostgreSQL license"
+  DESC "PostgreSQL redistributable binaries"  
+  REPO "repo" ${PSQL_REPO} "Mirror of the official PostgreSQL GIT repository on github"
+  VER ${VER}
+  GIT_ORIGIN ${PSQL_REPO}.git
+  GIT_TAG REL${VER_}
   DLURL https://ftp.postgresql.org/pub/source/v9.4.5/postgresql-9.4.5.tar.gz
   DLMD5 1ae5b653dfb5d88ce237b865c7d3d1cd
 )

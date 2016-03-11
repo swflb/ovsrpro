@@ -1,0 +1,67 @@
+diff --git a/qwtconfig.pri b/qwtconfig.pri
+index 7adefe2..1b6bc8b 100644
+--- a/qwtconfig.pri
++++ b/qwtconfig.pri
+@@ -16,20 +16,12 @@ QWT_VERSION      = $${QWT_VER_MAJ}.$${QWT_VER_MIN}.$${QWT_VER_PAT}
+ # Install paths
+ ######################################################################
+ 
+-QWT_INSTALL_PREFIX = $$[QT_INSTALL_PREFIX]
++#INSTALL_PATH is provided on the command line with the qmake command
++QWT_INSTALL_PREFIX = $$INSTALL_PATH
++message(Install path is $$INSTALL_PATH)
+ 
+-unix {
+-    QWT_INSTALL_PREFIX    = /usr/local/qwt-$$QWT_VERSION
+-    # QWT_INSTALL_PREFIX = /usr/local/qwt-$$QWT_VERSION-qt-$$QT_VERSION
+-}
+-
+-win32 {
+-    QWT_INSTALL_PREFIX    = C:/Qwt-$$QWT_VERSION
+-    # QWT_INSTALL_PREFIX = C:/Qwt-$$QWT_VERSION-qt-$$QT_VERSION
+-}
+-
+-QWT_INSTALL_DOCS      = $${QWT_INSTALL_PREFIX}/doc
+-QWT_INSTALL_HEADERS   = $${QWT_INSTALL_PREFIX}/include
++QWT_INSTALL_DOCS      = $${QWT_INSTALL_PREFIX}/share/qwt/doc
++QWT_INSTALL_HEADERS   = $${QWT_INSTALL_PREFIX}/include/qwt
+ QWT_INSTALL_LIBS      = $${QWT_INSTALL_PREFIX}/lib
+ 
+ ######################################################################
+@@ -42,7 +34,7 @@ QWT_INSTALL_LIBS      = $${QWT_INSTALL_PREFIX}/lib
+ # runtime environment of designer/creator.
+ ######################################################################
+ 
+-QWT_INSTALL_PLUGINS   = $${QWT_INSTALL_PREFIX}/plugins/designer
++QWT_INSTALL_PLUGINS   = $${QWT_INSTALL_PREFIX}/lib/qwt/plugins/designer
+ 
+ # linux distributors often organize the Qt installation
+ # their way and QT_INSTALL_PREFIX doesn't offer a good
+@@ -63,7 +55,7 @@ QWT_INSTALL_PLUGINS   = $${QWT_INSTALL_PREFIX}/plugins/designer
+ # with every Qt upgrade. 
+ ######################################################################
+ 
+-QWT_INSTALL_FEATURES  = $${QWT_INSTALL_PREFIX}/features
++QWT_INSTALL_FEATURES  = $${QWT_INSTALL_PREFIX}/share/qwt/features
+ # QWT_INSTALL_FEATURES  = $$[QT_INSTALL_PREFIX]/features
+ 
+ ######################################################################
+@@ -72,7 +64,17 @@ QWT_INSTALL_FEATURES  = $${QWT_INSTALL_PREFIX}/features
+ # it will be a static library.
+ ######################################################################
+ 
+-QWT_CONFIG           += QwtDll
++# STATIC_BUILD is provided on the command line with the qmake command
++STATIC = $$STATIC_BUILD
++
++equals(STATIC, "true") {
++  message(Building a static library)
++}
++
++!equals(STATIC, "true") {
++  QWT_CONFIG		+= QwtDll
++  message(Building a shared library))
++}
+ 
+ ######################################################################
+ # QwtPlot enables all classes, that are needed to use the QwtPlot 
