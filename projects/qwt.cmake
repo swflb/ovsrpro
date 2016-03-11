@@ -55,20 +55,17 @@ function(build_qwt)
   endif()
 
   if(${XP_BUILD_STATIC})
-    add_custom_target(qwt_configure ALL
-      WORKING_DIRECTORY ${QWT_SRC_PATH}
-      # Invoke qmake from the QT5 that was just built
-      COMMAND ${STAGE_DIR}/qt5/bin/qmake qwt.pro "INSTALL_PATH=${STAGE_DIR}" "STATIC_BUILD=true"
-      DEPENDS qwt qt5_build
-    )
+    set(STATIC_FLAG true)
   else()
-    add_custom_target(qwt_configure ALL
-      WORKING_DIRECTORY ${QWT_SRC_PATH}
-      # Invoke qmake from the QT5 that was just built
-      COMMAND ${STAGE_DIR}/qt5/bin/qmake qwt.pro "INSTALL_PATH=${STAGE_DIR}" "STATIC_BUILD=false"
-      DEPENDS qwt qt5_build
-    )
+    set(STATIC_FLAG false)
   endif()
+
+  add_custom_target(qwt_configure ALL
+    WORKING_DIRECTORY ${QWT_SRC_PATH}
+    # Invoke qmake from the QT5 that was just built
+    COMMAND ${STAGE_DIR}/qt5/bin/qmake qwt.pro "INSTALL_PATH=${STAGE_DIR}" "STATIC_BUILD=${STATIC_FLAG}"
+    DEPENDS qwt qt5_build
+  )
 
   # Haven't tested building on windows but this *should* work...
   if(WIN32)
