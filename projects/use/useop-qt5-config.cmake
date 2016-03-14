@@ -235,7 +235,7 @@ endif()
 
 # copy the qt5 plugins to the output directory (not needed if statically linking)
 # @param plugin_dirs a list of plugin directories to copy
-macro(opDeployQt5Plugins plugin_dirs)
+macro(opDeployQt5Plugins destination plugin_dirs)
   foreach(plugindir IN LISTS plugin_dirs)
     get_filename_component(plugindirname ${plugindir} NAME)
 
@@ -243,7 +243,7 @@ macro(opDeployQt5Plugins plugin_dirs)
     foreach(pluginfile ${pluginfiles})
       get_filename_component(pluginfilename ${pluginfile} NAME)
       file(COPY ${pluginfile}
-           DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${plugindirname}
+           DESTINATION ${destination}/${plugindirname}
       )
     endforeach()
   endforeach()
