@@ -22,18 +22,18 @@ function(getCompilerPrefix _ret)
     elseif(MSVC60)
       set(prefix vc60)
     else()
-      message(SEND_ERROR "functions.cmake: MSVC compiler support lacking")
+      message(SEND_ERROR "Findexternpro.cmake: MSVC compiler support lacking")
     endif()
   elseif(CMAKE_COMPILER_IS_GNUCXX)
     exec_program(${CMAKE_CXX_COMPILER}
       ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
       OUTPUT_VARIABLE GCC_VERSION
       )
-    string(REGEX REPLACE "([0-9]+)\\.([0-9]+)(\\.[0-9]+)?" "\\1\\2"
+    string(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)?" "\\1\\2\\3"
       GCC_VERSION ${GCC_VERSION}
       )
     set(prefix gcc${GCC_VERSION})
-  elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") # LLVM Clang (clang.llvm.org)
+  elseif(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang") # LLVM/Apple Clang (clang.llvm.org)
     if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
       exec_program(${CMAKE_CXX_COMPILER}
         ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
@@ -50,7 +50,7 @@ function(getCompilerPrefix _ret)
         )
     endif()
   else()
-    message(SEND_ERROR "functions.cmake: compiler support lacking")
+    message(SEND_ERROR "Findexternpro.cmake: compiler support lacking: ${CMAKE_CXX_COMPILER_ID}")
   endif()
   set(${_ret} ${prefix} PARENT_SCOPE)
 endfunction()
@@ -92,10 +92,14 @@ find_path(externpro_DIR
   DOC "externpro directory"
   )
 if(NOT externpro_DIR)
-  message(FATAL_ERROR "externpro ${externpro_SIG} not found")
+  if(DEFINED externpro_INSTALLER_LOCATION)
+    message(FATAL_ERROR "externpro ${externpro_SIG} not found.\n${externpro_INSTALLER_LOCATION}")
+  else()
+    message(FATAL_ERROR "externpro ${externpro_SIG} not found")
+  endif()
 else()
-  set(findFile ${externpro_DIR}/share/cmake/Findexternpro.cmake)
-  set(useFile ${externpro_DIR}/share/cmake/usexp-externpro.cmake)
+  set(moduleDir ${externpro_DIR}/share/cmake)
+  set(findFile ${moduleDir}/Findexternpro.cmake)
   execute_process(COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_CURRENT_LIST_FILE} ${findFile}
     RESULT_VARIABLE filesDiff
     OUTPUT_QUIET
@@ -107,5 +111,8 @@ else()
     message(AUTHOR_WARNING "Find scripts don't match. You may want to update the local with the externpro version.")
   endif()
   message(STATUS "Found externpro: ${externpro_DIR}")
-  include(${useFile})
+  list(APPEND XP_MODULE_PATH ${moduleDir})
+  if(EXISTS ${moduleDir}/xpfunmac.cmake)
+    include(${moduleDir}/xpfunmac.cmake)
+  endif()
 endif()

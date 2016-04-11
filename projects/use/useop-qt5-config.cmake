@@ -22,6 +22,7 @@ endmacro()
 get_filename_component(OP_ROOTDIR ${CMAKE_CURRENT_LIST_DIR}/../.. ABSOLUTE)
 get_filename_component(OP_ROOTDIR ${OP_ROOTDIR} ABSOLUTE)
 set(QT5_BASE_PATH ${OP_ROOTDIR}/qt5)
+set(QT5_PLUGIN_PATH ${OP_ROOTDIR}/qt5/plugins)
 
 # find the Qt5 package
 # Note - This is not an exhaustive list, if new ones are needed add them here and
@@ -234,6 +235,7 @@ else() # Not WIN32
 endif()
 
 # copy the qt5 plugins to the output directory (not needed if statically linking)
+# @param destination is the destination path for the copy
 # @param plugin_dirs a list of plugin directories to copy
 macro(opDeployQt5Plugins destination plugin_dirs)
   foreach(plugindir IN LISTS plugin_dirs)
