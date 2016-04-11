@@ -21,7 +21,7 @@ else()
   if(${build_type} STREQUAL debug)
     set(GLEW_LIB ${GLEW_LIB_DIR}/libGLEW.a)
   else()
-    set(GLEW_LIB ${GLEW_LIB_DIR}/libGLEWd.a)
+    set(GLEW_LIB ${GLEW_LIB_DIR}/glewdebug/libGLEWd.a)
   endif()
 endif()
 

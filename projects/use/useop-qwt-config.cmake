@@ -25,4 +25,5 @@ if(OP_BUILD_STATIC)
   endif()
 endif()
 
+link_directories(${QWT_LIB_DIR})
 include_directories(SYSTEM ${QWT_INCLUDE_DIR})
