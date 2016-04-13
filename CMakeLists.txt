@@ -12,11 +12,7 @@ if(PACKAGE_TYPE AND ${XP_STEP} STREQUAL "build")
   set(CPACK_GENERATOR ${PACKAGE_TYPE})
   set(CPACK_PACKAGE_RELOCATABLE FALSE)
   set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE)
-  # Call proGetBuildLists and proSetStageDir here to populate some needed variables
-  # (i.e. GIT_REV) these are also called by the cmake-generated pro_build.cmake file  
-  proGetBuildLists()
-  proSetStageDir()
-  set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/${PROJECT_NAME}/${PROJECT_NAME}-${GIT_REV}-${CMAKE_SYSTEM_NAME}")
+  set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/${PROJECT_NAME}")
   if(PACKAGE_TYPE STREQUAL "RPM")
     # Older versions of cmake have issues with the @ symbol in some names in the Qt library when building an RPM
     cmake_minimum_required(VERSION 3.3)
