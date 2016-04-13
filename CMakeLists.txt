@@ -18,6 +18,8 @@ if(PACKAGE_TYPE AND ${XP_STEP} STREQUAL "build")
   proSetStageDir()
   set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/${PROJECT_NAME}/${PROJECT_NAME}-${GIT_REV}-${CMAKE_SYSTEM_NAME}")
   if(PACKAGE_TYPE STREQUAL "RPM")
+    # Older versions of cmake have issues with the @ symbol in some names in the Qt library when building an RPM
+    cmake_minimum_required(VERSION 3.3)
     # This will add the ovsrpro libraries to the LD_LIBRARY_PATH environment variable
     configure_file(ovsrprolibs.in ${CMAKE_BINARY_DIR}/ovsrprolibs @ONLY NEWLINE_STYLE LF)
     set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_BINARY_DIR}/ovsrprolibs)
