@@ -32,6 +32,10 @@ For custom builds, the following cmake options are available (via the -D option)
   of the packages, set XP_DEFAULT=0 and specify the individual packages desired.
 - XP_STEP - may be used to define which steps to complete of the build process
           - see the externpro documentation for available options
+- PACKAGE_TYPE - optionally specify a non-default CPACK_GENERATOR to use, if not
+  present the default STGZ generator is used. (RPM is the only other generator
+  type that has been tested)
+
 Available package options when XP_DEFAULT=0 or is not defined
 -XP_PRO_GLEW - build the GLEW package
 -XP_PRO_HDF5 - build the HDF5 package
