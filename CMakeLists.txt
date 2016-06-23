@@ -21,6 +21,9 @@ if(PACKAGE_TYPE AND ${XP_STEP} STREQUAL "build")
     set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_BINARY_DIR}/ovsrproconf.sh)
     # This will remove the ovsrpro.conf file from /etc/ld.so.conf.d/ and run ldconfig on uninstall
     set(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/removeovsrproconf.sh)
+    # This is a workaround for removing some unwanted duplicate paths in the resulting RPM
+    # The proper way to correct the issue would be to convert the projects to use cmake (as externpro's build system expects)
+    set(CPACK_RPM_USER_BINARY_SPECFILE ${CMAKE_CURRENT_SOURCE_DIR}/ovsrpro.spec.in)
   endif()
 endif()
 proExecuteStep()
