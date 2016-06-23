@@ -1,2 +1,0 @@
-echo export LD_LIBRARY_PATH='$LD_LIBRARY_PATH:@CPACK_PACKAGING_INSTALL_PREFIX@/qt5/lib:@CPACK_PACKAGING_INSTALL_PREFIX@/lib' > /etc/profile.d/ovsrprolibs.sh
-echo "A new terminal session is required for the added libraries to be included in the appropriate environment variables"

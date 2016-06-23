@@ -1,0 +1,2 @@
+echo -e '@CPACK_PACKAGING_INSTALL_PREFIX@/qt5/lib\n@CPACK_PACKAGING_INSTALL_PREFIX@/lib' > /etc/ld.so.conf.d/ovsrpro.conf
+ldconfig

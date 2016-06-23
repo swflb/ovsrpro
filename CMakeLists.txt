@@ -16,11 +16,14 @@ if(PACKAGE_TYPE AND ${XP_STEP} STREQUAL "build")
   if(PACKAGE_TYPE STREQUAL "RPM")
     # Older versions of cmake have issues with the @ symbol in some names in the Qt library when building an RPM
     cmake_minimum_required(VERSION 3.3)
-    # This will add the ovsrpro libraries to the LD_LIBRARY_PATH environment variable
-    configure_file(ovsrprolibs.in ${CMAKE_BINARY_DIR}/ovsrprolibs @ONLY NEWLINE_STYLE LF)
-    set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_BINARY_DIR}/ovsrprolibs)
-    # This will remove the ovsrpro libraries from the LD_LIBRARY_PATH on uninstall
-    set(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/removeovsrprolibs)
+    # This will expose the shared object files in ovsrpro by adding a .conf file to /etc/ld.so.conf.d/ and run ldconfig
+    configure_file(ovsrproconf.sh.in ${CMAKE_BINARY_DIR}/ovsrproconf.sh @ONLY NEWLINE_STYLE LF)
+    set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_BINARY_DIR}/ovsrproconf.sh)
+    # This will remove the ovsrpro.conf file from /etc/ld.so.conf.d/ and run ldconfig on uninstall
+    set(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/removeovsrproconf.sh)
+    # This is a workaround for removing some unwanted duplicate paths in the resulting RPM
+    # The proper way to correct the issue would be to convert the projects to use cmake (as externpro's build system expects)
+    set(CPACK_RPM_USER_BINARY_SPECFILE ${CMAKE_CURRENT_SOURCE_DIR}/ovsrpro.spec.in)
   endif()
 endif()
 proExecuteStep()

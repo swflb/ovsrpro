@@ -95,8 +95,8 @@ function(build_glew)
   # Copy LICENSE file to STAGE_DIR
   add_custom_command(TARGET glew_build POST_BUILD
     WORKING_DIRECTORY ${GLEW_SRC_PATH}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/glew   
-    COMMAND ${CMAKE_COMMAND} -E copy ${GLEW_SRC_PATH}/LICENSE.txt ${STAGE_DIR}/share/glew    
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/glew
+    COMMAND ${CMAKE_COMMAND} -E copy ${GLEW_SRC_PATH}/LICENSE.txt ${STAGE_DIR}/share/glew
   )
 
   configure_file(${PRO_DIR}/use/useop-glew-config.cmake
