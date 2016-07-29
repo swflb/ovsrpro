@@ -4,10 +4,10 @@
 xpProOption(hdf5)
 set(HDF5_SRC_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/hdf5)
 if(WIN32)
-  set(HDF5_DLURL http://www.hdfgroup.org/ftp/HDF5/current/src/CMake-hdf5-1.8.16.zip)
+  set(HDF5_DLURL http://www.hdfgroup.org/ftp/HDF5/prev-releases/hdf5-1.8.16/src/CMake-hdf5-1.8.16.zip)
   set(HDF5_DLMD5 f909d87f2a913d9ec6a970c1063f907b)
 else()
-  set(HDF5_DLURL http://www.hdfgroup.org/ftp/HDF5/current/src/CMake-hdf5-1.8.16.tar.gz)
+  set(HDF5_DLURL http://www.hdfgroup.org/ftp/HDF5/prev-releases/hdf5-1.8.16/src/CMake-hdf5-1.8.16.tar.gz)
   set(HDF5_DLMD5 a7559a329dfe74e2dac7d5e2d224b1c2)
 endif()
 set(PRO_HDF5
