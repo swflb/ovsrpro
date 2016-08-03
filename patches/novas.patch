@@ -1,0 +1,33 @@
+diff -Nuar CdistOrig/CMakeLists.txt Cdist/CMakeLists.txt
+--- CdistOrig/CMakeLists.txt	1969-12-31 17:00:00.000000000 -0700
++++ Cdist/CMakeLists.txt	2016-08-03 10:30:36.615561609 -0600
+@@ -0,0 +1,29 @@
++cmake_minimum_required(VERSION 3.0)
++project(novas)
++set(CMAKE_DEBUG_POSTFIX "d")
++##############################
++# A list of files that can be used in all plugins
++set(${PROJECT_NAME}_srcs
++  eph_manager.c
++  eph_manager.h
++  novas.c
++  novas.h
++  novascon.c
++  novascon.h
++  nutation.c
++  nutation.h
++  readeph0.c
++  solarsystem.h
++  solsys3.c
++  )
++############################## 
++# Create an object library to include in the plugin shared objects.
++add_library(${PROJECT_NAME} STATIC ${${PROJECT_NAME}_srcs})
++############################## 
++install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}-targets
++  RUNTIME DESTINATION bin
++  LIBRARY DESTINATION lib
++  ARCHIVE DESTINATION lib
++)
++install(FILES novas.h DESTINATION include/novas)
++install(FILES README.txt NOVAS_C3.1_Guide.pdf DESTINATION share/novas)
