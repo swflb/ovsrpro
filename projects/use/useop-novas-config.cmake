@@ -5,7 +5,7 @@ get_filename_component(OP_ROOTDIR ${OP_ROOTDIR} ABSOLUTE)
 # Remove any old cached data
 unset(NOVAS_INCLUDE_DIR CACHE)
 unset(NOVAS_LIBRARY_DIRS CACHE)
-unset(NOVAS_LIB CACHE)
+unset(NOVAS_LIBS CACHE)
 
 set(NOVAS_INCLUDE_DIR ${OP_ROOTDIR}/include)
 set(NOVAS_LIBS_DIR ${OP_ROOTDIR}/lib)
