@@ -130,6 +130,7 @@ function(build_psql)
       COMMAND ./configure --prefix=${STAGE_DIR} --libdir=${STAGE_DIR}/lib --includedir=${STAGE_DIR}/include/psql --datadir=${DATA_DIR} --without-readline
       COMMAND make -j5
       COMMAND make -C src/include install
+      COMMAND make -C src/bin/pg_config install
       COMMAND make -C src/interfaces install
       DEPENDS psql
     )

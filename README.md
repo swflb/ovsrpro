@@ -7,6 +7,7 @@ Supports compiling the following projects from source for both Windows and Linux
 - HDF5 (http://www.hdfgroup.org)
 - MIT Kerberos (http://web.mit.edu/kerberos)
 - librdkafka (https://github.com/edenhill/librdkafka)
+- NOVAS (http://aa.usno.navy.mil/software/novas/novas_info.php)
 - postresql (http://www.postresql.org)
 - QT5 (http://code.qt.io)
 - Qwt (http://qwt.sourceforge.net)
@@ -41,6 +42,7 @@ Available package options when XP_DEFAULT=0 or is not defined
 -XP_PRO_HDF5 - build the HDF5 package
 -XP_PRO_KERBEROS - build the MIT kerberos package
 -XP_PRO_LIBRDKAFKA - build the librdkafka package
+-XP_PRO_NOVAS - build the novas package
 -XP_PRO_PSQL - build the postgresql package
 -XP_PRO_QT5 - build the qt5 package
 -XP_PRO_QWT - build the qwt package

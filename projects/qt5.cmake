@@ -48,6 +48,7 @@ macro(setConfigureOptions)
     -qt-freetype
     -opengl desktop
     -openssl
+    -psql_config ${STAGE_DIR}/bin/pg_config
     -qt-sql-psql
     -opensource
     -confirm-license
@@ -69,12 +70,6 @@ macro(setConfigureOptions)
   if(WIN32)
     list(APPEND QT5_CONFIGURE -platform win32-msvc2013 -qmake -mp)
   else()
-    if(${XP_BUILD_STATIC})
-      list(APPEND QT5_CONFIGURE
-      # Add include and library paths for postgres for static builds
-      -I ${STAGE_DIR}/include/psql
-      -L ${STAGE_DIR}/lib -lpq)
-    endif()
     list(APPEND QT5_CONFIGURE -platform linux-g++
       -c++11
       -qt-xcb
