@@ -2,7 +2,7 @@
 # librdkafka
 ########################################
 xpProOption(librdkafka)
-set(LIBRDKAFKA_VER 16.06.1)
+set(LIBRDKAFKA_VER 16.08.2)
 set(LIBRDKAFKA_REPO https://github.com/distributePro/librdkafka)
 set(LIBRDKAFKA_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/librdkafka_repo)
 set(PRO_LIBRDKAFKA
