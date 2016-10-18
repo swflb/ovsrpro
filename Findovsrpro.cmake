@@ -5,7 +5,9 @@
 # NOTE: wanted to use externpro version, but chicken-egg problem
 function(getCompilerPrefix _ret)
   if(MSVC)
-    if(MSVC12)
+    if(MSVC14)
+      set(prefix vc140)
+    elseif(MSVC12)
       set(prefix vc120)
     elseif(MSVC11)
       set(prefix vc110)
@@ -91,6 +93,8 @@ find_path(ovsrpro_DIR
     "/opt/ovsrpro/ovsrpro-${ovsrpro_SIG}-${CMAKE_SYSTEM_NAME}"
     # symbolic link install option
     "/opt/ovsrpro/ovsrpro"
+    # rpm installed location
+    "/opt/ovsrpro"
   DOC "ovsrpro directory"
   )
 if(NOT ovsrpro_DIR)

@@ -7,7 +7,7 @@ xpProOption(psql)
 set(PSQL_DOWNLOAD_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/psql)
 set(PSQL_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/psql)
 set(PSQL_REPO https://github.com/postgres/postgres)
-set(VER 9.4.5)
+set(VER 9.4.9)
 string(REPLACE "." "_" VER_ ${VER})
 #######################################
 # setup the postgres sql download
@@ -20,8 +20,8 @@ set(PRO_PSQL
   VER ${VER}
   GIT_ORIGIN ${PSQL_REPO}.git
   GIT_TAG REL${VER_}
-  DLURL https://ftp.postgresql.org/pub/source/v9.4.5/postgresql-9.4.5.tar.gz
-  DLMD5 1ae5b653dfb5d88ce237b865c7d3d1cd
+  DLURL https://ftp.postgresql.org/pub/source/v9.4.9/postgresql-9.4.9.tar.gz
+  DLMD5 7fea4bf5f9211f4d464a68b2b65ad9e1
 )
 #######################################
 function(mkpatch_psql)
