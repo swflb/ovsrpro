@@ -15,6 +15,7 @@ set(PRO_OPENH264
   GIT_TAG v${VER} # what to 'git checkout'
   DLURL https://github.com/cisco/openh264/archive/v${VER}.tar.gz
   DLMD5 ca77b91a7a33efb4c5e7c56a5c0f599f
+  DLNAME openh264-${VER}.tar.gz
   )
 ########################################
 function(mkpatch_openh264)

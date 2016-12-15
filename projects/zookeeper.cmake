@@ -6,7 +6,7 @@
 ########################################
 xpProOption(zookeeper)
 set(ZK_REPO https://github.com/apache/zookeeper.git)
-set(ZK_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo)
+set(ZK_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper)
 set(ZK_SRC_PATH ${ZK_REPO_PATH}/src/c/src)
 set(ZK_INCLUDE_PATH ${ZK_REPO_PATH}/src/c/include)
 set(ZK_INSTALL_PATH ${CMAKE_BINARY_DIR}/xpbase/Install/zookeeper)
@@ -20,6 +20,9 @@ set(PRO_ZOOKEEPER
   VER ${ZK_VER}
   GIT_ORIGIN ${ZK_REPO}
   GIT_TAG release-${ZK_VER}
+  DLURL ${ZK_REPO}/archive/release-${ZK_VER}.tar.gz
+  DLMD5 db347bd3547ab1c57ded10b6a1718900
+  DLNAME zookeeper-release-${ZK_VER}.tar.gz
 )
 set(CPP_UNIT_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/cppunit)
 set(CPP_UNIT_VER 1.12.1)
@@ -40,7 +43,7 @@ endfunction(mkpatch_zookeeper)
 ########################################
 # download
 function(download_zookeeper)
-  xpRepo(${PRO_ZOOKEEPER})
+  xpNewDownload(${PRO_ZOOKEEPER})
 endfunction(download_zookeeper)
 ########################################
 # patch
@@ -49,12 +52,10 @@ function(patch_zookeeper)
     return()
   endif()
 
-  if(NOT TARGET zookeeper_repo)
-    xpRepo(${PRO_ZOOKEEPER})
-  endif()
+  xpPatch(${PRO_ZOOKEEPER})
 
   if(WIN32)
-    ExternalProject_Add_Step(zookeeper_repo zookeeper_patch
+    ExternalProject_Add_Step(zookeeper zookeeper_patch
       WORKING_DIRECTORY ${ZK_REPO_PATH}/src/c
       COMMAND ${GIT_EXECUTABLE} apply ${PATCH_DIR}/zookeeper-windows.patch
       DEPENDEES patch
@@ -63,7 +64,7 @@ function(patch_zookeeper)
   add_custom_target(zookeeper_ant ALL
     WORKING_DIRECTORY ${ZK_REPO_PATH}
     COMMAND ant compile_jute
-    DEPENDS zookeeper_repo
+    DEPENDS zookeeper
   )
 endfunction(patch_zookeeper)
 ########################################
@@ -90,7 +91,7 @@ macro(getZookeeperFiles)
       ${ZK_INCLUDE_PATH}/winstdint.h)
   else()
     list(APPEND zookeeper_hdr_files
-      ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper_repo/src/c/config.h)
+      ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper/src/c/config.h)
   endif()
 endmacro()
 macro(zookeepercheckDependencies)
@@ -111,7 +112,7 @@ function(build_zookeeper)
     return()
   endif()
 
-  if(NOT TARGET zookeeper_repo)
+  if(NOT TARGET zookeeper)
     patch_zookeeper()
   endif()
 
@@ -129,7 +130,7 @@ function(build_zookeeper)
       COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/lib
       COMMAND ${CMAKE_COMMAND} -E copy ${ZK_REPO_PATH}/src/c/x64/Debug/libzookeeperd-mt.lib ${STAGE_DIR}/lib/libzookeeperd-mt.lib
       COMMAND ${CMAKE_COMMAND} -E copy ${ZK_REPO_PATH}/src/c/x64/Release/libzookeeper-mt.lib ${STAGE_DIR}/lib/libzookeeper-mt.lib
-      DEPENDS zookeeper_repo zookeeper_ant
+      DEPENDS zookeeper zookeeper_ant
     )
 
     # copy the needed header files
@@ -148,14 +149,14 @@ function(build_zookeeper)
       WORKING_DIRECTORY ${ZK_REPO_PATH}/src/c
       COMMAND ${CMAKE_COMMAND} -E tar xzf ${DWNLD_DIR}/cppunit-${CPP_UNIT_VER}.tar.gz
       COMMAND ${CMAKE_COMMAND} -E env ACLOCAL=\"aclocal -I ${ZK_REPO_PATH}/src/c/cppunit-${CPP_UNIT_VER}\" autoreconf -if -W none
-      DEPENDS zookeeper_repo zookeeper_ant download_cppunit-${CPP_UNIT_VER}.tar.gz
+      DEPENDS zookeeper zookeeper_ant download_cppunit-${CPP_UNIT_VER}.tar.gz
     )
     add_custom_target(zookeeper_build ALL
       WORKING_DIRECTORY ${ZK_REPO_PATH}/src/c
       COMMAND ./configure --without-cppunit --prefix=${STAGE_DIR}
       COMMAND make
       COMMAND make install
-      DEPENDS zookeeper_repo zookeeper_configure download_cppunit-${CPP_UNIT_VER}.tar.gz
+      DEPENDS zookeeper zookeeper_configure download_cppunit-${CPP_UNIT_VER}.tar.gz
     )
   endif()
 
