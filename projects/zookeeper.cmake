@@ -5,7 +5,7 @@
 # Note: Requres gnu32 for windows to use sed, find, and xargs (c:\program files(x86)\gnuwin32)
 ########################################
 xpProOption(zookeeper)
-set(ZK_REPO https://github.com/apache/zookeeper.git)
+set(ZK_REPO https://github.com/apache/zookeeper)
 set(ZK_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper)
 set(ZK_SRC_PATH ${ZK_REPO_PATH}/src/c/src)
 set(ZK_INCLUDE_PATH ${ZK_REPO_PATH}/src/c/include)
