@@ -62,7 +62,7 @@ function(build_ffmpeg)
       COMMAND ${CMAKE_COMMAND} -E env PKG_CONFIG_PATH=${STAGE_DIR}/lib/pkgconfig ./configure ${FFMPEG_CFG} --prefix=${STAGE_DIR} --disable-debug
       COMMAND make -j4
       COMMAND make install
-      DEPENDS ffmpeg openh264_build
+      DEPENDS ffmpeg openh264_Release
     )
 
     if(${XP_BUILD_DEBUG})
