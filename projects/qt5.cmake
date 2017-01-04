@@ -66,6 +66,8 @@ macro(setConfigureOptions)
   # Check if this is a static build
   if(${XP_BUILD_STATIC})
     list(APPEND QT5_CONFIGURE -static)
+  else()
+    list(APPEND QT5_CONFIGURE -shared)
   endif()
   if(WIN32)
     list(APPEND QT5_CONFIGURE -platform win32-msvc2013 -qmake -mp)
@@ -198,8 +200,7 @@ function(build_qt5)
       COMMAND echo %LIB%
       COMMAND echo %_CL_%
       COMMAND nmake
-      COMMAND nmake install
-      COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake/useop-qt5-config.cmake
+      COMMAND nmake install      
       COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin/qt.conf
       DEPENDS qt5 qt5_configure psql_build
     )
@@ -209,14 +210,14 @@ function(build_qt5)
       WORKING_DIRECTORY ${QT5_REPO_PATH}
       COMMAND make -j4
       COMMAND make install
-      COMMAND ${CMAKE_COMMAND} -E copy ${PRO_DIR}/use/useop-qt5-config.cmake ${STAGE_DIR}/share/cmake/useop-qt5-config.cmake
       COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin/qt.conf
       DEPENDS qt5 qt5_configure psql_build
     )
 
   endif()
 
-  # Copy the various LICENSE files to STAGE_DIR
+  # Copy the various LICENSE files and source code tar file to STAGE_DIR
+  ExternalProject_Get_Property(qt5 DOWNLOAD_DIR)
   add_custom_command(TARGET qt5_build POST_BUILD
     WORKING_DIRECTORY ${QT5_REPO_PATH}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/qt5
@@ -227,6 +228,8 @@ function(build_qt5)
     COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.LGPLv21 ${STAGE_DIR}/share/qt5
     COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.LGPLv3 ${STAGE_DIR}/share/qt5
     COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.PREVIEW.COMMERCIAL ${STAGE_DIR}/share/qt5
+    COMMAND ${CMAKE_COMMAND} -E copy ${DOWNLOAD_DIR}/${QT5_DOWNLOAD_FILE} ${STAGE_DIR}/share/qt5
+    COMMAND ${CMAKE_COMMAND} -E echo "Compile flags used when building the library: '${QT5_CONFIGURE}'" > ${STAGE_DIR}/share/qt5/compileFlags
   )
 
   configure_file(${PRO_DIR}/use/useop-qt5-config.cmake

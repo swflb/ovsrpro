@@ -52,22 +52,31 @@ function(build_openh264)
   xpSetPostfix()
 
   ExternalProject_Get_Property(openh264 SOURCE_DIR)
-  ExternalProject_Add(openh264_Debug DEPENDS openh264
-    DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
-    SOURCE_DIR ${SOURCE_DIR}
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND $(MAKE) clean && $(MAKE) BUILDTYPE=Debug PREFIX=${STAGE_DIR} POSTFIX=${CMAKE_DEBUG_POSTFIX} ${OPENH264_INSTALL_CMD}
-    BUILD_IN_SOURCE 1
-    INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/openh264 && ${CMAKE_COMMAND} -E copy_if_different ${SOURCE_DIR}/LICENSE ${STAGE_DIR}/share/openh264
-    )
-
-  ExternalProject_Add(openh264_Release DEPENDS openh264_Debug
+  ExternalProject_Add(openh264_Release DEPENDS openh264
     DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
     SOURCE_DIR ${SOURCE_DIR}
     CONFIGURE_COMMAND ""
     BUILD_COMMAND $(MAKE) clean && $(MAKE) ASM=yasm PREFIX=${STAGE_DIR} POSTFIX=${CMAKE_RELEASE_POSTFIX} ${OPENH264_INSTALL_CMD}
     BUILD_IN_SOURCE 1
-    INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/openh264 && ${CMAKE_COMMAND} -E copy_if_different ${SOURCE_DIR}/LICENSE ${STAGE_DIR}/share/openh264
+    INSTALL_COMMAND ""
+    )
+
+  ExternalProject_Add(openh264_Debug DEPENDS openh264_Release
+    DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
+    SOURCE_DIR ${SOURCE_DIR}
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND $(MAKE) clean && $(MAKE) BUILDTYPE=Debug PREFIX=${STAGE_DIR} POSTFIX=${CMAKE_DEBUG_POSTFIX} ${OPENH264_INSTALL_CMD}
+    BUILD_IN_SOURCE 1
+    INSTALL_COMMAND ""
+    )
+
+  ExternalProject_Add(openh264_install_files DEPENDS openh264_Release
+    DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
+    SOURCE_DIR ${NULL_DIR} CONFIGURE_COMMAND "" BUILD_COMMAND ""
+    INSTALL_COMMAND
+      ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/openh264 &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/LICENSE ${STAGE_DIR}/share/openh264 &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/README.md ${STAGE_DIR}/share/openh264
     )
 
 endfunction()

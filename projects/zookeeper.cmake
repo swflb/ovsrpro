@@ -10,7 +10,7 @@ set(ZK_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper)
 set(ZK_SRC_PATH ${ZK_REPO_PATH}/src/c/src)
 set(ZK_INCLUDE_PATH ${ZK_REPO_PATH}/src/c/include)
 set(ZK_INSTALL_PATH ${CMAKE_BINARY_DIR}/xpbase/Install/zookeeper)
-set(ZK_VER 3.4.6)
+set(ZK_VER 3.4.9)
 set(PRO_ZOOKEEPER
   NAME zookeeper
   WEB "Zookeeper" https://zookeeper.apache.org/ "Zookeeper - Home"
@@ -21,7 +21,7 @@ set(PRO_ZOOKEEPER
   GIT_ORIGIN ${ZK_REPO}
   GIT_TAG release-${ZK_VER}
   DLURL ${ZK_REPO}/archive/release-${ZK_VER}.tar.gz
-  DLMD5 db347bd3547ab1c57ded10b6a1718900
+  DLMD5 23df0e0bccf5d05d8190fd8ef459947c
   DLNAME zookeeper-release-${ZK_VER}.tar.gz
 )
 set(CPP_UNIT_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/cppunit)

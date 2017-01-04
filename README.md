@@ -21,6 +21,10 @@ YASM assembler is expected to be present for building FFmpeg and OpenH264 projec
 All projects can be built as static or shared libraries.  For static windows
 builds, libraries are compiled with the /MT flag.
 
+Each built project has a corresponding folder inside the share directory that
+contains files pertinent to the project (i.e. README and/or LICENSE files, flags
+used at compile time, etc.)
+
 To build an install package with these packages, perform the following steps:
 - $ git clone https://github.com/distributePro/ovsrpro.git
 - $ mkdir ovsrpro-build
