@@ -30,13 +30,24 @@ if(WIN32)
       ${externpro_DIR}/lib/ssl-s.lib)
   endif()
 else()
-  set(LIBRDKAFKA_LIBS
-    ${LIBRDKAFKA_LIBS_DIR}/librdkafka++.a
-    ${LIBRDKAFKA_LIBS_DIR}/librdkafka.a
+  if(${build_type} STREQUAL debug)
+    set(LIBRDKAFKA_LIBS
+      ${LIBRDKAFKA_LIBS_DIR}/librdkafkaDebug/librdkafka++.a
+      ${LIBRDKAFKA_LIBS_DIR}/librdkafkaDebug/librdkafka.a
+    )
+  else()
+    set(LIBRDKAFKA_LIBS
+      ${LIBRDKAFKA_LIBS_DIR}/librdkafka++.a
+      ${LIBRDKAFKA_LIBS_DIR}/librdkafka.a
+    )
+  endif()
+
+  list(APPEND LIBRDKAFKA_LIBS
     sasl2
     ${ZLIB_LIBRARIES}
     pthread
     rt
     ${OPENSSL_LIBRARIES}
-    crypto)
+    crypto
+  )
 endif()

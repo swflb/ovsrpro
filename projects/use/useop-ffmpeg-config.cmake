@@ -19,13 +19,13 @@ if(OP_BUILD_STATIC)
   else()
     if(${build_type} STREQUAL debug)
       set(FFMPEG_LIBS
-        ${FFMPEG_LIB_DIR}/ffmpegdebug/libavcodec.a
-        ${FFMPEG_LIB_DIR}/ffmpegdebug/libavdevice.a
-        ${FFMPEG_LIB_DIR}/ffmpegdebug/libavfilter.a
-        ${FFMPEG_LIB_DIR}/ffmpegdebug/libavformat.a
-        ${FFMPEG_LIB_DIR}/ffmpegdebug/libavutil.a
-        ${FFMPEG_LIB_DIR}/ffmpegdebug/libswresample.a
-        ${FFMPEG_LIB_DIR}/ffmpegdebug/libswscale.a)
+        ${FFMPEG_LIB_DIR}/libavcodec-d.a
+        ${FFMPEG_LIB_DIR}/libavdevice-d.a
+        ${FFMPEG_LIB_DIR}/libavfilter-d.a
+        ${FFMPEG_LIB_DIR}/libavformat-d.a
+        ${FFMPEG_LIB_DIR}/libavutil-d.a
+        ${FFMPEG_LIB_DIR}/libswresample-d.a
+        ${FFMPEG_LIB_DIR}/libswscale-d.a)
     else()
       set(FFMPEG_LIBS
         ${FFMPEG_LIB_DIR}/libavcodec.a
@@ -38,14 +38,25 @@ if(OP_BUILD_STATIC)
     endif()
   endif()
 else()
-  set(FFMPEG_LIBS
-    avcodec
-    avdevice
-    avfilter
-    avformat
-    avutil
-    swresample
-    swscale)
+  if(${build_type} STREQUAL debug)
+    set(FFMPEG_LIBS
+      avcodec-d
+      avdevice-d
+      avfilter-d
+      avformat-d
+      avutil-d
+      swresample-d
+      swscale-d)
+  else()
+    set(FFMPEG_LIBS
+      avcodec
+      avdevice
+      avfilter
+      avformat
+      avutil
+      swresample
+      swscale)
+  endif()
 endif()
 
 include_directories(SYSTEM ${FFMPEG_INCLUDE_DIR})

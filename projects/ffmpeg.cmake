@@ -2,8 +2,7 @@
 # ffmpeg
 xpProOption(ffmpeg)
 set(VER 2.6.2)
-set(REPO https://github.com/ndrasmussen/FFmpeg)
-set(FFMPEG_SRC_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/ffmpeg)
+set(REPO https://github.com/distributepro/FFmpeg)
 set(FFMPEG_DOWNLOAD_FILE ffmpeg-${VER}.tar.bz2)
 set(PRO_FFMPEG
   NAME ffmpeg
@@ -71,19 +70,22 @@ function(build_ffmpeg)
     DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
     SOURCE_DIR ${SOURCE_DIR}
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env PKG_CONFIG_PATH=${STAGE_DIR}/lib/pkgconfig ./configure ${FFMPEG_CFG} --disable-debug --build-suffix=${CMAKE_RELEASE_POSTFIX}
-    BUILD_COMMAND $(MAKE) clean && $(MAKE) && $(MAKE) install
+    BUILD_COMMAND $(MAKE) clean && $(MAKE)
     BUILD_IN_SOURCE 1
-    INSTALL_COMMAND ""
+    INSTALL_COMMAND $(MAKE) install
+  )
+  add_dependencies(ffmpeg_Release openh264_Release)
+
+  if(${XP_BUILD_DEBUG})
+    ExternalProject_Add(ffmpeg_Debug DEPENDS ffmpeg_Release
+      DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
+      SOURCE_DIR ${SOURCE_DIR}
+      CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env PKG_CONFIG_PATH=${STAGE_DIR}/lib/pkgconfig ./configure ${FFMPEG_CFG} --enable-debug --disable-stripping --build-suffix=${CMAKE_DEBUG_POSTFIX}
+      BUILD_COMMAND $(MAKE) clean && $(MAKE)
+      BUILD_IN_SOURCE 1
+      INSTALL_COMMAND $(MAKE) install-libs
     )
-  ExternalProject_Add(ffmpeg_Debug DEPENDS ffmpeg_Release
-    DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
-    SOURCE_DIR ${SOURCE_DIR}
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env PKG_CONFIG_PATH=${STAGE_DIR}/lib/pkgconfig ./configure ${FFMPEG_CFG} --enable-debug --disable-stripping --build-suffix=${CMAKE_DEBUG_POSTFIX}
-    BUILD_COMMAND $(MAKE) clean && $(MAKE) && $(MAKE) install-libs
-    BUILD_IN_SOURCE 1
-    INSTALL_COMMAND ""
-    )
-   add_dependencies(ffmpeg_Release openh264_Release)
+  endif()
 
   ExternalProject_Get_Property(ffmpeg DOWNLOAD_DIR)
   ExternalProject_Add(ffmpeg_install_files DEPENDS ffmpeg_Release
@@ -91,15 +93,15 @@ function(build_ffmpeg)
     SOURCE_DIR ${NULL_DIR} CONFIGURE_COMMAND "" BUILD_COMMAND ""
     INSTALL_COMMAND
       ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/ffmpeg &&
-      ${CMAKE_COMMAND} -E copy ${FFMPEG_SRC_PATH}/LICENSE.md ${STAGE_DIR}/share/ffmpeg &&
-      ${CMAKE_COMMAND} -E copy ${FFMPEG_SRC_PATH}/README.md ${STAGE_DIR}/share/ffmpeg &&
-      ${CMAKE_COMMAND} -E copy ${FFMPEG_SRC_PATH}/COPYING.GPLv2 ${STAGE_DIR}/share/ffmpeg &&
-      ${CMAKE_COMMAND} -E copy ${FFMPEG_SRC_PATH}/COPYING.GPLv3 ${STAGE_DIR}/share/ffmpeg &&
-      ${CMAKE_COMMAND} -E copy ${FFMPEG_SRC_PATH}/COPYING.LGPLv2.1 ${STAGE_DIR}/share/ffmpeg &&
-      ${CMAKE_COMMAND} -E copy ${FFMPEG_SRC_PATH}/COPYING.LGPLv3 ${STAGE_DIR}/share/ffmpeg &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/LICENSE.md ${STAGE_DIR}/share/ffmpeg &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/README.md ${STAGE_DIR}/share/ffmpeg &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/COPYING.GPLv2 ${STAGE_DIR}/share/ffmpeg &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/COPYING.GPLv3 ${STAGE_DIR}/share/ffmpeg &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/COPYING.LGPLv2.1 ${STAGE_DIR}/share/ffmpeg &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/COPYING.LGPLv3 ${STAGE_DIR}/share/ffmpeg &&
       ${CMAKE_COMMAND} -E copy ${DOWNLOAD_DIR}/${FFMPEG_DOWNLOAD_FILE} ${STAGE_DIR}/share/ffmpeg &&
       ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/ffmpeg.patch ${STAGE_DIR}/share/ffmpeg &&
       echo "Compile flags used when building the library (after applying 'ffmpeg.patch' file to the source tree): '${FFMPEG_CFG}'" > ${STAGE_DIR}/share/ffmpeg/compileFlags
-    )
+  )
 
 endfunction()

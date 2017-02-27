@@ -1,0 +1,5 @@
+diff -Nuar CMake-hdf5-1.8.16/CMakeLists.txt hdf5/CMakeLists.txt
+--- CMake-hdf5-1.8.16/CMakeLists.txt	1969-12-31 17:00:00.000000000 -0700
++++ hdf5/CMakeLists.txt	2017-01-31 10:27:54.635437994 -0700
+@@ -0,0 +1 @@
++add_subdirectory(hdf5-1.8.16)

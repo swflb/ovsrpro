@@ -51,7 +51,12 @@ function(build_glew)
     patch_glew()
   endif()
 
+  configure_file(${PRO_DIR}/use/useop-glew-config.cmake
+                 ${STAGE_DIR}/share/cmake/useop-glew-config.cmake
+                 COPYONLY)
+
   if(WIN32)
+    #TODO Still need to convert the Windows build to use ExternalProject...
     add_custom_target(glew_build ALL
       WORKING_DIRECTORY ${GLEW_SRC_PATH}
       #COMMAND devenv ${GLEW_SRC_PATH}/build/vc12/glew.sln /build "Release"
@@ -75,31 +80,36 @@ function(build_glew)
       )
     endif()
   else()
-    add_custom_target(glew_build ALL
-      WORKING_DIRECTORY ${GLEW_SRC_PATH}
-      COMMAND make
-      COMMAND make install.lib install.include install.bin LIBDIR=${STAGE_DIR}/lib INCDIR=${STAGE_DIR}/include/GL BINDIR=${STAGE_DIR}/bin
-      DEPENDS glew
+    ExternalProject_Get_Property(glew SOURCE_DIR)
+    ExternalProject_Add(glew_Release DEPENDS glew
+      DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
+      SOURCE_DIR ${SOURCE_DIR}
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND $(MAKE) clean && $(MAKE)
+      BUILD_IN_SOURCE 1
+      INSTALL_COMMAND $(MAKE) install.lib install.include install.bin LIBDIR=${STAGE_DIR}/lib INCDIR=${STAGE_DIR}/include/GL BINDIR=${STAGE_DIR}/bin
     )
-    if(${XP_BUILD_DEBUG})
-      add_custom_command(TARGET glew_build POST_BUILD
-        WORKING_DIRECTORY ${GLEW_SRC_PATH}
-        COMMAND make clean
-        COMMAND make debug
-        # Release is always built so no need re-build the install.include or install.bin targets here
-        COMMAND make install.lib LIBDIR=${STAGE_DIR}/lib/glewdebug
-      )
-    endif()
+
+   if(${XP_BUILD_DEBUG})
+     #TODO need to make glew add a suffix so debug build can go in lib folder
+     ExternalProject_Add(glew_Debug DEPENDS glew_Release
+       DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
+       SOURCE_DIR ${SOURCE_DIR}
+       CONFIGURE_COMMAND ""
+       BUILD_COMMAND $(MAKE) clean && $(MAKE) debug
+       BUILD_IN_SOURCE 1
+       INSTALL_COMMAND $(MAKE) install.lib LIBDIR=${STAGE_DIR}/lib/glewdebug
+     )
+   endif()
   endif()
 
   # Copy LICENSE file to STAGE_DIR
-  add_custom_command(TARGET glew_build POST_BUILD
-    WORKING_DIRECTORY ${GLEW_SRC_PATH}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/glew
-    COMMAND ${CMAKE_COMMAND} -E copy ${GLEW_SRC_PATH}/LICENSE.txt ${STAGE_DIR}/share/glew
+  ExternalProject_Add(glew_install_files DEPENDS glew_Release
+    DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
+    SOURCE_DIR ${NULL_DIR} CONFIGURE_COMMAND "" BUILD_COMMAND ""
+    INSTALL_COMMAND
+      ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/glew &&
+      ${CMAKE_COMMAND} -E copy ${GLEW_SRC_PATH}/LICENSE.txt ${STAGE_DIR}/share/glew
   )
 
-  configure_file(${PRO_DIR}/use/useop-glew-config.cmake
-                 ${STAGE_DIR}/share/cmake/useop-glew-config.cmake
-                 COPYONLY)
 endfunction()

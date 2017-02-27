@@ -24,7 +24,11 @@ if(WIN32)
   list(APPEND Zookeeper_LIB ws2_32.lib)
 else()
   # Unix just needs the .a
-  set(Zookeeper_LIB ${Zookeeper_LIBS_DIR}/libzookeeper_mt.a)
+  if(${build_type} STREQUAL debug)
+    set(Zookeeper_LIB ${Zookeeper_LIBS_DIR}/zookeeperDebug/libzookeeper_mt.a)
+  else()
+    set(Zookeeper_LIB ${Zookeeper_LIBS_DIR}/libzookeeper_mt.a)
+  endif()
 endif()
 
 

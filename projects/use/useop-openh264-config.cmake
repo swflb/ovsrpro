@@ -18,7 +18,7 @@ if(OP_BUILD_STATIC)
     # HAVEN'T ATTEMPTED WINDOWS BUILD YET...
   else()
     if(${build_type} STREQUAL debug)
-      set(OPENH264_LIB ${OPENH264_LIB_DIR}/openh264debug/libopenh264.a)
+      set(OPENH264_LIB ${OPENH264_LIB_DIR}/libopenh264-d.a)
     else()
       set(OPENH264_LIB ${OPENH264_LIB_DIR}/libopenh264.a)
     endif()
