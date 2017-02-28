@@ -13,8 +13,7 @@
 xpProOption(qt5)
 set(QT5_VER 5.5.1)
 set(QT5_REPO http://code.qt.io/cgit/qt/qt5.git)
-set(QT5_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/qt5)
-set(QT5_DOWNLOAD_FILE qt-everywhere-opensource-src-5.5.1.tar.gz)
+set(QT5_DOWNLOAD_FILE qt-everywhere-opensource-src-${QT5_VER}.tar.gz)
 set(PRO_QT5
   NAME qt5
   WEB "Qt" http://qt.io/ "Qt - Home"
@@ -24,7 +23,7 @@ set(PRO_QT5
   VER ${QT5_VER}
   GIT_ORIGIN ${QT5_REPO}
   GIT_TAG v${QT5_VER}
-  DLURL http://download.qt.io/archive/qt/5.5/5.5.1/single/${QT5_DOWNLOAD_FILE}
+  DLURL http://download.qt.io/archive/qt/5.5/${QT5_VER}/single/${QT5_DOWNLOAD_FILE}
   DLMD5 59f0216819152b77536cf660b015d784
 )
 set(QT5_REMOVE_SUBMODULES
@@ -107,11 +106,12 @@ function(patch_qt5)
     return()
   endif()
 
+  ExternalProject_Get_Property(qt5 SOURCE_DIR)
   # Remove the modules that aren't wanted
   foreach(RemoveModule ${QT5_REMOVE_SUBMODULES})
     ExternalProject_Add_Step(qt5 qt5_remove_${RemoveModule}
       COMMENT "Removing ${RemoveModule}"
-      WORKING_DIRECTORY ${QT5_REPO_PATH}
+      WORKING_DIRECTORY ${SOURCE_DIR}
       COMMAND ${CMAKE_COMMAND} -E remove_directory ${RemoveModule}
       DEPENDEES download
       )
@@ -120,11 +120,11 @@ function(patch_qt5)
   # if this didn't come from the repo (direct download) need to
   # add a .gitignore...it is used by the configure scripts to
   # determine whether to compile the configure.exe
-  if (NOT EXISTS ${QT5_REPO_PATH}/qtbase/.gitignore)
+  if (NOT EXISTS ${SOURCE_DIR}/qtbase/.gitignore)
     ExternalProject_Add_Step(qt5 qt5_add_gitignore
       COMMENT "Creating empty gitignore file"
-      WORKING_DIRECTORY ${QT5_REPO_PATH}
-      COMMAND ${CMAKE_COMMAND} -E touch ${QT5_REPO_PATH}/qtbase/.gitignore
+      WORKING_DIRECTORY ${SOURCE_DIR}
+      COMMAND ${CMAKE_COMMAND} -E touch ${SOURCE_DIR}/qtbase/.gitignore
       DEPENDEES download)
   endif()
 
@@ -138,7 +138,7 @@ function(patch_qt5)
 
     ExternalProject_Add_Step(qt5 qt5_setup_mkspec
       COMMENT "Preparing MKSPEC"
-      COMMAND ${CMAKE_COMMAND} -E copy ${QT5_MKSPEC} ${QT5_REPO_PATH}/qtbase/mkspecs/common/msvc-desktop.conf
+      COMMAND ${CMAKE_COMMAND} -E copy ${QT5_MKSPEC} ${SOURCE_DIR}/qtbase/mkspecs/common/msvc-desktop.conf
       DEPENDEES download)
   endif()
 endfunction(patch_qt5)
@@ -175,64 +175,50 @@ function(build_qt5)
 
   setConfigureOptions()
 
-  # Create a separate target to build and install...this is because for some
-  # reason even though the configure succeeds just fine, it stops before
-  # executing the build and install commands (may be because configure exits
-  # with warnings about static builds)
-  add_custom_target(qt5_configure ALL
-    COMMENT "Configuring qt5"
-    WORKING_DIRECTORY ${QT5_REPO_PATH}
-    COMMAND ./configure ${QT5_CONFIGURE}
-    DEPENDS qt5 psql_build)
+  configure_file(${PRO_DIR}/use/useop-qt5-config.cmake
+                 ${STAGE_DIR}/share/cmake/useop-qt5-config.cmake
+                 COPYONLY)
 
   # On windows, add the include directories for open ssl and postgres
   if(WIN32)
     set(XP_INCLUDE_DIR ${XP_ROOTDIR}/include) # for open ssl
     set(OPENSSL_LIB_DIR ${XP_ROOTDIR}/lib) # for open ssl
-    add_custom_target(qt5_build ALL
-      COMMENT "Configuration complete...building qt5"
-      WORKING_DIRECTORY ${QT5_REPO_PATH}
-      # The postgres and openssl includes seem to conflict with other libraries...they need to
-      # be included after all other options, which can be done with VS using the _CL_ environment
-      # variable
-      COMMAND set _CL_=%_CL_% /I"${XP_INCLUDE_DIR}" /I"${STAGE_DIR}/include/psql"
-      COMMAND set LIB=${OPENSSL_LIB_DIR}\;${STAGE_DIR}/lib\;%LIB%
-      COMMAND echo %LIB%
-      COMMAND echo %_CL_%
-      COMMAND nmake
-      COMMAND nmake install      
-      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin/qt.conf
-      DEPENDS qt5 qt5_configure psql_build
-    )
+    set(MAKE_CMD nmake)
+    set(ADDITIONAL_CONFIG "set _CL_=%_CL_% /I'${XP_INCLUDE_DIR}' /I'${STAGE_DIR}/include/psql' &&
+                           set LIB=${OPENSSL_LIB_DIR}\;${STAGE_DIR}/lib\;%LIB% &&")
   else()
-    add_custom_target(qt5_build ALL
-      COMMENT "Configuration complete...building qt5"
-      WORKING_DIRECTORY ${QT5_REPO_PATH}
-      COMMAND make -j4
-      COMMAND make install
-      COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin/qt.conf
-      DEPENDS qt5 qt5_configure psql_build
-    )
-
+    set(MAKE_CMD $(MAKE))
   endif()
+
+  ExternalProject_Get_Property(qt5 SOURCE_DIR)
+  ExternalProject_Add(qt5_build DEPENDS qt5
+    DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
+    SOURCE_DIR ${SOURCE_DIR}
+    CONFIGURE_COMMAND ./configure ${QT5_CONFIGURE}
+    BUILD_COMMAND ${ADDITIONAL_CFG} ${MAKE_CMD}
+    BUILD_IN_SOURCE 1
+    INSTALL_COMMAND
+      ${MAKE_CMD} install  &&
+      ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt.conf ${STAGE_DIR}/qt5/bin/qt.conf
+  )
+  add_dependencies(qt5_build psql_Release)
 
   # Copy the various LICENSE files and source code tar file to STAGE_DIR
   ExternalProject_Get_Property(qt5 DOWNLOAD_DIR)
-  add_custom_command(TARGET qt5_build POST_BUILD
-    WORKING_DIRECTORY ${QT5_REPO_PATH}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/qt5
-    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LGPL_EXCEPTION.txt ${STAGE_DIR}/share/qt5
-    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.FDL ${STAGE_DIR}/share/qt5
-    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.GPLv2 ${STAGE_DIR}/share/qt5
-    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.GPLv3 ${STAGE_DIR}/share/qt5
-    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.LGPLv21 ${STAGE_DIR}/share/qt5
-    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.LGPLv3 ${STAGE_DIR}/share/qt5
-    COMMAND ${CMAKE_COMMAND} -E copy ${QT5_REPO_PATH}/LICENSE.PREVIEW.COMMERCIAL ${STAGE_DIR}/share/qt5
-    COMMAND ${CMAKE_COMMAND} -E copy ${DOWNLOAD_DIR}/${QT5_DOWNLOAD_FILE} ${STAGE_DIR}/share/qt5
-    COMMAND ${CMAKE_COMMAND} -E echo "Compile flags used when building the library: '${QT5_CONFIGURE}'" > ${STAGE_DIR}/share/qt5/compileFlags
+  ExternalProject_Add(qt5_install_files DEPENDS qt5_build
+    DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
+    SOURCE_DIR ${NULL_DIR} CONFIGURE_COMMAND "" BUILD_COMMAND ""
+    INSTALL_COMMAND
+      ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/qt5 &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/LGPL_EXCEPTION.txt ${STAGE_DIR}/share/qt5 &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/LICENSE.FDL ${STAGE_DIR}/share/qt5 &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/LICENSE.GPLv2 ${STAGE_DIR}/share/qt5 &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/LICENSE.GPLv3 ${STAGE_DIR}/share/qt5 &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/LICENSE.LGPLv21 ${STAGE_DIR}/share/qt5 &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/LICENSE.LGPLv3 ${STAGE_DIR}/share/qt5 &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/LICENSE.PREVIEW.COMMERCIAL ${STAGE_DIR}/share/qt5 &&
+      ${CMAKE_COMMAND} -E copy ${DOWNLOAD_DIR}/${QT5_DOWNLOAD_FILE} ${STAGE_DIR}/share/qt5 &&
+      ${CMAKE_COMMAND} -E echo "Compile flags used when building the library: '${QT5_CONFIGURE}'" > ${STAGE_DIR}/share/qt5/compileFlags
   )
 
-  configure_file(${PRO_DIR}/use/useop-qt5-config.cmake
-                 ${STAGE_DIR}/share/cmake/useop-qt5-config.cmake
-                 COPYONLY)
 endfunction(build_qt5)

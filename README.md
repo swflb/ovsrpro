@@ -26,11 +26,16 @@ contains files pertinent to the project (i.e. README and/or LICENSE files, flags
 used at compile time, etc.)
 
 To build an install package with these packages, perform the following steps:
-- $ git clone https://github.com/distributePro/ovsrpro.git
-- $ mkdir ovsrpro-build
-- $ cd ovsrpro-build
-- $ cmake ../ovsrpro -DXP_STEP=build -DXP_DEFAULT=1
-- $ make package
+```bash
+git clone https://github.com/distributePro/ovsrpro.git
+cd ovsrpro
+git checkout <tag>		# where tag is, for example 17.02.1
+mkdir ovsrpro-build
+cd ovsrpro-build
+cmake ../ovsrpro -DXP_STEP=build
+make -j8			# where the -j8 specifies the number of cpus to use
+make package
+```
 
 For custom builds, the following cmake options are available (via the -D option)
 - XP_BUILD_DEBUG - build a debug version of the libraries along with the release

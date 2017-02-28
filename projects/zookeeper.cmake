@@ -8,9 +8,11 @@ xpProOption(zookeeper)
 set(ZK_REPO https://github.com/apache/zookeeper)
 set(ZK_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper)
 set(ZK_SRC_PATH ${ZK_REPO_PATH}/src/c/src)
-set(ZK_INCLUDE_PATH ${ZK_REPO_PATH}/src/c/include)
 set(ZK_INSTALL_PATH ${CMAKE_BINARY_DIR}/xpbase/Install/zookeeper)
 set(ZK_VER 3.4.9)
+if(WIN32)
+  set(ZOO_PATCH ${PATCH_DIR}/zookeeper-windows.patch)
+endif()
 set(PRO_ZOOKEEPER
   NAME zookeeper
   WEB "Zookeeper" https://zookeeper.apache.org/ "Zookeeper - Home"
@@ -23,6 +25,7 @@ set(PRO_ZOOKEEPER
   DLURL ${ZK_REPO}/archive/release-${ZK_VER}.tar.gz
   DLMD5 23df0e0bccf5d05d8190fd8ef459947c
   DLNAME zookeeper-release-${ZK_VER}.tar.gz
+  PATCH ${ZOO_PATCH} #This is only defined for Windows builds
 )
 set(CPP_UNIT_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/cppunit)
 set(CPP_UNIT_VER 1.12.1)
@@ -48,52 +51,10 @@ endfunction(download_zookeeper)
 ########################################
 # patch
 function(patch_zookeeper)
-  if(NOT (XP_DEFAULT OR XP_PRO_ZOOKEEPER))
-    return()
-  endif()
-
   xpPatch(${PRO_ZOOKEEPER})
-
-  if(WIN32)
-    ExternalProject_Add_Step(zookeeper zookeeper_patch
-      WORKING_DIRECTORY ${ZK_REPO_PATH}/src/c
-      COMMAND ${GIT_EXECUTABLE} apply ${PATCH_DIR}/zookeeper-windows.patch
-      DEPENDEES patch
-    )
-  endif()
-  add_custom_target(zookeeper_ant ALL
-    WORKING_DIRECTORY ${ZK_REPO_PATH}
-    COMMAND ant compile_jute
-    DEPENDS zookeeper
-  )
 endfunction(patch_zookeeper)
 ########################################
-# download cpp unit
-macro(downloadCppUnit)
-  xpNewDownload(${CPP_UNIT})
-endmacro(downloadCppUnit)
-########################################
 # Some helper stuff to clean up the builds
-macro(getZookeeperFiles)
-  set(zookeeper_hdr_files
-    ${ZK_INCLUDE_PATH}/proto.h
-    ${ZK_INCLUDE_PATH}/recordio.h
-    ${ZK_INCLUDE_PATH}/zookeeper.h
-    ${ZK_INCLUDE_PATH}/zookeeper_log.h
-    ${ZK_INCLUDE_PATH}/zookeeper_version.h
-    ${ZK_REPO_PATH}/src/c/generated/zookeeper.jute.h
-  )
-
-  if(WIN32)
-    list(APPEND zookeeper_hdr_files
-      ${ZK_SRC_PATH}/winport.h
-      ${ZK_INCLUDE_PATH}/winconfig.h
-      ${ZK_INCLUDE_PATH}/winstdint.h)
-  else()
-    list(APPEND zookeeper_hdr_files
-      ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper/src/c/config.h)
-  endif()
-endmacro()
 macro(zookeepercheckDependencies)
   find_program(javac javac)
   if(${javac} MATCHES javac-NOTFOUND)
@@ -118,10 +79,34 @@ function(build_zookeeper)
 
   zookeeperCheckDependencies()
 
-  # Gather together all of the source files needed
-  getZookeeperFiles()
+  configure_file(${PRO_DIR}/use/useop-zookeeper-config.cmake
+                 ${STAGE_DIR}/share/cmake/useop-zookeeper-config.cmake
+                 COPYONLY)
+
+  ExternalProject_Get_Property(zookeeper SOURCE_DIR)
+  ExternalProject_Add(zookeeper_ant DEPENDS zookeeper
+    DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
+    SOURCE_DIR ${SOURCE_DIR}
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ant compile_jute
+    BUILD_IN_SOURCE 1
+    INSTALL_COMMAND ""
+  )
 
   if(WIN32)
+  #TODO Still need to convert the Windows build to use ExternalProject...
+  set(ZK_INCLUDE_PATH ${SOURCE_DIR}/src/c/include)
+  set(zookeeper_hdr_files
+    ${ZK_INCLUDE_PATH}/proto.h
+    ${ZK_INCLUDE_PATH}/recordio.h
+    ${ZK_INCLUDE_PATH}/zookeeper.h
+    ${ZK_INCLUDE_PATH}/zookeeper_log.h
+    ${ZK_INCLUDE_PATH}/zookeeper_version.h
+    ${SOURCE_DIR}/src/c/generated/zookeeper.jute.h
+    ${SOURCE_DIR}/src/c/src/winport.h
+    ${ZK_INCLUDE_PATH}/winconfig.h
+    ${ZK_INCLUDE_PATH}/winstdint.h)
+
     add_custom_target(zookeeper_build ALL
       WORKING_DIRECTORY ${ZK_REPO_PATH}/src/c
       COMMAND msbuild ${ZK_REPO_PATH}/src/c/zookeeper.sln /p:Configuration=Release\;Platform=x64 /t:zookeeper:rebuild
@@ -141,34 +126,50 @@ function(build_zookeeper)
       )
     endforeach()
   else()
-    if(NOT TARGET download_cppunit-1.12.1.tar.gz)
-      downloadCppUnit()
-    endif()
+    # This is only needed for non-windows build
+    xpNewDownload(${CPP_UNIT})
 
-    add_custom_target(zookeeper_configure
-      WORKING_DIRECTORY ${ZK_REPO_PATH}/src/c
-      COMMAND ${CMAKE_COMMAND} -E tar xzf ${DWNLD_DIR}/cppunit-${CPP_UNIT_VER}.tar.gz
-      COMMAND ${CMAKE_COMMAND} -E env ACLOCAL=\"aclocal -I ${ZK_REPO_PATH}/src/c/cppunit-${CPP_UNIT_VER}\" autoreconf -if -W none
-      DEPENDS zookeeper zookeeper_ant download_cppunit-${CPP_UNIT_VER}.tar.gz
+    set(ACLOCAL_STR "aclocal -I ${SOURCE_DIR}/src/c/cppunit-${CPP_UNIT_VER}")
+    ExternalProject_Add(zookeeper_configure DEPENDS zookeeper download_cppunit-${CPP_UNIT_VER}.tar.gz
+      DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
+      SOURCE_DIR ${SOURCE_DIR}/src/c
+      CONFIGURE_COMMAND ${CMAKE_COMMAND} -E tar xzf ${DWNLD_DIR}/cppunit-${CPP_UNIT_VER}.tar.gz
+      BUILD_COMMAND ${CMAKE_COMMAND} -E env ACLOCAL=${ACLOCAL_STR} autoreconf -if -W none
+      BUILD_IN_SOURCE 1
+      INSTALL_COMMAND ""
     )
-    add_custom_target(zookeeper_build ALL
-      WORKING_DIRECTORY ${ZK_REPO_PATH}/src/c
-      COMMAND ./configure --without-cppunit --prefix=${STAGE_DIR}
-      COMMAND make
-      COMMAND make install
-      DEPENDS zookeeper zookeeper_configure download_cppunit-${CPP_UNIT_VER}.tar.gz
+
+    ExternalProject_Add(zookeeper_Release DEPENDS zookeeper_configure
+      DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
+      SOURCE_DIR ${SOURCE_DIR}/src/c
+      CONFIGURE_COMMAND ./configure --without-cppunit --prefix=${STAGE_DIR}
+      BUILD_COMMAND $(MAKE) clean && $(MAKE)
+      BUILD_IN_SOURCE 1
+      INSTALL_COMMAND $(MAKE) install
     )
+
+    if(${XP_BUILD_DEBUG})
+      #TODO need to make zookeeper add a suffix so debug build can go in lib folder
+      ExternalProject_Add(zookeeper_Debug DEPENDS zookeeper_Release
+        DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
+        SOURCE_DIR ${SOURCE_DIR}/src/c
+        CONFIGURE_COMMAND ./configure --without-cppunit --libdir=${STAGE_DIR}/lib/zookeeperDebug --enable-debug
+        BUILD_COMMAND $(MAKE) clean && $(MAKE)
+        BUILD_IN_SOURCE 1
+        INSTALL_COMMAND $(MAKE) install-libLTLIBRARIES
+      )
+    endif()
   endif()
 
-  # Copy LICENSE.txt and NOTICE.txt files to STAGE_DIR
-  add_custom_command(TARGET zookeeper_build POST_BUILD
-    WORKING_DIRECTORY ${ZK_REPO_PATH}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/zookeeper
-    COMMAND ${CMAKE_COMMAND} -E copy ${ZK_REPO_PATH}/LICENSE.txt ${STAGE_DIR}/share/zookeeper
-    COMMAND ${CMAKE_COMMAND} -E copy ${ZK_REPO_PATH}/NOTICE.txt ${STAGE_DIR}/share/zookeeper
+  # Copy LICENSE, NOTICE, and README files to STAGE_DIR
+  ExternalProject_Add(zookeeper_install_files DEPENDS zookeeper_Release
+    DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
+    SOURCE_DIR ${NULL_DIR} CONFIGURE_COMMAND "" BUILD_COMMAND ""
+    INSTALL_COMMAND
+      ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/zookeeper &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/src/c/LICENSE ${STAGE_DIR}/share/zookeeper &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/src/c/NOTICE.txt ${STAGE_DIR}/share/zookeeper &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/src/c/README ${STAGE_DIR}/share/zookeeper
   )
 
-  configure_file(${PRO_DIR}/use/useop-zookeeper-config.cmake
-                 ${STAGE_DIR}/share/cmake/useop-zookeeper-config.cmake
-                 COPYONLY)
 endfunction(build_zookeeper)

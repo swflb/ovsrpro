@@ -3,14 +3,8 @@
 ########################################
 xpProOption(qwt)
 ########################################
-set(QWT_SRC_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/qwt)
-if(WIN32)
-  set(QWT_DL_URL https://sourceforge.net/projects/qwt/files/qwt/6.1.2/qwt-6.1.2.zip/download)
-  set(QWT_DL_MD5 b43a4e93c59b09fa3eb60b2406b4b37f)
-else()
-  set(QWT_DL_URL https://sourceforge.net/projects/qwt/files/qwt/6.1.2/qwt-6.1.2.tar.bz2/download)
-  set(QWT_DL_MD5 9c88db1774fa7e3045af063bbde44d7d)
-endif()
+set(QWT_DL_URL https://sourceforge.net/projects/qwt/files/qwt/6.1.2/qwt-6.1.2.tar.bz2/download)
+set(QWT_DL_MD5 9c88db1774fa7e3045af063bbde44d7d)
 
 set(PRO_QWT
   NAME qwt
@@ -60,38 +54,35 @@ function(build_qwt)
     set(STATIC_FLAG false)
   endif()
 
-  add_custom_target(qwt_configure ALL
-    WORKING_DIRECTORY ${QWT_SRC_PATH}
-    # Invoke qmake from the QT5 that was just built
-    COMMAND ${STAGE_DIR}/qt5/bin/qmake qwt.pro "INSTALL_PATH=${STAGE_DIR}" "STATIC_BUILD=${STATIC_FLAG}"
-    DEPENDS qwt qt5_build
-  )
-
-  # Haven't tested building on windows but this *should* work...
-  if(WIN32)
-    add_custom_target(qwt_build ALL
-      WORKING_DIRECTORY ${QWT_SRC_PATH}
-      COMMAND nmake
-      COMMAND nmake install
-      DEPENDS qwt qwt_configure qt5_build
-    )
-  else()
-    add_custom_target(qwt_build ALL
-      WORKING_DIRECTORY ${QWT_SRC_PATH}
-      COMMAND make
-      COMMAND make install
-      DEPENDS qwt qwt_configure qt5_build
-    ) 
-  endif()
-
-  # Copy LICENSE file to STAGE_DIR
-  add_custom_command(TARGET qwt_build POST_BUILD
-    WORKING_DIRECTORY ${QWT_SRC_PATH}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/qwt
-    COMMAND ${CMAKE_COMMAND} -E copy ${QWT_SRC_PATH}/COPYING ${STAGE_DIR}/share/qwt
-  )
-
   configure_file(${PRO_DIR}/use/useop-qwt-config.cmake
                  ${STAGE_DIR}/share/cmake/useop-qwt-config.cmake
                  COPYONLY)
+
+  # Haven't tested building on windows but this *should* work...
+  if(WIN32)
+    set(MAKE_CMD nmake)
+  else()
+    set(MAKE_CMD $(MAKE))
+  endif()
+
+  # In the configure step invoke qmake from the QT5 that was just built
+  ExternalProject_Get_Property(qwt SOURCE_DIR)
+  ExternalProject_Add(qwt_build DEPENDS qwt qt5_build
+    DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
+    SOURCE_DIR ${SOURCE_DIR}
+    CONFIGURE_COMMAND ${STAGE_DIR}/qt5/bin/qmake qwt.pro "INSTALL_PATH=${STAGE_DIR}" "STATIC_BUILD=${STATIC_FLAG}"
+    BUILD_COMMAND ${MAKE_CMD} clean && ${MAKE_CMD}
+    BUILD_IN_SOURCE 1
+    INSTALL_COMMAND ${MAKE_CMD} install
+  )
+
+  # Copy LICENSE file to STAGE_DIR
+  ExternalProject_Add(qwt_install_files DEPENDS qwt_build
+    DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
+    SOURCE_DIR ${NULL_DIR} CONFIGURE_COMMAND "" BUILD_COMMAND ""
+    INSTALL_COMMAND
+      ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/qwt &&
+      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/COPYING ${STAGE_DIR}/share/qwt
+  )
+
 endfunction()
