@@ -78,7 +78,7 @@ endmacro()
 ########################################
 # build
 function(build_librdkafka)
-  if (NOT (XP_DEFAULT OR XP_PRO_LIBRDKAFKA))
+  if(NOT (XP_DEFAULT OR XP_PRO_LIBRDKAFKA))
     return()
   endif()
 
