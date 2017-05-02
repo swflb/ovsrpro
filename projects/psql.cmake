@@ -23,10 +23,18 @@ set(PRO_PSQL
 )
 #######################################
 function(mkpatch_psql)
+  if(NOT (XP_DEFAULT OR XP_PRO_PSQL))
+    return()
+  endif()
+
   xpRepo(${PRO_PSQL})
 endfunction()
 #######################################
 function(download_psql)
+  if(NOT (XP_DEFAULT OR XP_PRO_PSQL))
+    return()
+  endif()
+
   xpNewDownload(${PRO_PSQL})
 endfunction()
 #######################################

@@ -22,14 +22,26 @@ set(PRO_OPENH264
   )
 ########################################
 function(mkpatch_openh264)
+  if(NOT (XP_DEFAULT OR XP_PRO_OPENH264))
+    return()
+  endif()
+
   xpRepo(${PRO_OPENH264})
 endfunction()
 ########################################
 function(download_openh264)
+  if(NOT (XP_DEFAULT OR XP_PRO_OPENH264))
+    return()
+  endif()
+
   xpNewDownload(${PRO_OPENH264})
 endfunction()
 ########################################
 function(patch_openh264)
+  if(NOT (XP_DEFAULT OR XP_PRO_OPENH264))
+    return()
+  endif()
+
   xpPatch(${PRO_OPENH264})
 endfunction()
 ########################################

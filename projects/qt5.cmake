@@ -82,20 +82,29 @@ endmacro(setConfigureOptions)
 #######################################
 # mkpatch_qt5 - initialize and clone the main repository
 function(mkpatch_qt5)
+  if(NOT (XP_DEFAULT OR XP_PRO_QT5))
+    return()
+  endif()
+
   xpRepo(${PRO_QT5})
 endfunction(mkpatch_qt5)
 ########################################
 # download - initialize the git submodules
 function(download_qt5)
+  if(NOT (XP_DEFAULT OR XP_PRO_QT5))
+    return()
+  endif()
+
   xpNewDownload(${PRO_QT5})
 endfunction(download_qt5)
 ########################################
 # patch - remove any of the unwanted submodules
 function(patch_qt5)
-  xpPatch(${PRO_QT5})
   if(NOT (XP_DEFAULT OR XP_PRO_QT5))
     return()
   endif()
+
+  xpPatch(${PRO_QT5})
 
   ExternalProject_Get_Property(qt5 SOURCE_DIR)  
   # if this didn't come from the repo (direct download) need to

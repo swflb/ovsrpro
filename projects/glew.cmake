@@ -16,10 +16,16 @@ set(PRO_GLEW
 )
 ########################################
 function(mkpatch_glew)
+  if(NOT (XP_DEFAULT OR XP_PRO_GLEW))
+    return()
+  endif()
   xpRepo(${PRO_GLEW})
 endfunction()
 ########################################
 function(download_glew)
+  if(NOT (XP_DEFAULT OR XP_PRO_GLEW))
+    return()
+  endif()
   xpNewDownload(${PRO_GLEW})
 endfunction()
 ########################################

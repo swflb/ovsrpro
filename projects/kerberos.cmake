@@ -33,10 +33,16 @@ if(WIN32)
   )
   #######################################
   function(mkpatch_kerberos)
+    if(NOT (XP_DEFAULT OR XP_PRO_KERBEROS))
+      return()
+    endif()
     xpRepo(${PRO_KERBEROS})
   endfunction()
   #######################################
   function(download_kerberos)
+    if(NOT (XP_DEFAULT OR XP_PRO_KERBEROS))
+      return()
+    endif()
     xpNewDownload(${PRO_KERBEROS})
   endfunction()
   #######################################
