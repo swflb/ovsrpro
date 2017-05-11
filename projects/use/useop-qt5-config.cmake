@@ -39,6 +39,10 @@ find_package(Qt5 REQUIRED COMPONENTS
                Sql
                Svg
                Test
+               WebChannel
+               WebEngine
+               WebEngineWidgets
+               WebSockets
                Widgets
                Xml
                XmlPatterns

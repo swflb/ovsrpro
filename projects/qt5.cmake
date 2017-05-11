@@ -3,7 +3,7 @@
 ########################################
 # NOTES: see instructions http://wiki.qt.io/Building-Qt-5-from-Git
 # build/configure tools: Perl >= 5.14
-#                        Python >= 2.6
+#                        Python >= 2.7
 # depends: openssl from externpro
 #          psql from ovsrpro
 # After installation, the qt.conf file in OVSRPRO_INSTALL_PATH/qt5/bin
@@ -37,7 +37,7 @@ macro(setConfigureOptions)
     -qt-pcre
     -qt-libpng
     -qt-libjpeg
-    -qt-freetype
+    -system-freetype
     -opengl desktop
     -openssl
     -sql-psql
@@ -68,8 +68,10 @@ macro(setConfigureOptions)
       -c++std c++11
       -qt-xcb
       -qt-xkbcommon-x11
+      -fontconfig
       -optimized-qmake
       -verbose
+      -glib
       -no-cups
       -no-iconv
       -no-evdev

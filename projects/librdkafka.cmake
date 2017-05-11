@@ -119,6 +119,14 @@ function(build_librdkafka)
 #  else()
 
   xpSetPostfix()
-  xpCmakeBuild(librdkafka "" "-DCMAKE_DEBUG_POSTFIX=${CMAKE_DEBUG_POSTFIX}")
+  # Ensure both the C and C++ versions are built with the -fPIC flag
+  xpStringAppendIfDne(CMAKE_CXX_FLAGS "-fPIC")
+  xpStringAppendIfDne(CMAKE_C_FLAGS "-fPIC")
+  set(XP_CONFIGURE
+      -DCMAKE_DEBUG_POSTFIX=${CMAKE_DEBUG_POSTFIX}
+      -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+      -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
+     )
+  xpCmakeBuild(librdkafka "" "${XP_CONFIGURE}")
 
 endfunction()
