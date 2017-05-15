@@ -15,8 +15,19 @@ Supports compiling the following projects from source for both Windows and Linux
 - Qwt (http://qwt.sourceforge.net)
 - ZooKeeper (https://github.com/apache/zookeeper.git)
 
-Note: Depends on an installed version of externpro (https://github.com/smanders/externpro).
+Depends on an installed version of externpro (https://github.com/smanders/externpro).
+
 YASM assembler is expected to be present for building FFmpeg and OpenH264 projects.
+
+Some additional packages may need to be installed for the Qt Web modules to build, here is a list of ones that commonly need to be installed on a CentOS 6 system (additional ones may be required depending on system configuration):
+ - dbus-devel
+ - libXScrnSaver-devel
+ - libXtst-devel
+ - pciutils-devel
+ - mesa-libEGL-devel
+ - gperf
+ - expat-devel
+  
 
 All projects can be built as static or shared libraries.  For static windows
 builds, libraries are compiled with the /MT flag.
