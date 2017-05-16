@@ -32,8 +32,8 @@ if(WIN32)
 else()
   if(${build_type} STREQUAL debug)
     set(LIBRDKAFKA_LIBS
-      ${LIBRDKAFKA_LIBS_DIR}/librdkafkaDebug/librdkafka++.a
-      ${LIBRDKAFKA_LIBS_DIR}/librdkafkaDebug/librdkafka.a
+      ${LIBRDKAFKA_LIBS_DIR}/librdkafka++-d.a
+      ${LIBRDKAFKA_LIBS_DIR}/librdkafka-d.a
     )
   else()
     set(LIBRDKAFKA_LIBS

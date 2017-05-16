@@ -41,16 +41,28 @@ set(CPP_UNIT
 ########################################
 # mkpatch_zookeeper
 function(mkpatch_zookeeper)
+  if(NOT (XP_DEFAULT OR XP_PRO_ZOOKEEPER))
+    return()
+  endif()
+
   xpRepo(${PRO_ZOOKEEPER})
 endfunction(mkpatch_zookeeper)
 ########################################
 # download
 function(download_zookeeper)
+  if(NOT (XP_DEFAULT OR XP_PRO_ZOOKEEPER))
+    return()
+  endif()
+
   xpNewDownload(${PRO_ZOOKEEPER})
 endfunction(download_zookeeper)
 ########################################
 # patch
 function(patch_zookeeper)
+  if(NOT (XP_DEFAULT OR XP_PRO_ZOOKEEPER))
+    return()
+  endif()
+
   xpPatch(${PRO_ZOOKEEPER})
 endfunction(patch_zookeeper)
 ########################################

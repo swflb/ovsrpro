@@ -22,14 +22,23 @@ set(PRO_FFMPEG
   )
 ########################################
 function(mkpatch_ffmpeg)
+  if (NOT (XP_DEFAULT OR XP_PRO_FFMPEG))
+    return()
+  endif()
   xpRepo(${PRO_FFMPEG})
 endfunction()
 ########################################
 function(download_ffmpeg)
+  if (NOT (XP_DEFAULT OR XP_PRO_FFMPEG))
+    return()
+  endif()
   xpNewDownload(${PRO_FFMPEG})
 endfunction()
 ########################################
 function(patch_ffmpeg)
+  if (NOT (XP_DEFAULT OR XP_PRO_FFMPEG))
+    return()
+  endif()
   xpPatch(${PRO_FFMPEG})
 endfunction()
 ########################################

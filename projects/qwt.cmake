@@ -18,10 +18,18 @@ set(PRO_QWT
 )
 ########################################
 function(mkpatch_qwt)
+  if(NOT (XP_DEFAULT OR XP_PRO_QWT))
+    return()
+  endif()
+
   xpRepo(${PRO_QWT})
 endfunction()
 ########################################
 function(download_qwt)
+  if(NOT (XP_DEFAULT OR XP_PRO_QWT))
+    return()
+  endif()
+
   xpNewDownload(${PRO_QWT})
 endfunction()
 ########################################

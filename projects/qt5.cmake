@@ -3,7 +3,7 @@
 ########################################
 # NOTES: see instructions http://wiki.qt.io/Building-Qt-5-from-Git
 # build/configure tools: Perl >= 5.14
-#                        Python >= 2.6
+#                        Python >= 2.7
 # depends: openssl from externpro
 #          psql from ovsrpro
 # After installation, the qt.conf file in OVSRPRO_INSTALL_PATH/qt5/bin
@@ -11,7 +11,7 @@
 # path (e.g. C:/Program Files/ovsrpro 0.0.1-vc120-64/qt5)
 ########################################
 xpProOption(qt5)
-set(QT5_VER 5.5.1)
+set(QT5_VER 5.8.0)
 set(QT5_REPO http://code.qt.io/cgit/qt/qt5.git)
 set(QT5_DOWNLOAD_FILE qt-everywhere-opensource-src-${QT5_VER}.tar.gz)
 set(PRO_QT5
@@ -23,16 +23,10 @@ set(PRO_QT5
   VER ${QT5_VER}
   GIT_ORIGIN ${QT5_REPO}
   GIT_TAG v${QT5_VER}
-  DLURL http://download.qt.io/archive/qt/5.5/${QT5_VER}/single/${QT5_DOWNLOAD_FILE}
-  DLMD5 59f0216819152b77536cf660b015d784
+  DLURL http://download.qt.io/archive/qt/5.8/${QT5_VER}/single/${QT5_DOWNLOAD_FILE}
+  DLMD5 a9f2494f75f966e2f22358ec367d8f41
+  PATCH ${PATCH_DIR}/qt5.patch
 )
-set(QT5_REMOVE_SUBMODULES
-  qtandroidextras
-  qtwebchannel
-  qtwebengine
-  qtwebkit
-  qtwebkit-examples
-  qtwebsockets)
 
 #######################################
 # setup the configure options
@@ -44,11 +38,11 @@ macro(setConfigureOptions)
     -qt-pcre
     -qt-libpng
     -qt-libjpeg
-    -qt-freetype
+    -system-freetype
     -opengl desktop
     -openssl
+    -sql-psql
     -psql_config ${STAGE_DIR}/bin/pg_config
-    -qt-sql-psql
     -opensource
     -confirm-license
     -make libs
@@ -56,8 +50,8 @@ macro(setConfigureOptions)
     -make tools
     -nomake tests
     -prefix ${QT5_INSTALL_PATH})
-  # Check whether to include debug build
-  if(${XP_BUILD_DEBUG})
+  # Check whether to include debug build (debug-and-release not supported on Unix)
+  if(${XP_BUILD_DEBUG} AND WIN32)
     list(APPEND QT5_CONFIGURE -debug-and-release)
   else()
     list(APPEND QT5_CONFIGURE -release)
@@ -72,12 +66,13 @@ macro(setConfigureOptions)
     list(APPEND QT5_CONFIGURE -platform win32-msvc2013 -qmake -mp)
   else()
     list(APPEND QT5_CONFIGURE -platform linux-g++
-      -c++11
+      -c++std c++11
       -qt-xcb
       -qt-xkbcommon-x11
+      -fontconfig
       -optimized-qmake
       -verbose
-      -no-nis
+      -glib
       -no-cups
       -no-iconv
       -no-evdev
@@ -90,33 +85,31 @@ endmacro(setConfigureOptions)
 #######################################
 # mkpatch_qt5 - initialize and clone the main repository
 function(mkpatch_qt5)
+  if(NOT (XP_DEFAULT OR XP_PRO_QT5))
+    return()
+  endif()
+
   xpRepo(${PRO_QT5})
 endfunction(mkpatch_qt5)
 ########################################
 # download - initialize the git submodules
 function(download_qt5)
-  xpNewDownload(${PRO_QT5})
-endfunction(download_qt5)
-########################################
-# patch - remove any of the unwanted submodules
-# so that they do not configure/compile
-function(patch_qt5)
-  xpPatch(${PRO_QT5})
   if(NOT (XP_DEFAULT OR XP_PRO_QT5))
     return()
   endif()
 
-  ExternalProject_Get_Property(qt5 SOURCE_DIR)
-  # Remove the modules that aren't wanted
-  foreach(RemoveModule ${QT5_REMOVE_SUBMODULES})
-    ExternalProject_Add_Step(qt5 qt5_remove_${RemoveModule}
-      COMMENT "Removing ${RemoveModule}"
-      WORKING_DIRECTORY ${SOURCE_DIR}
-      COMMAND ${CMAKE_COMMAND} -E remove_directory ${RemoveModule}
-      DEPENDEES download
-      )
-  endforeach()
+  xpNewDownload(${PRO_QT5})
+endfunction(download_qt5)
+########################################
+# patch - remove any of the unwanted submodules
+function(patch_qt5)
+  if(NOT (XP_DEFAULT OR XP_PRO_QT5))
+    return()
+  endif()
 
+  xpPatch(${PRO_QT5})
+
+  ExternalProject_Get_Property(qt5 SOURCE_DIR)  
   # if this didn't come from the repo (direct download) need to
   # add a .gitignore...it is used by the configure scripts to
   # determine whether to compile the configure.exe
