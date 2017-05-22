@@ -13,6 +13,7 @@ Supports compiling the following projects from source for both Windows and Linux
 - PostreSQL (http://www.postresql.org)
 - Qt5 (http://code.qt.io)
 - Qwt (http://qwt.sourceforge.net)
+- ZeroMQ (https://zeromq.org)
 - ZooKeeper (https://github.com/apache/zookeeper.git)
 
 Depends on an installed version of externpro (https://github.com/smanders/externpro).
@@ -71,5 +72,6 @@ Available package options when XP_DEFAULT=0 or is not defined
 - XP_PRO_PSQL - build the postgresql package
 - XP_PRO_QT5 - build the qt5 package
 - XP_PRO_QWT - build the qwt package
+- XP_PRO_ZEROMQ - build the zeromq package
 - XP_PRO_ZOOKEEPER - build the zookeeper package
 
