@@ -7,9 +7,9 @@ unset(ZEROMQ_INCLUDE_DIR CACHE)
 unset(ZEROMQ_LIBRARY_DIRS CACHE)
 unset(ZEROMQ_LIBS CACHE)
 
-set(ZEOMQ_INCLUDE_DIR ${OP_ROOTDIR}/include)
+set(ZEROMQ_INCLUDE_DIR ${OP_ROOTDIR}/include)
+set(ZEROMQ_FULL_INCLUDE_DIR ${ZEROMQ_INCLUDE_DIR}/zeromq) #Kludge so cppzmq files can include zmq.h
 set(ZEROMQ_LIBS_DIR ${OP_ROOTDIR}/lib)
-set(ZeroMQ_VERSION ${ZEROMQ_VERSION}
 
 string(TOLOWER ${CMAKE_BUILD_TYPE} build_type)
 
