@@ -18,5 +18,5 @@ string(TOLOWER ${CMAKE_BUILD_TYPE} build_type)
     set(CPPZMQ_LIBS ${CPPZMQ_LIBS_DIR}/cppzmq.a)
   endif()
 
-# Add the novas headers to the system includes
-include_directories(SYSTEM ${ZEROMQ_INCLUDE_DIR})
+# Add the cppzmq headers to the system includes
+include_directories(SYSTEM ${CPPZMQ_INCLUDE_DIR})

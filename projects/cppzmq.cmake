@@ -9,7 +9,7 @@ set(CPPZMQ_DLMD5 72d1296f26341d136470c25320936683)
 set(PRO_CPPZMQ
   NAME cppzmq
   WEB "CPPZMQ" https://github.com/zeromq/cppzmq "CPPZMQ"
-  LICENSE "MIT" https://github.com/zeromq/cppzmq/blob/master/LICENSE "MIT"
+  LICENSE "MIT" https://github.com/zeromq/cppzmq/blob/v${CPPZMQ_VER}/LICENSE "MIT"
   DESC "CPPZMQ is a minimal c++ binding to the libzmq functions."
   VER ${CPPZMQ_VER}
   DLURL ${CPPZMQ_DLURL}
@@ -31,8 +31,9 @@ function(build_cppzmq)
     @ONLY NEWLINE_STYLE LF
   )
  
- set(XP_CONFIGURE
+  set(XP_CONFIGURE
     -DZeroMQ_DIR=${STAGE_DIR}/share/cmake/ZeroMQ
+    -DCMAKE_INSTALL_INCLUDEDIR=include/cppzmq
   )
 
   xpCmakeBuild(cppzmq "" "${XP_CONFIGURE}")
