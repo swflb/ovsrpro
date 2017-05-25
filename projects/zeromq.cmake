@@ -37,7 +37,7 @@ function(build_zeromq)
   xpSetPostfix()
   set(XP_CONFIGURE
     -DCMAKE_DEBUG_POSTFIX=${CMAKE_DEBUG_POSTFIX}
-    -DCMAKE_INSTALL_LIBDIR=lib/zeromq
+    -DCMAKE_INSTALL_LIBDIR=lib
     -DCMAKE_INSTALL_INCLUDEDIR=include/zeromq
     )
   xpCmakeBuild(zeromq "" "${XP_CONFIGURE}")
