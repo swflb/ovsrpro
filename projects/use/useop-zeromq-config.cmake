@@ -9,6 +9,7 @@ unset(ZEROMQ_LIBS CACHE)
 
 set(ZEOMQ_INCLUDE_DIR ${OP_ROOTDIR}/include)
 set(ZEROMQ_LIBS_DIR ${OP_ROOTDIR}/lib)
+set(ZeroMQ_VERSION ${ZEROMQ_VERSION}
 
 string(TOLOWER ${CMAKE_BUILD_TYPE} build_type)
 
