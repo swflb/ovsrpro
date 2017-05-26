@@ -8,7 +8,6 @@ unset(ZEROMQ_LIBRARY_DIRS CACHE)
 unset(ZEROMQ_LIBS CACHE)
 
 set(ZEROMQ_INCLUDE_DIR ${OP_ROOTDIR}/include)
-set(ZEROMQ_FULL_INCLUDE_DIR ${ZEROMQ_INCLUDE_DIR}/zeromq) #Kludge so cppzmq files can include zmq.h
 set(ZEROMQ_LIBS_DIR ${OP_ROOTDIR}/lib)
 
 string(TOLOWER ${CMAKE_BUILD_TYPE} build_type)
@@ -29,3 +28,4 @@ endif()
 
 # Add the novas headers to the system includes
 include_directories(SYSTEM ${ZEROMQ_INCLUDE_DIR})
+include_directories(SYSTEM ${ZEROMQ_INCLUDE_DIR}/zeromq)
