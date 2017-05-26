@@ -23,7 +23,7 @@ get_filename_component(OP_ROOTDIR ${CMAKE_CURRENT_LIST_DIR}/../.. ABSOLUTE)
 get_filename_component(OP_ROOTDIR ${OP_ROOTDIR} ABSOLUTE)
 set(QT5_BASE_PATH ${OP_ROOTDIR}/qt5)
 set(QT5_PLUGIN_PATH ${OP_ROOTDIR}/qt5/plugins)
-set(QT5_QTWEBENGINEPROCESS_PATH ${OP_ROOTDIR}/qt5/libexec/QtWebEngineProcess)
+set(QT5_LIBEXEC_PATH ${OP_ROOTDIR}/qt5/libexec)
 set(QT5_RESOURCE_PATH ${OP_ROOTDIR}/qt5/resources)
 
 # find the Qt5 package
