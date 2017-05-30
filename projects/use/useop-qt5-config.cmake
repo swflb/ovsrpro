@@ -23,6 +23,8 @@ get_filename_component(OP_ROOTDIR ${CMAKE_CURRENT_LIST_DIR}/../.. ABSOLUTE)
 get_filename_component(OP_ROOTDIR ${OP_ROOTDIR} ABSOLUTE)
 set(QT5_BASE_PATH ${OP_ROOTDIR}/qt5)
 set(QT5_PLUGIN_PATH ${OP_ROOTDIR}/qt5/plugins)
+set(QT5_LIBEXEC_PATH ${OP_ROOTDIR}/qt5/libexec)
+set(QT5_RESOURCE_PATH ${OP_ROOTDIR}/qt5/resources)
 
 # find the Qt5 package
 # Note - This is not an exhaustive list, if new ones are needed add them here and
@@ -256,3 +258,19 @@ macro(opDeployQt5Plugins destination plugin_dirs)
     endforeach()
   endforeach()
 endmacro()
+
+# Add commands to the given target name to deploy the Qt5 WebEngine
+# @param target_name the target to which the WebEngine should be deployed
+macro(opDeployQtWebEngine target_name)
+  add_custom_command(TARGET ${target_name} POST_BUILD
+   COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${QT5_LIBEXEC_PATH}/QtWebEngineProcess
+    $<TARGET_FILE_DIR:${target_name}>
+  )
+  add_custom_command(TARGET ${target_name} POST_BUILD
+   COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${QT5_RESOURCE_PATH}
+    $<TARGET_FILE_DIR:${target_name}>
+  )
+endmacro()
+
