@@ -19,6 +19,9 @@ if(PACKAGE_TYPE AND ${XP_STEP} STREQUAL "build")
     set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_BINARY_DIR}/ovsrproconf.sh)
     # This will remove the ovsrpro.conf file from /etc/ld.so.conf.d/ and run ldconfig on uninstall
     set(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/removeovsrproconf.sh)
+    # This will prevent rpmbuild from stripping the binaries (avoids some
+    # weird errors when linking against a few of the stripped libraries)
+    set(CPACK_RPM_SPEC_INSTALL_POST /bin/true)
   endif()
 endif()
 proExecuteStep()
