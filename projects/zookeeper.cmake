@@ -142,7 +142,7 @@ function(build_zookeeper)
     xpNewDownload(${CPP_UNIT})
 
     set(ACLOCAL_STR "aclocal -I ${SOURCE_DIR}/src/c/cppunit-${CPP_UNIT_VER}")
-    ExternalProject_Add(zookeeper_configure DEPENDS zookeeper download_cppunit-${CPP_UNIT_VER}.tar.gz
+    ExternalProject_Add(zookeeper_configure DEPENDS zookeeper_ant download_cppunit-${CPP_UNIT_VER}.tar.gz
       DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
       SOURCE_DIR ${SOURCE_DIR}/src/c
       CONFIGURE_COMMAND ${CMAKE_COMMAND} -E tar xzf ${DWNLD_DIR}/cppunit-${CPP_UNIT_VER}.tar.gz
