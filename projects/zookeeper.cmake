@@ -106,18 +106,18 @@ function(build_zookeeper)
   )
 
   if(WIN32)
-  #TODO Still need to convert the Windows build to use ExternalProject...
-  set(ZK_INCLUDE_PATH ${SOURCE_DIR}/src/c/include)
-  set(zookeeper_hdr_files
-    ${ZK_INCLUDE_PATH}/proto.h
-    ${ZK_INCLUDE_PATH}/recordio.h
-    ${ZK_INCLUDE_PATH}/zookeeper.h
-    ${ZK_INCLUDE_PATH}/zookeeper_log.h
-    ${ZK_INCLUDE_PATH}/zookeeper_version.h
-    ${SOURCE_DIR}/src/c/generated/zookeeper.jute.h
-    ${SOURCE_DIR}/src/c/src/winport.h
-    ${ZK_INCLUDE_PATH}/winconfig.h
-    ${ZK_INCLUDE_PATH}/winstdint.h)
+    #TODO Still need to convert the Windows build to use ExternalProject...
+    set(ZK_INCLUDE_PATH ${SOURCE_DIR}/src/c/include)
+    set(zookeeper_hdr_files
+      ${ZK_INCLUDE_PATH}/proto.h
+      ${ZK_INCLUDE_PATH}/recordio.h
+      ${ZK_INCLUDE_PATH}/zookeeper.h
+      ${ZK_INCLUDE_PATH}/zookeeper_log.h
+      ${ZK_INCLUDE_PATH}/zookeeper_version.h
+      ${SOURCE_DIR}/src/c/generated/zookeeper.jute.h
+      ${SOURCE_DIR}/src/c/src/winport.h
+      ${ZK_INCLUDE_PATH}/winconfig.h
+      ${ZK_INCLUDE_PATH}/winstdint.h)
 
     add_custom_target(zookeeper_build ALL
       WORKING_DIRECTORY ${ZK_REPO_PATH}/src/c
