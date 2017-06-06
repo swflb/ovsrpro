@@ -1,5 +1,20 @@
 ########################################
 # qt5
+
+# Qt5 Web depends on:
+# - gperf (an application, not a dev library)
+# - expat-dev
+find_program(gperf_location gperf)
+if (${gperf_location} STREQUAL "gperf_location-NOTFOUND")
+  message(FATAL_ERROR "\n"
+    "gperf not found -- OpenH264 can't be built. install on linux:\n"
+    "  apt install gperf\n"
+    "  yum install gperf  # requires epel-release\n")
+  return()
+endif()
+
+find_package(EXPAT REQUIRED)
+
 ########################################
 # NOTES: see instructions http://wiki.qt.io/Building-Qt-5-from-Git
 # build/configure tools: Perl >= 5.14
