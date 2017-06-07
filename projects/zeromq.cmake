@@ -17,15 +17,7 @@ set(PRO_ZEROMQ
   DLMD5 ${ZEROMQ_DLMD5}
   #PATCH ${PATCH_DIR}/zeromq.patch
 )
-########################################
-#function(patch_zeromq)
-#  if(NOT (XP_DEFAULT OR XP_PRO_ZEROMQ))
-#    return()
-#  endif()
 
-#  xpPatch(${PRO_ZEROMQ})
-#endfunction()
-########################################
 function(build_zeromq)
   if (NOT (XP_DEFAULT OR XP_PRO_ZEROMQ))
     return()

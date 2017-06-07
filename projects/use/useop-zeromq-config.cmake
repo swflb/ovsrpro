@@ -26,6 +26,6 @@ else()
   endif()
 endif()
 
-# Add the novas headers to the system includes
+# Add the zeromq headers to the system includes
 include_directories(SYSTEM ${ZEROMQ_INCLUDE_DIR})
 include_directories(SYSTEM ${ZEROMQ_INCLUDE_DIR}/zeromq)
