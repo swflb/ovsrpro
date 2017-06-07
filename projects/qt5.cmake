@@ -211,7 +211,8 @@ function(build_qt5)
       ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/LICENSE.LGPLv3 ${STAGE_DIR}/share/qt5 &&
       ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/LICENSE.PREVIEW.COMMERCIAL ${STAGE_DIR}/share/qt5 &&
       ${CMAKE_COMMAND} -E copy ${DOWNLOAD_DIR}/${QT5_DOWNLOAD_FILE} ${STAGE_DIR}/share/qt5 &&
-      ${CMAKE_COMMAND} -E copy echo "Compile flags used when building the library: '${QT5_CONFIGURE}'" > ${STAGE_DIR}/share/qt5/compileFlags
+      ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/qt5.patch ${STAGE_DIR}/share/qt5 &&
+      ${CMAKE_COMMAND} -E echo "Compile flags used when building the library: '${QT5_CONFIGURE}'" > ${STAGE_DIR}/share/qt5/compileFlags
   )
 
 endfunction(build_qt5)

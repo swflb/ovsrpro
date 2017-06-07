@@ -258,3 +258,19 @@ macro(opDeployQt5Plugins destination plugin_dirs)
     endforeach()
   endforeach()
 endmacro()
+
+# Add commands to the given target name to deploy the Qt5 WebEngine
+# @param target_name the target to which the WebEngine should be deployed
+macro(opDeployQtWebEngine target_name)
+  add_custom_command(TARGET ${target_name} POST_BUILD
+   COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${QT5_LIBEXEC_PATH}/QtWebEngineProcess
+    $<TARGET_FILE_DIR:${target_name}>
+  )
+  add_custom_command(TARGET ${target_name} POST_BUILD
+   COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${QT5_RESOURCE_PATH}
+    $<TARGET_FILE_DIR:${target_name}>
+  )
+endmacro()
+
