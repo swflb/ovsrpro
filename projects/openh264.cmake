@@ -1,5 +1,16 @@
 ########################################
 # openh264
+
+# OpenH264 requires YASM
+find_program(yasm_location yasm)
+if (${yasm_location} STREQUAL "yasm_location-NOTFOUND")
+  message(FATAL_ERROR "\n"
+    "yasm not found -- OpenH264 can't be built. install on linux:\n"
+    "  apt install yasm\n"
+    "  yum install yasm  # requires epel-release\n")
+  return()
+endif()
+
 xpProOption(openh264)
 set(VER 1.4.0)
 set(REPO https://github.com/distributepro/openh264)
