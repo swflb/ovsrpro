@@ -3,6 +3,7 @@
 builds overseer [projects](projects/README.md) by leveraging externpro
 
 Supports compiling the following projects from source for both Windows and Linux:
+- CPPZMQ (https://github.com/zeromq/cppzmq)
 - FFmpeg (https://www.ffmpeg.org)
 - GLEW (http://glew.sourceforge.net)
 - HDF5 (http://www.hdfgroup.org)
@@ -62,6 +63,7 @@ For custom builds, the following cmake options are available (via the -D option)
   type that has been tested)
 
 Available package options when XP_DEFAULT=0 or is not defined
+- XP_PRO_CPPZMQ - build the cppzmq package (depends on zeromq)
 - XP_PRO_FFMPEG - build the FFmpeg package
 - XP_PRO_GLEW - build the GLEW package
 - XP_PRO_HDF5 - build the HDF5 package
