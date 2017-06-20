@@ -3,6 +3,7 @@
 builds overseer [projects](projects/README.md) by leveraging externpro
 
 Supports compiling the following projects from source for both Windows and Linux:
+- CPPZMQ (https://github.com/zeromq/cppzmq)
 - FFmpeg (https://www.ffmpeg.org)
 - GLEW (http://glew.sourceforge.net)
 - HDF5 (http://www.hdfgroup.org)
@@ -13,6 +14,7 @@ Supports compiling the following projects from source for both Windows and Linux
 - PostreSQL (http://www.postresql.org)
 - Qt5 (http://code.qt.io)
 - Qwt (http://qwt.sourceforge.net)
+- ZeroMQ (https://zeromq.org)
 - ZooKeeper (https://github.com/apache/zookeeper.git)
 
 Depends on an installed version of externpro (https://github.com/smanders/externpro).
@@ -61,6 +63,7 @@ For custom builds, the following cmake options are available (via the -D option)
   type that has been tested)
 
 Available package options when XP_DEFAULT=0 or is not defined
+- XP_PRO_CPPZMQ - build the cppzmq package (depends on zeromq)
 - XP_PRO_FFMPEG - build the FFmpeg package
 - XP_PRO_GLEW - build the GLEW package
 - XP_PRO_HDF5 - build the HDF5 package
@@ -71,5 +74,6 @@ Available package options when XP_DEFAULT=0 or is not defined
 - XP_PRO_PSQL - build the postgresql package
 - XP_PRO_QT5 - build the qt5 package
 - XP_PRO_QWT - build the qwt package
+- XP_PRO_ZEROMQ - build the zeromq package
 - XP_PRO_ZOOKEEPER - build the zookeeper package
 
