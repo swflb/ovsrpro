@@ -22,13 +22,14 @@ YASM assembler is expected to be present for building FFmpeg and OpenH264 projec
 Some additional packages may need to be installed for the Qt Web modules to build, here is a list of ones that commonly need to be installed on a CentOS 6 system (additional ones may be required depending on system configuration):
 | Yum | Apt |
 |:----|:----|
-| dbus-devel          | |
-| libXScrnSaver-devel | |
+| dbus-devel          | libdbus-1-dev |
+| libXScrnSaver-devel | libxss-dev |
 | libXtst-devel       | libxtst-dev |
 | pciutils-devel      | libpci-dev |
 | mesa-libEGL-devel   | libegl1-mesa-dev |
 | gperf               | gperf |
 | expat-devel         | libexpat1-dev |
+|                     | bison |
   
 
 All projects can be built as static or shared libraries.  For static windows

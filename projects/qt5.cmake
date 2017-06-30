@@ -1,20 +1,5 @@
 ########################################
 # qt5
-
-# Qt5 Web depends on:
-# - gperf (an application, not a dev library)
-# - expat-dev
-find_program(gperf_location gperf)
-if (${gperf_location} STREQUAL "gperf_location-NOTFOUND")
-  message(FATAL_ERROR "\n"
-    "gperf not found -- OpenH264 can't be built. install on linux:\n"
-    "  apt install gperf\n"
-    "  yum install gperf  # requires epel-release\n")
-  return()
-endif()
-
-find_package(EXPAT REQUIRED)
-
 ########################################
 # NOTES: see instructions http://wiki.qt.io/Building-Qt-5-from-Git
 # build/configure tools: Perl >= 5.14
@@ -151,14 +136,40 @@ function(patch_qt5)
   endif()
 endfunction(patch_qt5)
 macro(qt5CheckDependencies)
+  find_program(gperf gperf)
+  if (${gperf} STREQUAL "gperf-NOTFOUND")
+    message(FATAL_ERROR "\n"
+      "Gperf is required for Qt5.  To install on linux:\n"
+      "  apt install gperf\n"
+      "  yum install gperf  # requires epel-release\n")
+    return()
+  endif()
+
+  find_package(EXPAT REQUIRED)
+
+  find_program(bison bison)
+  if (${bison} STREQUAL "bison-NOTFOUND")
+    message(FATAL_ERROR "\n"
+      "Bison is required for Qt5. To install on linux:\n"
+      "  apt install bison\n"
+      "  yum install bison")
+    return()
+  endif()
+
   find_program(python python)
-  if(${python} MATCHES python-NOTFOUND)
-    message(FATAL_ERROR "python required for qt5")
+  if(${python} STREQUAL python-NOTFOUND)
+    message(FATAL_ERROR "\n"
+      "Python is required for Qt5. To install on linux:\n"
+      "  apt install python\n"
+      "  yum install python")
   endif()
 
   find_program(perl perl)
-  if(${perl} MATCHES perl-NOTFOUND)
-    message(FATAL_ERROR "perl required for qt5")
+  if(${perl} STREQUAL perl-NOTFOUND)
+    message(FATAL_ERROR "\n"
+      "Perl is required for Qt5. To install on linux:\n"
+      "  apt install perl\n"
+      "  yum install perl")
   endif()
 endmacro()
 ########################################
