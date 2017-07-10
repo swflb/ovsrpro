@@ -9,7 +9,7 @@ set(PRO_HDF5
   LICENSE "open" https://www.hdfgroup.org/ftp/HDF5/current/src/unpacked/COPYING "HDF5 License"
   DESC "HDF5 is a data model, library, and file format for storing and managing data"
   VER ${HDF5_VER}
-  DLURL http://www.hdfgroup.org/ftp/HDF5/prev-releases/hdf5-${HDF5_VER}/src/CMake-hdf5-${HDF5_VER}.tar.gz
+  DLURL http://www.hdfgroup.org/ftp/HDF5/prev-releases/hdf5-1.8/hdf5-${HDF5_VER}/src/CMake-hdf5-${HDF5_VER}.tar.gz
   DLMD5 a7559a329dfe74e2dac7d5e2d224b1c2
   PATCH ${PATCH_DIR}/hdf5.patch
 )

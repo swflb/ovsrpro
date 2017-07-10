@@ -9,7 +9,7 @@ Supports compiling the following projects from source for both Windows and Linux
 - HDF5 (http://www.hdfgroup.org)
 - MIT Kerberos (http://web.mit.edu/kerberos)
 - librdkafka (https://github.com/edenhill/librdkafka)
-- NOVAS (http://aa.usno.navy.mil/software/novas/novas_info.php)
+- NOVAS (http://aa.usno.navy.mil/software/novas/novas\_info.php)
 - OpenH264 (http://www.openh264.org)
 - PostreSQL (http://www.postresql.org)
 - Qt5 (http://code.qt.io)
@@ -22,14 +22,17 @@ Depends on an installed version of externpro (https://github.com/smanders/extern
 YASM assembler is expected to be present for building FFmpeg and OpenH264 projects.
 
 Some additional packages may need to be installed for the Qt Web modules to build, here is a list of ones that commonly need to be installed on a CentOS 6 system (additional ones may be required depending on system configuration):
- - dbus-devel
- - libXScrnSaver-devel
- - libXtst-devel
- - pciutils-devel
- - mesa-libEGL-devel
- - gperf
- - expat-devel
-  
+
+| Yum | Apt |
+|:----|:----|
+| dbus-devel          | libdbus-1-dev |
+| libXScrnSaver-devel | libxss-dev |
+| libXtst-devel       | libxtst-dev |
+| pciutils-devel      | libpci-dev |
+| mesa-libEGL-devel   | libegl1-mesa-dev |
+| gperf               | gperf |
+| expat-devel         | libexpat1-dev |
+|                     | bison |
 
 All projects can be built as static or shared libraries.  For static windows
 builds, libraries are compiled with the /MT flag.
@@ -51,29 +54,29 @@ make package
 ```
 
 For custom builds, the following cmake options are available (via the -D option)
-- XP_BUILD_DEBUG - build a debug version of the libraries along with the release
-- XP_BUILD_STATIC - build static libraries rather than dynamic.  Note that some
+- XP\_BUILD\_DEBUG - build a debug version of the libraries along with the release
+- XP\_BUILD\_STATIC - build static libraries rather than dynamic.  Note that some
   project build systems build both static and shared by default
-- XP_DEFAULT - Compiles all of the available packages.  To only compile a subset
-  of the packages, set XP_DEFAULT=0 and specify the individual packages desired.
-- XP_STEP - may be used to define which steps to complete of the build process
+- XP\_DEFAULT - Compiles all of the available packages.  To only compile a subset
+  of the packages, set XP\_DEFAULT=0 and specify the individual packages desired.
+- XP\_STEP - may be used to define which steps to complete of the build process
           - see the externpro documentation for available options
-- PACKAGE_TYPE - optionally specify a non-default CPACK_GENERATOR to use, if not
+- PACKAGE\_TYPE - optionally specify a non-default CPACK\_GENERATOR to use, if not
   present the default STGZ generator is used. (RPM is the only other generator
   type that has been tested)
 
-Available package options when XP_DEFAULT=0 or is not defined
-- XP_PRO_CPPZMQ - build the cppzmq package (depends on zeromq)
-- XP_PRO_FFMPEG - build the FFmpeg package
-- XP_PRO_GLEW - build the GLEW package
-- XP_PRO_HDF5 - build the HDF5 package
-- XP_PRO_KERBEROS - build the MIT kerberos package
-- XP_PRO_LIBRDKAFKA - build the librdkafka package
-- XP_PRO_NOVAS - build the novas package
-- XP_PRO_OPENH264 - build the OpenH264 package
-- XP_PRO_PSQL - build the postgresql package
-- XP_PRO_QT5 - build the qt5 package
-- XP_PRO_QWT - build the qwt package
-- XP_PRO_ZEROMQ - build the zeromq package
-- XP_PRO_ZOOKEEPER - build the zookeeper package
+Available package options when XP\_DEFAULT=0 or is not defined
+- XP\_PRO\_CPPZMQ - build the cppzmq package (depends on zeromq)
+- XP\_PRO\_FFMPEG - build the FFmpeg package
+- XP\_PRO\_GLEW - build the GLEW package
+- XP\_PRO\_HDF5 - build the HDF5 package
+- XP\_PRO\_KERBEROS - build the MIT kerberos package
+- XP\_PRO\_LIBRDKAFKA - build the librdkafka package
+- XP\_PRO\_NOVAS - build the novas package
+- XP\_PRO\_OPENH264 - build the OpenH264 package
+- XP\_PRO\_PSQL - build the postgresql package
+- XP\_PRO\_QT5 - build the qt5 package
+- XP\_PRO\_QWT - build the qwt package
+- XP\_PRO\_ZEROMQ - build the zeromq package
+- XP\_PRO\_ZOOKEEPER - build the zookeeper package
 
