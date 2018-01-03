@@ -203,7 +203,7 @@ function(build_qt5)
     set(XP_INCLUDE_DIR ${XP_ROOTDIR}/include) # for open ssl
     set(OPENSSL_LIB_DIR ${XP_ROOTDIR}/lib) # for open ssl
     set(MAKE_CMD nmake)
-    set(ADDITIONAL_CONFIG "set _CL_=%_CL_% /I'${XP_INCLUDE_DIR}' /I'${STAGE_DIR}/include/psql' &&
+    set(ADDITIONAL_CFG "set _CL_=%_CL_% /I'${XP_INCLUDE_DIR}' /I'${STAGE_DIR}/include/psql' &&
                            set LIB=${OPENSSL_LIB_DIR}\;${STAGE_DIR}/lib\;%LIB% &&")
   else()
     set(MAKE_CMD $(MAKE))
