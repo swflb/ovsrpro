@@ -35,7 +35,7 @@ function(download_psql)
     return()
   endif()
 
-  xpNewDownload(${PRO_PSQL})
+  ipDownload(${PRO_PSQL})
 endfunction()
 #######################################
 function(patch_psql)
@@ -43,7 +43,7 @@ function(patch_psql)
     return()
   endif()
 
-  xpPatch(${PRO_PSQL})
+  ipPatch(${PRO_PSQL})
 
   if(WIN32)
     if(${XP_BUILD_STATIC})

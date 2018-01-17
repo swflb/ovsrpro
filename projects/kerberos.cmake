@@ -43,7 +43,7 @@ if(WIN32)
     if(NOT (XP_DEFAULT OR XP_PRO_KERBEROS))
       return()
     endif()
-    xpNewDownload(${PRO_KERBEROS})
+    ipDownload(${PRO_KERBEROS})
   endfunction()
   #######################################
   function(patch_kerberos)
@@ -51,7 +51,7 @@ if(WIN32)
       return()
     endif()
 
-    xpPatch(${PRO_KERBEROS})
+    ipPatch(${PRO_KERBEROS})
 
     if(WIN32)
       ExternalProject_Add_Step(kerberos kerberos_windows_minimal_patch

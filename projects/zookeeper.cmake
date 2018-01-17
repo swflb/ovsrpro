@@ -23,7 +23,7 @@ set(PRO_ZOOKEEPER
   GIT_ORIGIN ${ZK_REPO}
   GIT_TAG release-${ZK_VER}
   DLURL ${ZK_REPO}/archive/release-${ZK_VER}.tar.gz
-  DLMD5 23df0e0bccf5d05d8190fd8ef459947c
+  DLMD5 790c9b028f2f9c6ed17938a396365b74
   DLNAME zookeeper-release-${ZK_VER}.tar.gz
   PATCH ${ZOO_PATCH} #This is only defined for Windows builds
 )
@@ -54,7 +54,7 @@ function(download_zookeeper)
     return()
   endif()
 
-  xpNewDownload(${PRO_ZOOKEEPER})
+  ipDownload(${PRO_ZOOKEEPER})
 endfunction(download_zookeeper)
 ########################################
 # patch
@@ -63,7 +63,7 @@ function(patch_zookeeper)
     return()
   endif()
 
-  xpPatch(${PRO_ZOOKEEPER})
+  ipPatch(${PRO_ZOOKEEPER})
 endfunction(patch_zookeeper)
 ########################################
 # Some helper stuff to clean up the builds
@@ -139,7 +139,7 @@ function(build_zookeeper)
     endforeach()
   else()
     # This is only needed for non-windows build
-    xpNewDownload(${CPP_UNIT})
+    ipDownload(${CPP_UNIT})
 
     set(ACLOCAL_STR "aclocal -I ${SOURCE_DIR}/src/c/cppunit-${CPP_UNIT_VER}")
     ExternalProject_Add(zookeeper_configure DEPENDS zookeeper_ant download_cppunit-${CPP_UNIT_VER}.tar.gz

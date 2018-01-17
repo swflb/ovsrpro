@@ -26,7 +26,7 @@ function(download_glew)
   if(NOT (XP_DEFAULT OR XP_PRO_GLEW))
     return()
   endif()
-  xpNewDownload(${PRO_GLEW})
+  ipDownload(${PRO_GLEW})
 endfunction()
 ########################################
 function(patch_glew)
@@ -34,7 +34,7 @@ function(patch_glew)
     return()
   endif()
 
-  xpPatch(${PRO_GLEW})
+  ipPatch(${PRO_GLEW})
 
   if(WIN32)
     # fix the static debug build to use /MTd

@@ -25,7 +25,7 @@ function(download_hdf5)
   if(NOT (XP_DEFAULT OR XP_PRO_HDF5))
     return()
   endif()
-  xpNewDownload(${PRO_HDF5})
+  ipDownload(${PRO_HDF5})
 endfunction()
 ########################################
 function(patch_hdf5)
@@ -33,7 +33,7 @@ function(patch_hdf5)
     return()
   endif()
 
-  xpPatch(${PRO_HDF5})
+  ipPatch(${PRO_HDF5})
 
   if(WIN32)
     if(${XP_BUILD_STATIC})

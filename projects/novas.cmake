@@ -26,7 +26,7 @@ function(patch_novas)
     return()
   endif()
 
-  xpPatch(${PRO_NOVAS})
+  ipPatch(${PRO_NOVAS})
 endfunction()
 ########################################
 function(build_novas)
