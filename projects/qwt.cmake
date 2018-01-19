@@ -30,7 +30,7 @@ function(download_qwt)
     return()
   endif()
 
-  xpNewDownload(${PRO_QWT})
+  ipDownload(${PRO_QWT})
 endfunction()
 ########################################
 function(patch_qwt)
@@ -38,7 +38,7 @@ function(patch_qwt)
     return()
   endif()
 
-  xpPatch(${PRO_QWT})
+  ipPatch(${PRO_QWT})
 endfunction()
 ########################################
 function(build_qwt)

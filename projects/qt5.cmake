@@ -98,7 +98,7 @@ function(download_qt5)
     return()
   endif()
 
-  xpNewDownload(${PRO_QT5})
+  ipDownload(${PRO_QT5})
 endfunction(download_qt5)
 ########################################
 # patch - remove any of the unwanted submodules
@@ -107,7 +107,7 @@ function(patch_qt5)
     return()
   endif()
 
-  xpPatch(${PRO_QT5})
+  ipPatch(${PRO_QT5})
 
   ExternalProject_Get_Property(qt5 SOURCE_DIR)  
   # if this didn't come from the repo (direct download) need to

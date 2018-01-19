@@ -45,7 +45,7 @@ function(download_openh264)
     return()
   endif()
 
-  xpNewDownload(${PRO_OPENH264})
+  ipDownload(${PRO_OPENH264})
 endfunction()
 ########################################
 function(patch_openh264)
@@ -53,7 +53,7 @@ function(patch_openh264)
     return()
   endif()
 
-  xpPatch(${PRO_OPENH264})
+  ipPatch(${PRO_OPENH264})
 endfunction()
 ########################################
 function(build_openh264)

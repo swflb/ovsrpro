@@ -38,7 +38,7 @@ function(download_librdkafka)
     return()
   endif()
 
-  xpNewDownload(${PRO_LIBRDKAFKA})
+  ipDownload(${PRO_LIBRDKAFKA})
 endfunction(download_librdkafka)
 ########################################
 # patch
@@ -47,7 +47,7 @@ function(patch_librdkafka)
     return()
   endif()
 
-  xpPatch(${PRO_LIBRDKAFKA})
+  ipPatch(${PRO_LIBRDKAFKA})
 
   #TODO Verify that this patch is still necessary now that it is being built via Cmake
   if(WIN32)
