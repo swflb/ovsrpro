@@ -1,11 +1,11 @@
-# - Find an ovsrpro installation.
-# ovsrpro_DIR
+# - Find an @CMAKE_PROJECT_NAME@ installation.
+# @CMAKE_PROJECT_NAME@_DIR
 ################################################################################
 # should match xpGetCompilerPrefix in externpro's xpfunmac.cmake
 # NOTE: wanted to use externpro version, but chicken-egg problem
 function(getCompilerPrefix _ret)
   set(options GCC_TWO_VER)
-  cmake_parse_arguments(x "${options}" "" "" ${ARGN})
+  cmake_parse_arguments(X "${options}" "" "" ${ARGN})
   if(MSVC)
     if(MSVC14)
       set(prefix vc140)
@@ -26,7 +26,7 @@ function(getCompilerPrefix _ret)
     elseif(MSVC60)
       set(prefix vc60)
     else()
-      message(SEND_ERROR "Findovsrpro.cmake: MSVC compiler support lacking")
+      message(SEND_ERROR "Find@CMAKE_PROJECT_NAME@.cmake: MSVC compiler support lacking")
     endif()
   elseif(CMAKE_COMPILER_IS_GNUCXX)
     exec_program(${CMAKE_CXX_COMPILER}
@@ -34,7 +34,7 @@ function(getCompilerPrefix _ret)
       OUTPUT_VARIABLE GCC_VERSION
       )
     if(X_GCC_TWO_VER)
-      set(digits "\\1\\1")
+      set(digits "\\1\\2")
     else()
       set(digits "\\1\\2\\3")
     endif()
@@ -59,7 +59,7 @@ function(getCompilerPrefix _ret)
         )
     endif()
   else()
-    message(SEND_ERROR "Findovsrpro.cmake: compiler support lacking: ${CMAKE_CXX_COMPILER_ID}")
+    message(SEND_ERROR "Find@CMAKE_PROJECT_NAME@.cmake: compiler support lacking: ${CMAKE_CXX_COMPILER_ID}")
   endif()
   set(${_ret} ${prefix} PARENT_SCOPE)
 endfunction()
@@ -75,44 +75,40 @@ function(getNumBits _ret)
 endfunction()
 ################################################################################
 # TRICKY: clear cached variables each time we cmake so we can change
-# ovsrpro_REV and reuse the same build directory
-unset(ovsrpro_DIR CACHE)
+# @CMAKE_PROJECT_NAME@_REV and reuse the same build directory
+unset(@CMAKE_PROJECT_NAME@_DIR CACHE)
 ################################################################################
-# find the path to the ovsrpro directory
+# find the path to the @CMAKE_PROJECT_NAME@ directory
 getCompilerPrefix(COMPILER)
 getNumBits(BITS)
-set(ovsrpro_SIG ${ovsrpro_REV}-${COMPILER}-${BITS})
+set(@CMAKE_PROJECT_NAME@_SIG ${@CMAKE_PROJECT_NAME@_REV}-${COMPILER}-${BITS})
 set(PFX86 "ProgramFiles(x86)")
-find_path(ovsrpro_DIR
+find_path(@CMAKE_PROJECT_NAME@_DIR
   NAMES
-    ovsrpro_${ovsrpro_SIG}.txt
+    @CMAKE_PROJECT_NAME@_${@CMAKE_PROJECT_NAME@_SIG}.txt
   PATHS
     # build versions
-    C:/src/ovsrpro/_bld/ovsrpro_${ovsrpro_SIG}
-    ~/src/ovsrpro/_bld/ovsrpro_${ovsrpro_SIG}
+    C:/src/@CMAKE_PROJECT_NAME@/_bld/@CMAKE_PROJECT_NAME@_${@CMAKE_PROJECT_NAME@_SIG}
+    ~/src/@CMAKE_PROJECT_NAME@/_bld/@CMAKE_PROJECT_NAME@_${@CMAKE_PROJECT_NAME@_SIG}
     # environment variable
-    "$ENV{ovsrpro}/ovsrpro ${ovsrpro_SIG}"
-    "$ENV{ovsrpro_DIR}/ovsrpro-${ovsrpro_SIG}-${CMAKE_SYSTEM_NAME}"
+    "$ENV{extern_DIR}/@CMAKE_PROJECT_NAME@ ${@CMAKE_PROJECT_NAME@_SIG}"
+    "$ENV{extern_DIR}/@CMAKE_PROJECT_NAME@-${@CMAKE_PROJECT_NAME@_SIG}-${CMAKE_SYSTEM_NAME}"
     # installed versions
-    "$ENV{ProgramW6432}/ovsrpro ${ovsrpro_SIG}"
-    "$ENV{${PFX86}}/ovsrpro ${ovsrpro_SIG}"
-    "~/ovsrpro/ovsrpro-${ovsrpro_SIG}-${CMAKE_SYSTEM_NAME}"
-    "/opt/ovsrpro/ovsrpro-${ovsrpro_SIG}-${CMAKE_SYSTEM_NAME}"
-    # symbolic link install option
-    "/opt/ovsrpro/ovsrpro"
-    # rpm installed location
-    "/opt/ovsrpro"
-  DOC "ovsrpro directory"
+    "$ENV{ProgramW6432}/@CMAKE_PROJECT_NAME@ ${@CMAKE_PROJECT_NAME@_SIG}"
+    "$ENV{${PFX86}}/@CMAKE_PROJECT_NAME@ ${@CMAKE_PROJECT_NAME@_SIG}"
+    "~/extern/@CMAKE_PROJECT_NAME@-${@CMAKE_PROJECT_NAME@_SIG}-${CMAKE_SYSTEM_NAME}"
+    "/opt/extern/@CMAKE_PROJECT_NAME@-${@CMAKE_PROJECT_NAME@_SIG}-${CMAKE_SYSTEM_NAME}"
+  DOC "@CMAKE_PROJECT_NAME@ directory"
   )
-if(NOT ovsrpro_DIR)
-  if(DEFINED ovsrpro_INSTALLER_LOCATION)
-    message(FATAL_ERROR "ovsrpro ${ovsrpro_SIG} not found.\n${ovsrpro_INSTALLER_LOCATION}")
+if(NOT @CMAKE_PROJECT_NAME@_DIR)
+  if(DEFINED @CMAKE_PROJECT_NAME@_INSTALLER_LOCATION)
+    message(FATAL_ERROR "@CMAKE_PROJECT_NAME@ ${@CMAKE_PROJECT_NAME@_SIG} not found.\n${@CMAKE_PROJECT_NAME@_INSTALLER_LOCATION}")
   else()
-    message(FATAL_ERROR "ovsrpro ${ovsrpro_SIG} not found")
+    message(FATAL_ERROR "@CMAKE_PROJECT_NAME@ ${@CMAKE_PROJECT_NAME@_SIG} not found")
   endif()
 else()
-  set(moduleDir ${ovsrpro_DIR}/share/cmake)
-  set(findFile ${moduleDir}/Findovsrpro.cmake)
+  set(moduleDir ${@CMAKE_PROJECT_NAME@_DIR}/share/cmake)
+  set(findFile ${moduleDir}/Find@CMAKE_PROJECT_NAME@.cmake)
   execute_process(COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_CURRENT_LIST_FILE} ${findFile}
     RESULT_VARIABLE filesDiff
     OUTPUT_QUIET
@@ -120,13 +116,13 @@ else()
     )
   if(filesDiff)
     message(STATUS "local: ${CMAKE_CURRENT_LIST_FILE}.")
-    message(STATUS "ovsrpro: ${findFile}.")
-    message(AUTHOR_WARNING "Find scripts don't match. You may want to update the local with the ovsrpro version.")
+    message(STATUS "@CMAKE_PROJECT_NAME@: ${findFile}.")
+    message(AUTHOR_WARNING "Find scripts don't match. You may want to update the local with the @CMAKE_PROJECT_NAME@ version.")
   endif()
-  message(STATUS "Found ovsrpro: ${ovsrpro_DIR}")
-  list(APPEND OP_MODULE_PATH ${moduleDir})
-  link_directories(${ovsrpro_DIR}/lib)
-  if(EXISTS ${moduleDir}/opfunmac.cmake)
-    include(${moduleDir}/opfunmac.cmake)
+  message(STATUS "Found @CMAKE_PROJECT_NAME@: ${@CMAKE_PROJECT_NAME@_DIR}")
+  list(APPEND XP_MODULE_PATH ${moduleDir})
+  link_directories(${@CMAKE_PROJECT_NAME@_DIR}/lib)
+  if(EXISTS ${moduleDir}/xpfunmac.cmake)
+    include(${moduleDir}/xpfunmac.cmake)
   endif()
 endif()
