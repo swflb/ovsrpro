@@ -25,7 +25,7 @@ set(PRO_QT5
   GIT_TAG v${QT5_VER}
   DLURL http://download.qt.io/archive/qt/5.10/${QT5_VER}/single/${QT5_DOWNLOAD_FILE}
   DLMD5 d41d8cd98f00b204e9800998ecf8427e
-  PATCH ${PATCH_DIR}/qt5.patch
+#  PATCH ${PATCH_DIR}/qt5.patch
 )
 
 #######################################
