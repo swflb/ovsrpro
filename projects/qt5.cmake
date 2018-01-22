@@ -11,7 +11,7 @@
 # path (e.g. C:/Program Files/ovsrpro 0.0.1-vc120-64/qt5)
 ########################################
 xpProOption(qt5)
-set(QT5_VER 5.8.0)
+set(QT5_VER 5.10.0)
 set(QT5_REPO http://code.qt.io/cgit/qt/qt5.git)
 set(QT5_DOWNLOAD_FILE qt-everywhere-opensource-src-${QT5_VER}.tar.gz)
 set(PRO_QT5
@@ -23,8 +23,8 @@ set(PRO_QT5
   VER ${QT5_VER}
   GIT_ORIGIN ${QT5_REPO}
   GIT_TAG v${QT5_VER}
-  DLURL http://download.qt.io/archive/qt/5.8/${QT5_VER}/single/${QT5_DOWNLOAD_FILE}
-  DLMD5 a9f2494f75f966e2f22358ec367d8f41
+  DLURL http://download.qt.io/archive/qt/5.10/${QT5_VER}/single/${QT5_DOWNLOAD_FILE}
+  DLMD5 d41d8cd98f00b204e9800998ecf8427e
   PATCH ${PATCH_DIR}/qt5.patch
 )
 
@@ -109,7 +109,7 @@ function(patch_qt5)
 
   ipPatch(${PRO_QT5})
 
-  ExternalProject_Get_Property(qt5 SOURCE_DIR)  
+  ExternalProject_Get_Property(qt5 SOURCE_DIR)
   # if this didn't come from the repo (direct download) need to
   # add a .gitignore...it is used by the configure scripts to
   # determine whether to compile the configure.exe
