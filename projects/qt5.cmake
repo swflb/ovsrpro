@@ -13,7 +13,7 @@
 xpProOption(qt5)
 set(QT5_VER 5.10.0)
 set(QT5_REPO http://code.qt.io/cgit/qt/qt5.git)
-set(QT5_DOWNLOAD_FILE qt-everywhere-opensource-src-${QT5_VER}.tar.gz)
+set(QT5_DOWNLOAD_FILE qt-everywhere-src-${QT5_VER}.tar.xz)
 set(PRO_QT5
   NAME qt5
   WEB "Qt" http://qt.io/ "Qt - Home"
@@ -24,7 +24,7 @@ set(PRO_QT5
   GIT_ORIGIN ${QT5_REPO}
   GIT_TAG v${QT5_VER}
   DLURL http://download.qt.io/archive/qt/5.10/${QT5_VER}/single/${QT5_DOWNLOAD_FILE}
-  DLMD5 d41d8cd98f00b204e9800998ecf8427e
+  DLMD5 c5e275ab0ed7ee61d0f4b82cd471770d
 #  PATCH ${PATCH_DIR}/qt5.patch
 )
 
@@ -66,7 +66,7 @@ macro(setConfigureOptions)
     list(APPEND QT5_CONFIGURE -platform win32-msvc2013 -qmake -mp)
   else()
     list(APPEND QT5_CONFIGURE -platform linux-g++
-      -c++std c++11
+      -c++std c++14
       -qt-xcb
       -qt-xkbcommon-x11
       -fontconfig
@@ -89,7 +89,7 @@ function(mkpatch_qt5)
     return()
   endif()
 
-  xpRepo(${PRO_QT5})
+#  xpRepo(${PRO_QT5})
 endfunction(mkpatch_qt5)
 ########################################
 # download - initialize the git submodules
@@ -187,7 +187,7 @@ function(build_qt5)
 
   # Make sure the qt5 target this depends on has been created
   if(NOT TARGET qt5)
-    patch_qt5()
+   # patch_qt5()
   endif()
 
   qt5CheckDependencies()
