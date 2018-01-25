@@ -28,7 +28,6 @@ proExecuteStep()
 
 if(${XP_STEP} STREQUAL "build")
 # move some needed cmake files into place
-#configure_file(Findovsrpro.cmake ${STAGE_DIR}/share/cmake/Findovsrpro.cmake COPYONLY)
 configure_file(opfunmac.cmake ${STAGE_DIR}/share/cmake/opfunmac.cmake COPYONLY)
 configure_file(opopts.cmake.in
   ${STAGE_DIR}/share/cmake/opopts.cmake
