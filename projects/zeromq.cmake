@@ -8,9 +8,10 @@ set(ZEROMQ_DLURL https://github.com/zeromq/libzmq/archive/v${ZEROMQ_VERSION}.tar
 set(ZEROMQ_DLMD5 18599afc000dacd4d5715abbb18bfe6b)
 set(PRO_ZEROMQ
   NAME zeromq
-  WEB "ZEROMQ" https://zeromq.org "ZEROMQ"
-  LICENSE "open" https://github.com/zeromq/libzmq/blob/master/README.md "(See License Section. GNU Lesser General Public LIcense.)"
-  DESC "ZEROMQ is a lightweight messaging kernel is a library that extends standard socket interfaces."
+  WEB "ZeroMQ" https://zeromq.org "ZeroMQ - Home"
+  LICENSE "LGPL" https://github.com/zeromq/libzmq/blob/master/README.md "LGPL v3 (See License Section)"
+  DESC "ZeroMQ is a lightweight messaging kernel that extends standard socket interfaces with more powerful features."
+  REPO "repo" https://github.com/zeromq/libzmq "ZeroMQ repo on github"
   VER ${ZEROMQ_VERSION}
   DLURL ${ZEROMQ_DLURL}
   DLMD5 ${ZEROMQ_DLMD5}
