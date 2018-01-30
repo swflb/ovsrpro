@@ -9,7 +9,7 @@ set(PRO_LIBRDKAFKA
   NAME librdkafka
   WEB "librdkafka" ${REPO_UPSTREAM} "librdkafka on github"
   LICENSE "open" ${REPO_UPSTREAM}/blob/master/LICENSE "2-clause BSD license"
-  DESC "librdkafka is a C library implementation of the Apache Kafka protocol, containing both Producer and Consumer support"
+  DESC "librdkafka is a C library implementation of the Apache Kafka protocol, containing both Producer and Consumer support -- [windows-only patch](../patches/librdkafka-windows.patch)"
   REPO "repo" ${REPO} "distributePro fork of librdkafka repo on github"
   VER ${VER}
   GIT_ORIGIN git://github.com/distributepro/librdkafka.git

@@ -17,7 +17,7 @@ set(PRO_ZOOKEEPER
   NAME zookeeper
   WEB "Zookeeper" https://zookeeper.apache.org/ "Zookeeper - Home"
   LICENSE "open" http://www.apache.org/licenses/ "Apache V2.0"
-  DESC "Apache ZooKeeper is an effort to develop and maintain an open-source server which enables highly reliable distributed coordination."
+  DESC "Apache ZooKeeper is an effort to develop and maintain an open-source server which enables highly reliable distributed coordination. -- [windows-only patch](../patches/zookeeper-windows.patch)"
   REPO "repo" ${ZK_REPO} "Zookeeper main repo"
   VER ${ZK_VER}
   GIT_ORIGIN ${ZK_REPO}
