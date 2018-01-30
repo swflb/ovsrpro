@@ -22,22 +22,6 @@ set(PRO_PSQL
   DLMD5 7fea4bf5f9211f4d464a68b2b65ad9e1
 )
 #######################################
-function(mkpatch_psql)
-  if(NOT (XP_DEFAULT OR XP_PRO_PSQL))
-    return()
-  endif()
-
-  xpCloneProject(${PRO_PSQL})
-endfunction()
-#######################################
-function(download_psql)
-  if(NOT (XP_DEFAULT OR XP_PRO_PSQL))
-    return()
-  endif()
-
-  ipDownload(${PRO_PSQL})
-endfunction()
-#######################################
 function(patch_psql)
   if(NOT (XP_DEFAULT OR XP_PRO_PSQL))
     return()

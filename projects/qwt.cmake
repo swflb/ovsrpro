@@ -17,22 +17,6 @@ set(PRO_QWT
   PATCH ${PATCH_DIR}/qwtconfig.pri.patch  
 )
 ########################################
-function(mkpatch_qwt)
-  if(NOT (XP_DEFAULT OR XP_PRO_QWT))
-    return()
-  endif()
-
-  xpCloneProject(${PRO_QWT})
-endfunction()
-########################################
-function(download_qwt)
-  if(NOT (XP_DEFAULT OR XP_PRO_QWT))
-    return()
-  endif()
-
-  ipDownload(${PRO_QWT})
-endfunction()
-########################################
 function(patch_qwt)
   if(NOT (XP_DEFAULT OR XP_PRO_QWT))
     return()

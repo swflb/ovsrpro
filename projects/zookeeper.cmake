@@ -39,24 +39,6 @@ set(CPP_UNIT
   DLMD5 bd30e9cf5523cdfc019b94f5e1d7fd19
 )
 ########################################
-# mkpatch_zookeeper
-function(mkpatch_zookeeper)
-  if(NOT (XP_DEFAULT OR XP_PRO_ZOOKEEPER))
-    return()
-  endif()
-
-  xpCloneProject(${PRO_ZOOKEEPER})
-endfunction(mkpatch_zookeeper)
-########################################
-# download
-function(download_zookeeper)
-  if(NOT (XP_DEFAULT OR XP_PRO_ZOOKEEPER))
-    return()
-  endif()
-
-  ipDownload(${PRO_ZOOKEEPER})
-endfunction(download_zookeeper)
-########################################
 # patch
 function(patch_zookeeper)
   if(NOT (XP_DEFAULT OR XP_PRO_ZOOKEEPER))

@@ -15,20 +15,6 @@ set(PRO_GLEW
   DLMD5 7cbada3166d2aadfc4169c4283701066
 )
 ########################################
-function(mkpatch_glew)
-  if(NOT (XP_DEFAULT OR XP_PRO_GLEW))
-    return()
-  endif()
-  xpCloneProject(${PRO_GLEW})
-endfunction()
-########################################
-function(download_glew)
-  if(NOT (XP_DEFAULT OR XP_PRO_GLEW))
-    return()
-  endif()
-  ipDownload(${PRO_GLEW})
-endfunction()
-########################################
 function(patch_glew)
   if(NOT (XP_DEFAULT OR XP_PRO_GLEW))
     return()
