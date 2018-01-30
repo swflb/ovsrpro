@@ -39,15 +39,6 @@ set(CPP_UNIT
   DLMD5 bd30e9cf5523cdfc019b94f5e1d7fd19
 )
 ########################################
-# patch
-function(patch_zookeeper)
-  if(NOT (XP_DEFAULT OR XP_PRO_ZOOKEEPER))
-    return()
-  endif()
-
-  ipPatch(${PRO_ZOOKEEPER})
-endfunction(patch_zookeeper)
-########################################
 # Some helper stuff to clean up the builds
 macro(zookeepercheckDependencies)
   find_program(javac javac)
@@ -68,7 +59,7 @@ function(build_zookeeper)
   endif()
 
   if(NOT TARGET zookeeper)
-    patch_zookeeper()
+    xpPatchProject(${PRO_ZOOKEEPER})
   endif()
 
   zookeeperCheckDependencies()

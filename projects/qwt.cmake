@@ -17,21 +17,13 @@ set(PRO_QWT
   PATCH ${PATCH_DIR}/qwtconfig.pri.patch  
 )
 ########################################
-function(patch_qwt)
-  if(NOT (XP_DEFAULT OR XP_PRO_QWT))
-    return()
-  endif()
-
-  ipPatch(${PRO_QWT})
-endfunction()
-########################################
 function(build_qwt)
   if(NOT (XP_DEFAULT OR XP_PRO_QWT))
     return()
   endif()
 
   if(NOT TARGET qwt)
-    patch_qwt()
+    xpPatchProject(${PRO_QWT})
   endif()
 
   # Make sure the qt5 target this depends on has been created
