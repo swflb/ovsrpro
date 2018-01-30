@@ -45,7 +45,7 @@ function(mkpatch_zookeeper)
     return()
   endif()
 
-  xpRepo(${PRO_ZOOKEEPER})
+  xpCloneProject(${PRO_ZOOKEEPER})
 endfunction(mkpatch_zookeeper)
 ########################################
 # download

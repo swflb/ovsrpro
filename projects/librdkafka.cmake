@@ -29,7 +29,7 @@ function(mkpatch_librdkafka)
     return()
   endif()
 
-  xpRepo(${PRO_LIBRDKAFKA})
+  xpCloneProject(${PRO_LIBRDKAFKA})
 endfunction(mkpatch_librdkafka)
 ########################################
 # download

@@ -18,7 +18,7 @@ function(mkpatch_hdf5)
   if(NOT (XP_DEFAULT OR XP_PRO_HDF5))
     return()
   endif()
-  xpRepo(${PRO_HDF5})
+  xpCloneProject(${PRO_HDF5})
 endfunction()
 ########################################
 function(download_hdf5)

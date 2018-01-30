@@ -27,7 +27,7 @@ function(mkpatch_psql)
     return()
   endif()
 
-  xpRepo(${PRO_PSQL})
+  xpCloneProject(${PRO_PSQL})
 endfunction()
 #######################################
 function(download_psql)
