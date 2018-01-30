@@ -22,7 +22,7 @@ function(mkpatch_qwt)
     return()
   endif()
 
-  xpRepo(${PRO_QWT})
+  xpCloneProject(${PRO_QWT})
 endfunction()
 ########################################
 function(download_qwt)
