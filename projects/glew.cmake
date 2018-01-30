@@ -20,7 +20,7 @@ function(patch_glew)
     return()
   endif()
 
-  ipPatch(${PRO_GLEW})
+  xpPatchProject(${PRO_GLEW})
 
   if(WIN32)
     # fix the static debug build to use /MTd

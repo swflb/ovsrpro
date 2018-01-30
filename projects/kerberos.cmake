@@ -35,7 +35,7 @@ function(patch_kerberos)
     return()
   endif()
 
-  ipPatch(${PRO_KERBEROS})
+  xpPatchProject(${PRO_KERBEROS})
 
   if(WIN32)
     ExternalProject_Add_Step(kerberos kerberos_windows_minimal_patch

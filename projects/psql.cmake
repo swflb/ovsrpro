@@ -27,7 +27,7 @@ function(patch_psql)
     return()
   endif()
 
-  ipPatch(${PRO_PSQL})
+  xpPatchProject(${PRO_PSQL})
 
   if(WIN32)
     if(${XP_BUILD_STATIC})

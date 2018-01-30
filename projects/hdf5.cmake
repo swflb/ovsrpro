@@ -19,7 +19,7 @@ function(patch_hdf5)
     return()
   endif()
 
-  ipPatch(${PRO_HDF5})
+  xpPatchProject(${PRO_HDF5})
 
   if(WIN32)
     if(${XP_BUILD_STATIC})

@@ -29,7 +29,7 @@ function(patch_librdkafka)
     return()
   endif()
 
-  ipPatch(${PRO_LIBRDKAFKA})
+  xpPatchProject(${PRO_LIBRDKAFKA})
 
   #TODO Verify that this patch is still necessary now that it is being built via Cmake
   if(WIN32)
