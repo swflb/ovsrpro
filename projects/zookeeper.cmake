@@ -112,7 +112,7 @@ function(build_zookeeper)
     endforeach()
   else()
     # This is only needed for non-windows build
-    ipDownload(${CPP_UNIT})
+    xpDownloadProject(${CPP_UNIT})
 
     set(ACLOCAL_STR "aclocal -I ${SOURCE_DIR}/src/c/cppunit-${CPP_UNIT_VER}")
     ExternalProject_Add(zookeeper_configure DEPENDS zookeeper_ant download_cppunit-${CPP_UNIT_VER}.tar.gz
