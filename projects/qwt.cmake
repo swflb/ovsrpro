@@ -3,17 +3,15 @@
 ########################################
 xpProOption(qwt)
 ########################################
-set(QWT_DL_URL https://sourceforge.net/projects/qwt/files/qwt/6.1.2/qwt-6.1.2.tar.bz2/download)
-set(QWT_DL_MD5 9c88db1774fa7e3045af063bbde44d7d)
-
+set(VER 6.1.2)
 set(PRO_QWT
   NAME qwt
   WEB "Qwt" http://http://qwt.sourceforge.net/ "Qwt - Qt Widgets for Technical Applications"
   LICENSE "LGPL" http://qwt.sourceforge.net/qwtlicense.html "LGPL with exceptions"
   DESC "The Qwt library contains GUI Components and utility classes which are primarily useful for programs with a technical background."
-  VER 6.1.2
-  DLURL ${QWT_DL_URL}
-  DLMD5 ${QWT_DL_MD5}
+  VER ${VER}
+  DLURL https://downloads.sourceforge.net/project/qwt/qwt/${VER}/qwt-${VER}.tar.bz2
+  DLMD5 9c88db1774fa7e3045af063bbde44d7d
   PATCH ${PATCH_DIR}/qwtconfig.pri.patch  
 )
 ########################################
