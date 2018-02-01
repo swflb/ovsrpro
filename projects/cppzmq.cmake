@@ -14,6 +14,7 @@ set(PRO_CPPZMQ
   VER ${CPPZMQ_VER}
   DLURL ${REPO}/archive/v${CPPZMQ_VER}.tar.gz
   DLMD5 72d1296f26341d136470c25320936683
+  DLNAME cppzmq-${CPPZMQ_VER}.tar.gz
 )
 ########################################
 function(build_cppzmq)

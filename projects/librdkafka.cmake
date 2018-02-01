@@ -23,31 +23,13 @@ set(PRO_LIBRDKAFKA
   DIFF ${REPO}/compare/edenhill:
   )
 ########################################
-# mkpatch_librdkafka
-function(mkpatch_librdkafka)
-  if(NOT (XP_DEFAULT OR XP_PRO_LIBRDKAFKA))
-    return()
-  endif()
-
-  xpCloneProject(${PRO_LIBRDKAFKA})
-endfunction(mkpatch_librdkafka)
-########################################
-# download
-function(download_librdkafka)
-  if(NOT (XP_DEFAULT OR XP_PRO_LIBRDKAFKA))
-    return()
-  endif()
-
-  ipDownload(${PRO_LIBRDKAFKA})
-endfunction(download_librdkafka)
-########################################
 # patch
 function(patch_librdkafka)
   if(NOT (XP_DEFAULT OR XP_PRO_LIBRDKAFKA))
     return()
   endif()
 
-  ipPatch(${PRO_LIBRDKAFKA})
+  xpPatchProject(${PRO_LIBRDKAFKA})
 
   #TODO Verify that this patch is still necessary now that it is being built via Cmake
   if(WIN32)

@@ -39,33 +39,6 @@ set(CPP_UNIT
   DLMD5 bd30e9cf5523cdfc019b94f5e1d7fd19
 )
 ########################################
-# mkpatch_zookeeper
-function(mkpatch_zookeeper)
-  if(NOT (XP_DEFAULT OR XP_PRO_ZOOKEEPER))
-    return()
-  endif()
-
-  xpCloneProject(${PRO_ZOOKEEPER})
-endfunction(mkpatch_zookeeper)
-########################################
-# download
-function(download_zookeeper)
-  if(NOT (XP_DEFAULT OR XP_PRO_ZOOKEEPER))
-    return()
-  endif()
-
-  ipDownload(${PRO_ZOOKEEPER})
-endfunction(download_zookeeper)
-########################################
-# patch
-function(patch_zookeeper)
-  if(NOT (XP_DEFAULT OR XP_PRO_ZOOKEEPER))
-    return()
-  endif()
-
-  ipPatch(${PRO_ZOOKEEPER})
-endfunction(patch_zookeeper)
-########################################
 # Some helper stuff to clean up the builds
 macro(zookeepercheckDependencies)
   find_program(javac javac)
@@ -86,7 +59,7 @@ function(build_zookeeper)
   endif()
 
   if(NOT TARGET zookeeper)
-    patch_zookeeper()
+    xpPatchProject(${PRO_ZOOKEEPER})
   endif()
 
   zookeeperCheckDependencies()
@@ -139,7 +112,7 @@ function(build_zookeeper)
     endforeach()
   else()
     # This is only needed for non-windows build
-    ipDownload(${CPP_UNIT})
+    xpDownloadProject(${CPP_UNIT})
 
     set(ACLOCAL_STR "aclocal -I ${SOURCE_DIR}/src/c/cppunit-${CPP_UNIT_VER}")
     ExternalProject_Add(zookeeper_configure DEPENDS zookeeper_ant download_cppunit-${CPP_UNIT_VER}.tar.gz

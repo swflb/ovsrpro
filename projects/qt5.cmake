@@ -81,15 +81,6 @@ macro(setConfigureOptions)
       -no-gstreamer)
   endif() # OS type
 endmacro(setConfigureOptions)
-#######################################
-# download - initialize the git submodules
-function(download_qt5)
-  if(NOT (XP_DEFAULT OR XP_PRO_QT5))
-    return()
-  endif()
-
-  ipDownload(${PRO_QT5})
-endfunction(download_qt5)
 ########################################
 macro(qt5CheckDependencies)
   find_program(gperf gperf)

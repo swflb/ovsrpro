@@ -14,26 +14,12 @@ set(PRO_HDF5
   PATCH ${PATCH_DIR}/hdf5.patch
 )
 ########################################
-function(mkpatch_hdf5)
-  if(NOT (XP_DEFAULT OR XP_PRO_HDF5))
-    return()
-  endif()
-  xpCloneProject(${PRO_HDF5})
-endfunction()
-########################################
-function(download_hdf5)
-  if(NOT (XP_DEFAULT OR XP_PRO_HDF5))
-    return()
-  endif()
-  ipDownload(${PRO_HDF5})
-endfunction()
-########################################
 function(patch_hdf5)
   if(NOT (XP_DEFAULT OR XP_PRO_HDF5))
     return()
   endif()
 
-  ipPatch(${PRO_HDF5})
+  xpPatchProject(${PRO_HDF5})
 
   if(WIN32)
     if(${XP_BUILD_STATIC})

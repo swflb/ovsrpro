@@ -30,26 +30,12 @@ set(PRO_KERBEROS
   DLMD5 ${KERBEROS_DL_MD5}
   )
 #######################################
-function(mkpatch_kerberos)
-  if(NOT (XP_DEFAULT OR XP_PRO_KERBEROS))
-    return()
-  endif()
-  xpCloneProject(${PRO_KERBEROS})
-endfunction()
-#######################################
-function(download_kerberos)
-  if(NOT (XP_DEFAULT OR XP_PRO_KERBEROS))
-    return()
-  endif()
-  ipDownload(${PRO_KERBEROS})
-endfunction()
-#######################################
 function(patch_kerberos)
   if(NOT (XP_DEFAULT OR XP_PRO_KERBEROS))
     return()
   endif()
 
-  ipPatch(${PRO_KERBEROS})
+  xpPatchProject(${PRO_KERBEROS})
 
   if(WIN32)
     ExternalProject_Add_Step(kerberos kerberos_windows_minimal_patch
