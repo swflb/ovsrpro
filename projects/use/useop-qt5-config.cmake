@@ -52,11 +52,9 @@ if (NOT DEFINED Qt5_LIBRARIES)
 endif()
 
 # find the Qt5 package
-# Note - This is not an exhaustive list, if new ones are needed add them here and
-# any additional library requirements below (see opAddLinkLibs calls below)
 find_package(Qt5
   REQUIRED
-  COMPONENTS ${Qt_LIBRARIES}
+  COMPONENTS ${Qt5_LIBRARIES}
   PATHS ${QT5_BASE_PATH}/lib/cmake/Qt5
   NO_CMAKE_PATH
   NO_CMAKE_ENVIRONMENT_PATH
