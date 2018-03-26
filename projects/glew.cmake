@@ -13,7 +13,7 @@ set(PRO_GLEW
   REPO "repo" https://github.com/nigels-com/glew "GLEW repo on github"
   VER ${VER}
   DLURL https://downloads.sourceforge.net/project/glew/glew/${VER}/glew-${VER}.tgz
-  DLMD5 cb530d737c8f2d1023797cf0587b4e05
+  DLMD5 7cbada3166d2aadfc4169c4283701066
 )
 ########################################
 function(patch_glew)

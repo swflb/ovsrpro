@@ -11,7 +11,7 @@ set(PRO_QWT
   DESC "The Qwt library contains GUI Components and utility classes which are primarily useful for programs with a technical background."
   VER ${VER}
   DLURL https://downloads.sourceforge.net/project/qwt/qwt/${VER}/qwt-${VER}.tar.bz2
-  DLMD5 cb530d737c8f2d1023797cf0587b4e05
+  DLMD5 9c88db1774fa7e3045af063bbde44d7d
   PATCH ${PATCH_DIR}/qwtconfig.pri.patch
 )
 ########################################
