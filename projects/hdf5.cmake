@@ -2,15 +2,15 @@
 # hdf5
 ########################################
 xpProOption(hdf5)
-set(HDF5_VER 1.8.16)
+set(HDF5_VER 1.10.2)
 set(PRO_HDF5
   NAME hdf5
   WEB "HDF-GROUP" http://www.hdfgroup.org "The HDF Group"
   LICENSE "open" https://www.hdfgroup.org/ftp/HDF5/current/src/unpacked/COPYING "HDF5 License"
   DESC "HDF5 is a data model, library, and file format for storing and managing data"
   VER ${HDF5_VER}
-  DLURL http://www.hdfgroup.org/ftp/HDF5/prev-releases/hdf5-1.8/hdf5-${HDF5_VER}/src/CMake-hdf5-${HDF5_VER}.tar.gz
-  DLMD5 a7559a329dfe74e2dac7d5e2d224b1c2
+  DLURL http://www.hdfgroup.org/ftp/HDF5/prev-releases/hdf5-1.10/hdf5-${HDF5_VER}/src/CMake-hdf5-${HDF5_VER}.tar.gz
+  DLMD5 bf1695f8b17fe3d1050893b7e54a2c01
   PATCH ${PATCH_DIR}/hdf5.patch
 )
 ########################################
@@ -27,7 +27,7 @@ function(patch_hdf5)
       ExternalProject_Add_Step(hdf5 hdf5_setFlags
         WORKING_DIRECTORY ${SOURCE_DIR}
         # Update hdf5 to use /MT
-        COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/hdf5-windows-static-UserMacros.cmake ${SOURCE_DIR}/hdf5-1.8.16/UserMacros.cmake
+        COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/hdf5-windows-static-UserMacros.cmake ${SOURCE_DIR}/hdf5-1.10.2/UserMacros.cmake
         # Decompress SZip, update to use /MT, then re-zip
         COMMAND ${CMAKE_COMMAND} -E tar xvf ${SOURCE_DIR}/SZip.tar.gz
         COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/hdf5-windows-static-UserMacros.cmake ${SOURCE_DIR}/SZip/UserMacros.cmake
