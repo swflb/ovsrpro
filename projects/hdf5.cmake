@@ -86,8 +86,8 @@ function(build_hdf5)
     DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
     SOURCE_DIR ${NULL_DIR} CONFIGURE_COMMAND "" BUILD_COMMAND ""
     INSTALL_COMMAND
-      ${CMAKE_COMMAND} -E copy ${BINARY_DIR}/hdf5-${HDF5_VER}/bin/libszip.a ${STAGE_DIR}/lib &&
-      ${CMAKE_COMMAND} -E copy ${BINARY_DIR}/hdf5-${HDF5_VER}/bin/libz.a ${STAGE_DIR}/lib &&
+      #${CMAKE_COMMAND} -E copy ${BINARY_DIR}/hdf5-${HDF5_VER}/bin/libszip.a ${STAGE_DIR}/lib &&
+      #${CMAKE_COMMAND} -E copy ${BINARY_DIR}/hdf5-${HDF5_VER}/bin/libz.a ${STAGE_DIR}/lib &&
       ${CMAKE_COMMAND} -E copy ${BINARY_DIR}/hdf5-${HDF5_VER}/SZIP-prefix/src/SZIP/src/ricehdf.h ${STAGE_DIR}/include/hdf5 &&
       ${CMAKE_COMMAND} -E copy ${BINARY_DIR}/hdf5-${HDF5_VER}/SZIP-prefix/src/SZIP/src/szip_adpt.h ${STAGE_DIR}/include/hdf5 &&
       ${CMAKE_COMMAND} -E copy ${BINARY_DIR}/hdf5-${HDF5_VER}/SZIP-prefix/src/SZIP/src/szlib.h ${STAGE_DIR}/include/hdf5 &&
