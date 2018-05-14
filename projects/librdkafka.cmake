@@ -52,9 +52,9 @@ macro(addLibs target)
   if(WIN32)
     message("adding libs to ${target}")
     target_link_libraries(${target}
-      ${XP_ROOTDIR}/lib/zlibstatic-s.lib
-      ${XP_ROOTDIR}/lib/crypto-s.lib
-      ${XP_ROOTDIR}/lib/ssl-s.lib)
+      ${XP_ROOTDIR}/lib/libz_1.2.8.a
+      ${XP_ROOTDIR}/lib/libcrypto_1.0.2a.a
+      ${XP_ROOTDIR}/lib/libssl_1.0.2a.a)
   endif()
 endmacro()
 ########################################
