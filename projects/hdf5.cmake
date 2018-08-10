@@ -27,7 +27,7 @@ function(patch_hdf5)
       ExternalProject_Add_Step(hdf5 hdf5_setFlags
         WORKING_DIRECTORY ${SOURCE_DIR}
         # Update hdf5 to use /MT
-        COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/hdf5-windows-static-UserMacros.cmake ${SOURCE_DIR}/hdf5-1.8.16/UserMacros.cmake
+        COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/hdf5-windows-static-UserMacros.cmake ${SOURCE_DIR}/hdf5-1.8.22/UserMacros.cmake
         # Decompress SZip, update to use /MT, then re-zip
         COMMAND ${CMAKE_COMMAND} -E tar xvf ${SOURCE_DIR}/SZip.tar.gz
         COMMAND ${CMAKE_COMMAND} -E copy ${PATCH_DIR}/hdf5-windows-static-UserMacros.cmake ${SOURCE_DIR}/SZip/UserMacros.cmake
