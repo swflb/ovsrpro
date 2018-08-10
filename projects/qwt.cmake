@@ -6,13 +6,13 @@ xpProOption(qwt)
 set(VER 6.1.2)
 set(PRO_QWT
   NAME qwt
-  WEB "Qwt" http://http://qwt.sourceforge.net/ "Qwt - Qt Widgets for Technical Applications"
+  WEB "Qwt" http://qwt.sourceforge.net/ "Qwt - Qt Widgets for Technical Applications"
   LICENSE "LGPL" http://qwt.sourceforge.net/qwtlicense.html "LGPL with exceptions"
   DESC "The Qwt library contains GUI Components and utility classes which are primarily useful for programs with a technical background."
   VER ${VER}
   DLURL https://downloads.sourceforge.net/project/qwt/qwt/${VER}/qwt-${VER}.tar.bz2
   DLMD5 9c88db1774fa7e3045af063bbde44d7d
-  PATCH ${PATCH_DIR}/qwtconfig.pri.patch  
+  PATCH ${PATCH_DIR}/qwtconfig.pri.patch
 )
 ########################################
 function(build_qwt)

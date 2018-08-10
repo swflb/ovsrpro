@@ -9,7 +9,7 @@ set(ZK_REPO https://github.com/apache/zookeeper)
 set(ZK_REPO_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/zookeeper)
 set(ZK_SRC_PATH ${ZK_REPO_PATH}/src/c/src)
 set(ZK_INSTALL_PATH ${CMAKE_BINARY_DIR}/xpbase/Install/zookeeper)
-set(ZK_VER 3.4.9)
+set(ZK_VER 3.4.13)
 if(WIN32)
   set(ZOO_PATCH ${PATCH_DIR}/zookeeper-windows.patch)
 endif()
@@ -23,7 +23,7 @@ set(PRO_ZOOKEEPER
   GIT_ORIGIN ${ZK_REPO}
   GIT_TAG release-${ZK_VER}
   DLURL ${ZK_REPO}/archive/release-${ZK_VER}.tar.gz
-  DLMD5 790c9b028f2f9c6ed17938a396365b74
+  DLMD5 c6eeaab9624730f0a16a97dd24838813
   DLNAME zookeeper-release-${ZK_VER}.tar.gz
   PATCH ${ZOO_PATCH} #This is only defined for Windows builds
 )

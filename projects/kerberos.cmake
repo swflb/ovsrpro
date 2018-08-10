@@ -12,9 +12,9 @@ if(WIN32 OR TRUE) # use this version for all platforms since we're only building
   set(KERBEROS_DL_MD5 6d58ca865beb5b5c145dc4f579753d33)
   set(KERBEROS_VER 4.0.1)
 elseif(ATTEMPTING_TO_BUILD_ON_LINUX)
-  set(KERBEROS_DL_URL http://web.mit.edu/kerberos/dist/krb5/1.14/krb5-1.14.tar.gz)
+  set(KERBEROS_DL_URL http://web.mit.edu/kerberos/dist/krb5/1.16/krb5-1.16.tar.gz)
   set(KERBEROS_DL_MD5 0727968764d0208388b85ad31aafde24)
-  set(KERBEROS_VER 5.1.14)
+  set(KERBEROS_VER 5.1.16)
   # TRICKY: cmake generation of the projects/README.md doesn't support two versions for one project
   # if two versions needed, there should be two project files -- see externpro 18.01.1 for an example
   # https://github.com/smanders/externpro/tree/18.01.1/projects (two versions of ffmpeg)

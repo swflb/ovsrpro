@@ -1,7 +1,8 @@
 ########################################
-# cppzmq 
+# cppzmq
 ########################################
 xpProOption(cppzmq)
+# updating to 4.2.2 leads to build errors!
 set(CPPZMQ_VER 4.2.1)
 set(CPPZMQ_SRC_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/cppzmq)
 set(REPO https://github.com/zeromq/cppzmq)
@@ -31,7 +32,7 @@ function(build_cppzmq)
   configure_file(${PRO_DIR}/use/useop-cppzmq-config.cmake ${STAGE_DIR}/share/cmake/
     @ONLY NEWLINE_STYLE LF
   )
- 
+
   set(XP_CONFIGURE
     -DZeroMQ_DIR=${STAGE_DIR}/share/cmake/ZeroMQ
     -DCMAKE_INSTALL_INCLUDEDIR=include/cppzmq
