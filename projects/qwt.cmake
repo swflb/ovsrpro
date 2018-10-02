@@ -3,7 +3,7 @@
 ########################################
 xpProOption(qwt)
 ########################################
-set(VER 6.1.2)
+set(VER 6.1.3)
 set(PRO_QWT
   NAME qwt
   WEB "Qwt" http://qwt.sourceforge.net/ "Qwt - Qt Widgets for Technical Applications"
@@ -11,7 +11,7 @@ set(PRO_QWT
   DESC "The Qwt library contains GUI Components and utility classes which are primarily useful for programs with a technical background."
   VER ${VER}
   DLURL https://downloads.sourceforge.net/project/qwt/qwt/${VER}/qwt-${VER}.tar.bz2
-  DLMD5 9c88db1774fa7e3045af063bbde44d7d
+  DLMD5 19d1f5fa5e22054d22ee3accc37c54ba
   PATCH ${PATCH_DIR}/qwtconfig.pri.patch
 )
 ########################################
