@@ -5,7 +5,7 @@ xpProOption(psql)
 #######################################
 # setup some pathing variables
 set(PSQL_REPO https://github.com/postgres/postgres)
-set(VER 9.4.9)
+set(VER 9.6.10)
 string(REPLACE "." "_" VER_ ${VER})
 #######################################
 # setup the postgres sql download
@@ -13,13 +13,13 @@ set(PRO_PSQL
   NAME psql
   WEB "PostgreSQL" http://www.postgresql.org/ "PostgreSQL"
   LICENSE "open" http://www.postgresql.org/about/licence "PostgreSQL license"
-  DESC "PostgreSQL redistributable binaries"  
+  DESC "PostgreSQL redistributable binaries"
   REPO "repo" ${PSQL_REPO} "Mirror of the official PostgreSQL GIT repository on github"
   VER ${VER}
   GIT_ORIGIN ${PSQL_REPO}.git
   GIT_TAG REL${VER_}
-  DLURL https://ftp.postgresql.org/pub/source/v9.4.9/postgresql-9.4.9.tar.gz
-  DLMD5 7fea4bf5f9211f4d464a68b2b65ad9e1
+  DLURL https://ftp.postgresql.org/pub/source/v9.6.10/postgresql-9.6.10.tar.gz
+  DLMD5 4d7c59f21bff8ab91ceb4f931258d729
 )
 #######################################
 function(patch_psql)

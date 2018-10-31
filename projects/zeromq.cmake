@@ -1,8 +1,8 @@
 ########################################
-# zeromq 
+# zeromq
 ########################################
 xpProOption(zeromq)
-set(ZEROMQ_VERSION 4.2.2)
+set(ZEROMQ_VERSION 4.2.3)
 set(ZEROMQ_SRC_PATH ${CMAKE_BINARY_DIR}/xpbase/Source/zeromq)
 set(REPO https://github.com/zeromq/libzmq)
 set(PRO_ZEROMQ
@@ -13,7 +13,7 @@ set(PRO_ZEROMQ
   REPO "repo" ${REPO} "ZeroMQ repo on github"
   VER ${ZEROMQ_VERSION}
   DLURL ${REPO}/archive/v${ZEROMQ_VERSION}.tar.gz
-  DLMD5 18599afc000dacd4d5715abbb18bfe6b
+  DLMD5 ad07f71105fc914e1937683d33b4ee8d
   DLNAME libzmq-${ZEROMQ_VERSION}.tar.gz
 )
 
