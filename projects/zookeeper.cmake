@@ -72,7 +72,7 @@ function(build_zookeeper)
   ExternalProject_Add(zookeeper_ant DEPENDS zookeeper
     DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
     SOURCE_DIR ${SOURCE_DIR}
-    CONFIGURE_COMMAND ""
+    CONFIGURE_COMMAND ant clean jar
     BUILD_COMMAND ant compile_jute
     BUILD_IN_SOURCE 1
     INSTALL_COMMAND ""
@@ -127,7 +127,11 @@ function(build_zookeeper)
     ExternalProject_Add(zookeeper_Release DEPENDS zookeeper_configure
       DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
       SOURCE_DIR ${SOURCE_DIR}/src/c
-      CONFIGURE_COMMAND ./configure --without-cppunit --prefix=${STAGE_DIR}
+      CONFIGURE_COMMAND
+        ./configure
+        CFLAGS=-Wno-format-overflow
+        --without-cppunit
+        --prefix=${STAGE_DIR}
       BUILD_COMMAND $(MAKE) clean && $(MAKE)
       BUILD_IN_SOURCE 1
       INSTALL_COMMAND $(MAKE) install
@@ -138,7 +142,12 @@ function(build_zookeeper)
       ExternalProject_Add(zookeeper_Debug DEPENDS zookeeper_Release
         DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
         SOURCE_DIR ${SOURCE_DIR}/src/c
-        CONFIGURE_COMMAND ./configure --without-cppunit --libdir=${STAGE_DIR}/lib/zookeeperDebug --enable-debug
+        CONFIGURE_COMMAND
+          ./configure
+          CFLAGS=-Wno-format-overflow
+          --without-cppunit
+          --libdir=${STAGE_DIR}/lib/zookeeperDebug
+          --enable-debug
         BUILD_COMMAND $(MAKE) clean && $(MAKE)
         BUILD_IN_SOURCE 1
         INSTALL_COMMAND $(MAKE) install-libLTLIBRARIES
