@@ -11,7 +11,7 @@
 # path (e.g. C:/Program Files/ovsrpro 0.0.1-vc120-64/qt5)
 ########################################
 xpProOption(qt5)
-set(QT5_VER 5.11.1)
+set(QT5_VER 5.11.3)
 set(QT5_REPO http://code.qt.io/cgit/qt/qt5.git)
 set(QT5_DOWNLOAD_FILE qt-everywhere-src-${QT5_VER}.tar.xz)
 set(PRO_QT5
@@ -24,8 +24,7 @@ set(PRO_QT5
   GIT_ORIGIN ${QT5_REPO}
   GIT_TAG v${QT5_VER}
   DLURL http://download.qt.io/archive/qt/5.11/${QT5_VER}/single/${QT5_DOWNLOAD_FILE}
-  DLMD5 c6f0854d7de7bde80cfd8cc85bb7152b
-  # DLMD5 c6aef9ae58a0f65fceb50ff128a61198
+  DLMD5 02b353bfe7a40a8dc4274e1d17226d2b
 )
 
 #######################################
