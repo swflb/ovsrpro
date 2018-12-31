@@ -7,6 +7,7 @@ list(APPEND CMAKE_MODULE_PATH ${externpro_DIR}/share/cmake)
 include(macpro)
 proInit()
 proAddProjectDir(projects)
+set(CPACK_PACKAGE_CHECKSUM SHA256)
 if(PACKAGE_TYPE AND ${XP_STEP} STREQUAL "build")
   # This must be set before proExecuteStep otherwise the generator will be STGZ
   set(CPACK_GENERATOR ${PACKAGE_TYPE})
