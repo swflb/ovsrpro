@@ -84,7 +84,8 @@ endmacro(setConfigureOptions)
 ########################################
 macro(qt5CheckDependencies)
   find_program(gperf gperf)
-  if (${gperf} STREQUAL "gperf-NOTFOUND")
+  mark_as_advanced(gperf)
+  if(NOT gperf)
     message(FATAL_ERROR "\n"
       "Gperf is required for Qt5.  To install on linux:\n"
       "  apt install gperf\n"
@@ -93,9 +94,11 @@ macro(qt5CheckDependencies)
   endif()
 
   find_package(EXPAT REQUIRED)
+  mark_as_advanced(pkgcfg_lib_PC_EXPAT_expat)
 
   find_program(bison bison)
-  if (${bison} STREQUAL "bison-NOTFOUND")
+  mark_as_advanced(bison)
+  if(NOT bison)
     message(FATAL_ERROR "\n"
       "Bison is required for Qt5. To install on linux:\n"
       "  apt install bison\n"
@@ -104,7 +107,8 @@ macro(qt5CheckDependencies)
   endif()
 
   find_program(python python)
-  if(${python} STREQUAL python-NOTFOUND)
+  mark_as_advanced(python)
+  if(NOT python)
     message(FATAL_ERROR "\n"
       "Python is required for Qt5. To install on linux:\n"
       "  apt install python\n"
@@ -112,7 +116,8 @@ macro(qt5CheckDependencies)
   endif()
 
   find_program(perl perl)
-  if(${perl} STREQUAL perl-NOTFOUND)
+  mark_as_advanced(perl)
+  if(NOT perl)
     message(FATAL_ERROR "\n"
       "Perl is required for Qt5. To install on linux:\n"
       "  apt install perl\n"

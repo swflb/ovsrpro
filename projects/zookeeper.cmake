@@ -42,12 +42,14 @@ set(CPP_UNIT
 # Some helper stuff to clean up the builds
 macro(zookeepercheckDependencies)
   find_program(javac javac)
-  if(${javac} MATCHES javac-NOTFOUND)
+  mark_as_advanced(javac)
+  if(NOT javac)
     message(FATAL_ERROR "javac required for zookeeper")
   endif()
 
   find_program(ant ant)
-  if(${ant} MATCHES ant-NOTFOUND)
+  mark_as_advanced(ant)
+  if(NOT ant)
     message(FATAL_ERROR "ant required for zookeeper")
   endif()
 endmacro()
