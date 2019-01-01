@@ -1,23 +1,66 @@
 # ovsrpro
 
-builds overseer [projects](projects/README.md) by leveraging externpro
+Build Overseer [dependencies](projects/README.md) by leveraging externpro
+(https://github.com/smanders/externpro).
 
-Supports compiling the following projects from source for both Windows and Linux:
-- CPPZMQ (https://github.com/zeromq/cppzmq)
-- GLEW (http://glew.sourceforge.net)
-- HDF5 (http://www.hdfgroup.org)
-- MIT Kerberos (http://web.mit.edu/kerberos)
-- librdkafka (https://github.com/edenhill/librdkafka)
-- NOVAS (http://aa.usno.navy.mil/software/novas/novas\_info.php)
-- PostreSQL (http://www.postresql.org)
-- Qt5 (http://code.qt.io)
-- Qwt (http://qwt.sourceforge.net)
-- ZeroMQ (https://zeromq.org)
-- ZooKeeper (https://github.com/apache/zookeeper.git)
+## Installing ovsrpro
 
-Depends on an installed version of externpro (https://github.com/smanders/externpro).
+1. Download the installer for the release you need, for the your development
+   environment (OS, compiler, etc). See
+   https://github.com/distributePro/ovsrpro/releases.
+1. Download the SHA256 checksum file for your release.
+1. Validate the checksum.
+1. Run the installer.
 
-Some additional packages may need to be installed for the Qt Web modules to build, here is a list of ones that commonly need to be installed on a CentOS 6 system (additional ones may be required depending on system configuration):
+```
+sha256sum --check ovsrpro-18.10.1-gcc631-64-Linux.sh.sha256
+sudo ovsrpro-18.10.1-gcc631-64-Linux.sh --prefix=/opt/extern/ --include-subdir
+```
+
+The recommended location for installation is */opt/extern/*. We also recommend
+using the subdirectory. Both these options are in the example above.
+
+## Building ovsrpro
+
+### Project Dependencies
+
+Certain projects have build dependencies, which you need to install on your
+system. Install the appropriate development packages on your system using apt or
+yum.
+
+| Project | Required Libraries | Required Tools |
+|:---|:---|:---|
+| Qt5 | fontconfig | |
+| | freetype | |
+| | glib2 | |
+| | openssl | |
+| ZooKeeper | | ant |
+| | | javac |
+
+### Building
+
+1. Create a build directory.
+1. Clone the repository.
+1. In the repository, checkout the version you wish to build.
+1. In the build directory, run CMake.
+1. In the build directory, build the projects.
+1. In the build directory, create an installation package.
+
+```
+mkdir -p ~/repositories/ovsrpro/release
+cd ~/repositories/ovsrpro
+git clone git://github.com/distributePro/ovsrpro.git
+cd ovsrpro
+git checkout 18.10.1
+cd ../release
+cmake -D XP_STEP=build ../ovsrpro
+cmake --build . -- -j3
+cpack
+```
+
+Some additional packages may need to be installed for the Qt Web modules to
+build, here is a list of ones that commonly need to be installed on a CentOS 6
+system (additional ones may be required depending on system configuration):
 
 | Yum | Apt |
 |:----|:----|
