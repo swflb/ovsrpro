@@ -1,15 +1,23 @@
-diff --git a/build.xml b/build.xml
-index 8562000f7..4653db92b 100644
---- a/build.xml
-+++ b/build.xml
-@@ -36,8 +36,8 @@ xmlns:maven="antlib:org.apache.maven.artifact.ant">
-     <property name="revision.properties" value="revision.properties" />
-     <property file="${basedir}/src/java/${revision.properties}" />
-     
--    <property name="javac.target" value="1.5" />
--    <property name="javac.source" value="1.5" />
-+    <property name="javac.target" value="1.7" />
-+    <property name="javac.source" value="1.7" />
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+new file mode 100644
+index 000000000..0486822e9
+--- /dev/null
++++ b/CMakeLists.txt
+@@ -0,0 +1,2 @@
++cmake_minimum_required(VERSION 3.5)
++add_subdirectory(zookeeper-client/zookeeper-client-c)
+\ No newline at end of file
+diff --git a/zookeeper-client/zookeeper-client-c/CMakeLists.txt b/zookeeper-client/zookeeper-client-c/CMakeLists.txt
+index 12773fc92..c0e5012c1 100644
+--- a/zookeeper-client/zookeeper-client-c/CMakeLists.txt
++++ b/zookeeper-client/zookeeper-client-c/CMakeLists.txt
+@@ -181,6 +181,9 @@ target_link_libraries(zookeeper PUBLIC
+   hashtable
+   $<$<PLATFORM_ID:Linux>:rt> # clock_gettime
+   $<$<PLATFORM_ID:Windows>:ws2_32>) # Winsock 2.0
++install(TARGETS zookeeper DESTINATION lib)
++install(DIRECTORY include/ DESTINATION include/zookeeper CONFIGURATIONS Release)
++install(FILES generated/zookeeper.jute.h DESTINATION include/zookeeper CONFIGURATIONS Release)
  
-     <property name="src.dir" value="${basedir}/src" />
-     <property name="java.src.dir" value="${src.dir}/java/main" />
+ option(WITH_OPENSSL "turn ON/OFF SSL support, or define openssl library location (default: ON)" ON)
+ message("-- using WITH_OPENSSL=${WITH_OPENSSL}")
