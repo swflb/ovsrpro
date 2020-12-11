@@ -1,0 +1,47 @@
+{
+  "name": "Ovsrpro development container",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "extensions": [
+    "ms-azuretools.vscode-docker",
+    "DavidAnson.vscode-markdownlint",
+    "eamodio.gitlens",
+    "Gruntfuggly.todo-tree",
+    "IBM.output-colorizer",
+    "mhutchie.git-graph",
+    "ms-vscode.cmake-tools",
+    "ms-vscode.cpptools",
+    "streetsidesoftware.code-spell-checker",
+    "twxs.cmake",
+    "xaver.clang-format"
+  ],
+  "settings": {
+    "cmake.configureArgs": [
+      "-DXP_STEP:STRING=build"
+    ],
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "files.associations": {
+        // C/C++ Files
+        "*.h": "cpp",
+        "*.hpp": "cpp",
+        "*.hpp.in": "cpp",
+        "*.h++": "cpp",
+        "*.c": "cpp",
+        "*.cpp": "cpp",
+        "*.cpp.in": "cpp",
+        // Matlab Files
+        "*.m": "matlab",
+        // Script Files
+        "*.sh": "shellscript",
+        // YAML Files
+        "*.yaml": "yaml",
+        "*.yml": "yaml"
+  },
+  "mounts": [
+    "source=${localWorkspaceFolder}/../build,target=/workspaces/build,type=bind,consistency=delegated",
+    "source=${localWorkspaceFolder}/../_bldpkgs,target=/workspaces/_bldpkgs,type=bind,consistency=delegated",
+  ]
+}
+
