@@ -52,7 +52,7 @@ RUN set -eux; \
   echo ". ~/git-prompt.sh" >> ${HOME}/.bashrc; \
   echo "alias ls='ls --color=auto'" >> ${HOME}/.bashrc
 
-# RUN echo "PS1='\n\[\e[01;39m\]externpro-dev \[\e[01;35m\]\w\[\e[01;36m\]\$(__git_ps1)\[\e[0m\]\n'" >> ${HOME}/.bashrc
+RUN echo "PS1='\n\[\e[01;39m\]ovsrpro-dev \[\e[01;35m\]\w\[\e[01;36m\]\$(__git_ps1)\[\e[0m\]\n'" >> ${HOME}/.bashrc
 
 CMD ["/bin/bash"]
 
