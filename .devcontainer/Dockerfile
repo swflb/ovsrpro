@@ -43,6 +43,14 @@ RUN set -eux; \
   ln -s cpack3 /usr/bin/cpack
 
 RUN set -eux; \
+  mkdir -p /opt/extern; \
+  pushd /opt/extern; \
+  wget \
+    https://github.com/distributePro/externpro/releases/download/18.01.2/externpro-18.01.2-gcc631-64-Linux.sh; \
+  chmod +x ./externpro*; \
+  ./externpro-18.01.2-gcc631-64-Linux.sh --skip-license --include-subdir; \
+  rm ./externpro-18.01.2-gcc631-64-Linux.sh; \
+  popd; \
   wget \
     https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash; \
   wget \
