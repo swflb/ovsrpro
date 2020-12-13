@@ -1,0 +1,27 @@
+{
+  "name": "Ovsrpro development container",
+  "build": {
+    "dockerfile": "Dockerfile",
+  },
+  "extensions": [
+    "ms-azuretools.vscode-docker",
+    "DavidAnson.vscode-markdownlint",
+    "eamodio.gitlens",
+    "Gruntfuggly.todo-tree",
+    "IBM.output-colorizer",
+    "mhutchie.git-graph",
+    "ms-vscode.cmake-tools",
+    "ms-vscode.cpptools",
+    "streetsidesoftware.code-spell-checker",
+    "twxs.cmake",
+  ],
+  "settings": {
+    "cmake.configureArgs": [
+      "-DXP_STEP:STRING=build"
+    ],
+  },
+  "mounts": [
+    "source=${localWorkspaceFolder}/../build,target=/workspaces/build,type=bind,consistency=delegated",
+    "source=${localWorkspaceFolder}/../_bldpkgs,target=/workspaces/_bldpkgs,type=bind,consistency=delegated",
+  ]
+}
