@@ -1,7 +1,9 @@
-diff -Nuar CdistOrig/CMakeLists.txt Cdist/CMakeLists.txt
---- CdistOrig/CMakeLists.txt	1969-12-31 17:00:00.000000000 -0700
-+++ Cdist/CMakeLists.txt	2016-08-03 15:15:37.186274172 -0600
-@@ -0,0 +1,42 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+new file mode 100644
+index 0000000..9597f63
+--- /dev/null
++++ b/CMakeLists.txt
+@@ -0,0 +1,41 @@
 +cmake_minimum_required(VERSION 3.0)
 +project(novas)
 +set(CMAKE_DEBUG_POSTFIX "d")
@@ -37,7 +39,6 @@ diff -Nuar CdistOrig/CMakeLists.txt Cdist/CMakeLists.txt
 +  solarsystem.h
 +)
 +install(FILES ${header_files} DESTINATION include/novas)
-+install(FILES README.txt NOVAS_C3.1_Guide.pdf DESTINATION share/novas)
 +# Compiler options
 +if(UNIX)
 +  # Creates position independent code in GCC making it suitable for
