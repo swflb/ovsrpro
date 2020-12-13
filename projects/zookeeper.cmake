@@ -12,6 +12,8 @@ set(ZK_INSTALL_PATH ${CMAKE_BINARY_DIR}/xpbase/Install/zookeeper)
 set(ZK_VER 3.4.9)
 if(WIN32)
   set(ZOO_PATCH ${PATCH_DIR}/zookeeper-windows.patch)
+else()
+  set(ZOO_PATCH "${PATCH_DIR}/zookeeper.patch")
 endif()
 set(PRO_ZOOKEEPER
   NAME zookeeper
@@ -127,7 +129,11 @@ function(build_zookeeper)
     ExternalProject_Add(zookeeper_Release DEPENDS zookeeper_configure
       DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
       SOURCE_DIR ${SOURCE_DIR}/src/c
-      CONFIGURE_COMMAND ./configure --without-cppunit --prefix=${STAGE_DIR}
+      CONFIGURE_COMMAND
+        CFLAGS=-Wno-error
+        ./configure
+        --without-cppunit
+        --prefix=${STAGE_DIR}
       BUILD_COMMAND $(MAKE) clean && $(MAKE)
       BUILD_IN_SOURCE 1
       INSTALL_COMMAND $(MAKE) install
@@ -138,7 +144,12 @@ function(build_zookeeper)
       ExternalProject_Add(zookeeper_Debug DEPENDS zookeeper_Release
         DOWNLOAD_COMMAND "" DOWNLOAD_DIR ${NULL_DIR}
         SOURCE_DIR ${SOURCE_DIR}/src/c
-        CONFIGURE_COMMAND ./configure --without-cppunit --libdir=${STAGE_DIR}/lib/zookeeperDebug --enable-debug
+        CONFIGURE_COMMAND
+          CFLAGS=-Wno-error
+          ./configure
+          --without-cppunit
+          --libdir=${STAGE_DIR}/lib/zookeeperDebug
+          --enable-debug
         BUILD_COMMAND $(MAKE) clean && $(MAKE)
         BUILD_IN_SOURCE 1
         INSTALL_COMMAND $(MAKE) install-libLTLIBRARIES
