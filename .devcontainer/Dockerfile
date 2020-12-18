@@ -32,11 +32,11 @@ RUN set -eux; \
     which \
     zlib-devel \
     # Required by ZooKeeper
-    ant \
     autoconf \
     automake \
     java-11-openjdk-devel \
-    libtool; \
+    libtool \
+    maven; \
   yum --assumeyes clean all; \
   ln -s ccmake3 /usr/bin/ccmake; \
   ln -s cmake3 /usr/bin/cmake; \
