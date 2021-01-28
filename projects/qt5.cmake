@@ -4,14 +4,13 @@
 # NOTES: see instructions http://wiki.qt.io/Building-Qt-5-from-Git
 # build/configure tools: Perl >= 5.14
 #                        Python >= 2.7
-# depends: openssl from externpro
-#          psql from ovsrpro
+# depends: psql from ovsrpro
 # After installation, the qt.conf file in OVSRPRO_INSTALL_PATH/qt5/bin
 # must be manually modified setting the "Prefix" value to the qt5 installation
 # path (e.g. C:/Program Files/ovsrpro 0.0.1-vc120-64/qt5)
 ########################################
 xpProOption(qt5)
-set(QT5_VER 5.10.0)
+set(QT5_VER 5.12.10)
 set(QT5_REPO http://code.qt.io/cgit/qt/qt5.git)
 set(QT5_DOWNLOAD_FILE qt-everywhere-src-${QT5_VER}.tar.xz)
 set(PRO_QT5
@@ -23,8 +22,8 @@ set(PRO_QT5
   VER ${QT5_VER}
   GIT_ORIGIN ${QT5_REPO}
   GIT_TAG v${QT5_VER}
-  DLURL http://download.qt.io/archive/qt/5.10/${QT5_VER}/single/${QT5_DOWNLOAD_FILE}
-  DLMD5 c5e275ab0ed7ee61d0f4b82cd471770d
+  DLURL https://download.qt.io/archive/qt/5.12/5.12.10/single/${QT5_DOWNLOAD_FILE}
+  DLMD5 a781a0e247400e764c0730b8fb54226f
 )
 
 #######################################
@@ -39,7 +38,6 @@ macro(setConfigureOptions)
     -qt-libjpeg
     -system-freetype
     -opengl desktop
-    -openssl
     -sql-psql
     -psql_config ${STAGE_DIR}/bin/pg_config
     -opensource
@@ -67,11 +65,9 @@ macro(setConfigureOptions)
     list(APPEND QT5_CONFIGURE -platform linux-g++
       -c++std c++14
       -qt-xcb
-      -qt-xkbcommon-x11
       -fontconfig
       -optimized-qmake
       -verbose
-      -glib
       -no-cups
       -no-iconv
       -no-evdev
@@ -140,10 +136,7 @@ function(build_qt5)
                  ${STAGE_DIR}/share/cmake/useop-qt5-config.cmake
                  COPYONLY)
 
-  # On windows, add the include directories for open ssl and postgres
   if(WIN32)
-    set(XP_INCLUDE_DIR ${XP_ROOTDIR}/include) # for open ssl
-    set(OPENSSL_LIB_DIR ${XP_ROOTDIR}/lib) # for open ssl
     set(MAKE_CMD nmake)
     set(ADDITIONAL_CFG "set _CL_=%_CL_% /I'${XP_INCLUDE_DIR}' /I'${STAGE_DIR}/include/psql' &&
                            set LIB=${OPENSSL_LIB_DIR}\;${STAGE_DIR}/lib\;%LIB% &&")
@@ -171,7 +164,6 @@ function(build_qt5)
     SOURCE_DIR ${NULL_DIR} CONFIGURE_COMMAND "" BUILD_COMMAND ""
     INSTALL_COMMAND
       ${CMAKE_COMMAND} -E make_directory ${STAGE_DIR}/share/qt5 &&
-      ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/LGPL_EXCEPTION.txt ${STAGE_DIR}/share/qt5 &&
       ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/LICENSE.FDL ${STAGE_DIR}/share/qt5 &&
       ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/LICENSE.GPLv2 ${STAGE_DIR}/share/qt5 &&
       ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/LICENSE.GPLv3 ${STAGE_DIR}/share/qt5 &&
