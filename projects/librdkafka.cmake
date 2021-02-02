@@ -2,8 +2,8 @@
 # librdkafka
 ########################################
 xpProOption(librdkafka)
-set(VER v0.9.5)
-set(REPO https://github.com/distributePro/librdkafka)
+set(VER v1.5.3)
+set(REPO https://github.com/edenhill/librdkafka)
 set(REPO_UPSTREAM https://github.com/edenhill/librdkafka)
 set(PRO_LIBRDKAFKA
   NAME librdkafka
@@ -12,12 +12,12 @@ set(PRO_LIBRDKAFKA
   DESC "librdkafka is a C library implementation of the Apache Kafka protocol, containing both Producer and Consumer support -- [windows-only patch](../patches/librdkafka-windows.patch)"
   REPO "repo" ${REPO} "distributePro fork of librdkafka repo on github"
   VER ${VER}
-  GIT_ORIGIN git://github.com/distributepro/librdkafka.git
+  GIT_ORIGIN git://github.com/edenhill/librdkafka.git
   GIT_UPSTREAM git://github.com/edenhill/librdkafka.git
-  GIT_TAG xp-${VER} # what to 'git checkout'
+  GIT_TAG ${VER} # what to 'git checkout'
   GIT_REF ${VER} # create path from this tag to 'git checkout'
   DLURL ${REPO_UPSTREAM}/archive/${VER}.tar.gz
-  DLMD5 8e5685baa01554108ae8c8e9c97dc495
+  DLMD5 17017d9bdaf1398087d1f0dcad2e5cc7
   DLNAME librdkafka-${VER}.tar.gz
   PATCH ${PATCH_DIR}/librdkafka.patch
   DIFF ${REPO}/compare/edenhill:
@@ -105,6 +105,7 @@ function(build_librdkafka)
   xpStringAppendIfDne(CMAKE_CXX_FLAGS "-fPIC")
   xpStringAppendIfDne(CMAKE_C_FLAGS "-fPIC")
   set(XP_CONFIGURE
+      -DRDKAFKA_BUILD_STATIC=on
       -DCMAKE_DEBUG_POSTFIX=${CMAKE_DEBUG_POSTFIX}
       -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
       -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
