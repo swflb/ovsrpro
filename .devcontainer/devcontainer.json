@@ -1,18 +1,27 @@
 {
-	"name": "externpro",
-	"dockerComposeFile": "../docker-compose.yml",
-	"service": "bpro",
-	"workspaceFolder": "/bpvol",
-	"initializeCommand": ["./.devcontainer/denv.sh"],
-	"settings": {
-		"terminal.integrated.shell.linux": "/bin/bash"
-	},
-	"extensions": [
-		"ms-vscode.cpptools",
-		"ms-vscode.cmake-tools",
-		"ms-azuretools.vscode-docker",
-		"davidanson.vscode-markdownlint",
-		"mhutchie.git-graph",
-		"twxs.cmake"
-	]
+  "name": "Ovsrpro development container",
+  "build": {
+    "dockerfile": "Dockerfile",
+  },
+  "extensions": [
+    "ms-vscode.cpptools",
+    "ms-vscode.cmake-tools",
+    "ms-azuretools.vscode-docker",
+    "davidanson.vscode-markdownlint",
+    "mhutchie.git-graph",
+    "twxs.cmake",
+    "eamodio.gitlens",
+    "Gruntfuggly.todo-tree",
+    "IBM.output-colorizer",
+    "streetsidesoftware.code-spell-checker",
+  ],
+  "settings": {
+    "cmake.configureArgs": [
+      "-DXP_STEP:STRING=build"
+    ],
+  },
+  "mounts": [
+    "source=${localWorkspaceFolder}/../build,target=/workspaces/build,type=bind,consistency=delegated",
+    "source=${localWorkspaceFolder}/../_bldpkgs,target=/workspaces/_bldpkgs,type=bind,consistency=delegated",
+  ]
 }
